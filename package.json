@@ -1,0 +1,34 @@
+{
+  "name": "autodock-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AutoDock — Multi-vendor Vehicle Spare-Parts Marketplace (MERN Modular Monolith)",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace=apps/api run dev",
+    "dev:web": "npm --workspace=apps/web run dev",
+    "build:api": "npm --workspace=apps/api run build",
+    "build:web": "npm --workspace=apps/web run build",
+    "build": "npm run build:api && npm run build:web",
+    "typecheck:api": "npm --workspace=apps/api run typecheck",
+    "typecheck:web": "npm --workspace=apps/web run typecheck",
+    "typecheck": "npm run typecheck:api && npm run typecheck:web",
+    "test:api": "npm --workspace=apps/api run test",
+    "test:web": "npm --workspace=apps/web run test",
+    "test": "npm run test:api && npm run test:web",
+    "lint:api": "npm --workspace=apps/api run lint",
+    "lint:web": "npm --workspace=apps/web run lint",
+    "lint": "npm run lint:api && npm run lint:web"
+  },
+  "keywords": [
+    "autodock",
+    "mern",
+    "modular-monolith",
+    "ecommerce",
+    "vehicle-spare-parts"
+  ],
+  "author": "AutoDock University Engineering Team",
+  "license": "UNLICENSED"
+}
