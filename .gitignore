@@ -61,11 +61,8 @@ temp/
 # ─── GitHub templates — local only ───────────────────────────────────────────
 .github/
 
-# ─── Application structure (READMEs only for now) — local only ───────────────
-apps/
-
-# ─── Test directory — local only until code exists ────────────────────────────
-tests/
+# ─── Private storage & uploads — local only ──────────────────────────────────
+storage/
 
 # ─── AI prompt files — never push ─────────────────────────────────────────────
 prompts/
