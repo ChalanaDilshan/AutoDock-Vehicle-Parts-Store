@@ -60,7 +60,7 @@ export async function getProductDetails(
 
     const product = await productService.getProductById(id);
 
-    if (!product) {
+    if (!product || product.status !== 'ACTIVE') {
       sendError({
         res,
         statusCode: 404,
