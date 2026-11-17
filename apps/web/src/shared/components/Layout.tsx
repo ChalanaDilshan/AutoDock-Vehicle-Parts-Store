@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Wrench, ShieldCheck, User, LogOut, Shield } from 'lucide-react';
+import { ShoppingCart, Wrench, ShieldCheck, User, LogOut, Shield, Heart, Layers, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../modules/identity/context/AuthContext.js';
 
 export const Layout: React.FC = () => {
@@ -30,7 +30,7 @@ export const Layout: React.FC = () => {
           </Link>
 
           {/* Quick Nav / Fitment Badge */}
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-700">
+          <div className="hidden md:flex items-center gap-5 text-sm font-medium text-slate-700">
             <Link to="/products" className="hover:text-blue-600 transition">
               Parts Catalog
             </Link>
@@ -39,21 +39,45 @@ export const Layout: React.FC = () => {
               <span>My Garage</span>
             </Link>
             {user?.role === 'ADMIN' ? (
-              <Link
-                to="/admin/sellers/verification"
-                className="flex items-center gap-1 text-blue-700 hover:text-blue-900 transition font-semibold"
-              >
-                <Shield className="w-4 h-4 text-blue-600" />
-                <span>Verification Workstation</span>
-              </Link>
+              <div className="flex items-center gap-4 text-xs font-semibold">
+                <Link
+                  to="/admin/sellers/verification"
+                  className="flex items-center gap-1 text-blue-700 hover:text-blue-900 transition"
+                >
+                  <Shield className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Sellers</span>
+                </Link>
+                <Link
+                  to="/admin/catalogue"
+                  className="flex items-center gap-1 text-slate-700 hover:text-blue-900 transition"
+                >
+                  <Layers className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Catalogue</span>
+                </Link>
+                <Link
+                  to="/admin/reviews"
+                  className="flex items-center gap-1 text-slate-700 hover:text-blue-900 transition"
+                >
+                  <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Reviews</span>
+                </Link>
+              </div>
             ) : user?.role === 'SELLER' ? (
-              <Link
-                to="/seller/dashboard"
-                className="flex items-center gap-1 text-emerald-700 hover:text-emerald-900 transition font-semibold"
-              >
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Seller Portal</span>
-              </Link>
+              <div className="flex items-center gap-4 text-xs font-semibold">
+                <Link
+                  to="/seller/dashboard"
+                  className="flex items-center gap-1 text-emerald-700 hover:text-emerald-900 transition"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Seller Portal</span>
+                </Link>
+                <Link
+                  to="/seller/products"
+                  className="hover:text-blue-600 text-slate-700 transition"
+                >
+                  Inventory
+                </Link>
+              </div>
             ) : (
               <Link
                 to="/sellers/register"
@@ -66,7 +90,16 @@ export const Layout: React.FC = () => {
           </div>
 
           {/* User Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Link
+              to="/wishlist"
+              className="p-2 text-slate-700 hover:text-rose-600 hover:bg-slate-100 rounded-full transition"
+              title="Saved Wishlist"
+              aria-label="Wishlist"
+            >
+              <Heart className="w-5 h-5" />
+            </Link>
+
             <Link
               to="/cart"
               className="p-2 text-slate-700 hover:text-blue-600 hover:bg-slate-100 rounded-full relative transition"
