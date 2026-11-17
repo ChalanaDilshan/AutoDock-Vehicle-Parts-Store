@@ -1,8 +1,17 @@
 import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
-import { ShoppingCart, Wrench, ShieldCheck, User } from 'lucide-react';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { ShoppingCart, Wrench, ShieldCheck, User, LogOut, Shield } from 'lucide-react';
+import { useAuth } from '../../modules/identity/context/AuthContext.js';
 
 export const Layout: React.FC = () => {
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans">
       {/* Top Notification / Trust Bar */}
@@ -29,10 +38,31 @@ export const Layout: React.FC = () => {
               <Wrench className="w-4 h-4 text-amber-500" />
               <span>My Garage</span>
             </Link>
-            <Link to="/sellers/register" className="flex items-center gap-1 text-slate-600 hover:text-blue-600 transition">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              <span>Sell on AutoDock</span>
-            </Link>
+            {user?.role === 'ADMIN' ? (
+              <Link
+                to="/admin/sellers/verification"
+                className="flex items-center gap-1 text-blue-700 hover:text-blue-900 transition font-semibold"
+              >
+                <Shield className="w-4 h-4 text-blue-600" />
+                <span>Verification Workstation</span>
+              </Link>
+            ) : user?.role === 'SELLER' ? (
+              <Link
+                to="/seller/dashboard"
+                className="flex items-center gap-1 text-emerald-700 hover:text-emerald-900 transition font-semibold"
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Seller Portal</span>
+              </Link>
+            ) : (
+              <Link
+                to="/sellers/register"
+                className="flex items-center gap-1 text-slate-600 hover:text-blue-600 transition"
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                <span>Sell on AutoDock</span>
+              </Link>
+            )}
           </div>
 
           {/* User Actions */}
@@ -44,13 +74,36 @@ export const Layout: React.FC = () => {
             >
               <ShoppingCart className="w-5 h-5" />
             </Link>
-            <Link
-              to="/login"
-              className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
-            >
-              <User className="w-4 h-4" />
-              <span>Login</span>
-            </Link>
+
+            {isAuthenticated && user ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/account/profile"
+                  className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-300 rounded-md text-xs font-semibold text-slate-800 hover:bg-slate-50 transition"
+                  title={`${user.firstName} (${user.role})`}
+                >
+                  <User className="w-3.5 h-3.5 text-blue-600" />
+                  <span className="max-w-[100px] truncate">{user.firstName}</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition"
+                  title="Sign Out"
+                  aria-label="Sign Out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+              >
+                <User className="w-4 h-4" />
+                <span>Login</span>
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -62,8 +115,16 @@ export const Layout: React.FC = () => {
 
       {/* Shared Footer */}
       <footer className="bg-white border-t border-slate-200 mt-auto py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
-          <p className="mb-2 font-medium text-slate-700">AutoDock — Sri Lanka Vehicle Spare-Parts Marketplace</p>
+        <div className="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 space-y-2">
+          <p className="font-medium text-slate-700">AutoDock — Sri Lanka Vehicle Spare-Parts Marketplace</p>
+          <div className="flex justify-center gap-4 text-slate-600">
+            <Link to="/privacy-policy" className="hover:text-blue-600 underline">
+              Privacy Policy & Verification Notice (v1.2)
+            </Link>
+            <Link to="/sellers/register" className="hover:text-blue-600 underline">
+              Merchant Application
+            </Link>
+          </div>
           <p>© {new Date().getFullYear()} AutoDock Platform. Developed for University Undergraduate Project.</p>
         </div>
       </footer>
