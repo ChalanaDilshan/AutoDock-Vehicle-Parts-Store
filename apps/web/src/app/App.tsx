@@ -2,6 +2,7 @@ import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Layout } from '../shared/components/Layout.js';
 import { ErrorBoundary } from '../shared/components/ErrorBoundary.js';
+import { AuthProvider } from '../modules/identity/context/AuthContext.js';
 
 // Module route imports
 import { identityRoutes } from '../modules/identity/routes.js';
@@ -36,7 +37,9 @@ const router = createBrowserRouter([
 export const App: React.FC = () => {
   return (
     <ErrorBoundary>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </ErrorBoundary>
   );
 };
