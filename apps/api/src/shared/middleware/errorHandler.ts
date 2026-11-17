@@ -32,13 +32,13 @@ export function errorHandler(
 ): void {
   logger.error(`Unhandled request error: ${err.message}`, err);
 
-  if (err instanceof AppError) {
+  if (err instanceof AppError || (err as any).statusCode) {
     sendError({
       res,
-      statusCode: err.statusCode,
-      code: err.code,
+      statusCode: (err as any).statusCode || (err as AppError).statusCode || 400,
+      code: (err as any).code || (err as AppError).code || 'BAD_REQUEST',
       message: err.message,
-      errors: err.errors,
+      errors: (err as any).errors,
     });
     return;
   }

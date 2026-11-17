@@ -17,7 +17,20 @@ import {
   sellerRouter,
   adminSellerRouter,
 } from './modules/identity/index.js';
-import { customerExperienceRouter } from './modules/customer-experience/index.js';
+import {
+  customerExperienceRouter,
+  publicProductRouter,
+  sellerProductRouter,
+  categoryRouter,
+  brandRouter,
+  vehicleRouter,
+  garageRouter,
+  cartRouter,
+  wishlistRouter,
+  reviewRouter,
+  adminProductRouter,
+  adminReviewRouter,
+} from './modules/customer-experience/index.js';
 import { ordersDeliveryRouter } from './modules/orders-delivery/index.js';
 import { financePromotionsRouter } from './modules/finance-promotions/index.js';
 import { adminPlatformRouter } from './modules/admin-platform/index.js';
@@ -90,13 +103,29 @@ export function createApp(): Express {
   // ---------------------------------------------------------------------------
   // Mount Module Business Routers & Module Route Placeholders
   // ---------------------------------------------------------------------------
+  // MOD-01 Identity & Seller Verification Routes
   app.use(`${env.API_PREFIX}/auth`, authRouter);
   app.use(`${env.API_PREFIX}/users`, userRouter);
   app.use(`${env.API_PREFIX}/sellers`, sellerRouter);
   app.use(`${env.API_PREFIX}/admin/sellers`, adminSellerRouter);
-
   app.use(`${env.API_PREFIX}/identity`, identityRouter);
-  app.use(`${env.API_PREFIX}/products`, customerExperienceRouter);
+
+  // MOD-02 Product & Customer Experience Routes
+  app.use(`${env.API_PREFIX}/products`, publicProductRouter);
+  app.use(`${env.API_PREFIX}/seller/products`, sellerProductRouter);
+  app.use(`${env.API_PREFIX}/sellers/products`, sellerProductRouter);
+  app.use(`${env.API_PREFIX}/categories`, categoryRouter);
+  app.use(`${env.API_PREFIX}/brands`, brandRouter);
+  app.use(`${env.API_PREFIX}/vehicles`, vehicleRouter);
+  app.use(`${env.API_PREFIX}/garage`, garageRouter);
+  app.use(`${env.API_PREFIX}/cart`, cartRouter);
+  app.use(`${env.API_PREFIX}/wishlist`, wishlistRouter);
+  app.use(`${env.API_PREFIX}/reviews`, reviewRouter);
+  app.use(`${env.API_PREFIX}/admin/products`, adminProductRouter);
+  app.use(`${env.API_PREFIX}/admin/reviews`, adminReviewRouter);
+  app.use(`${env.API_PREFIX}/customer-experience`, customerExperienceRouter);
+
+  // Future Module Route Placeholders
   app.use(`${env.API_PREFIX}/orders`, ordersDeliveryRouter);
   app.use(`${env.API_PREFIX}/finance`, financePromotionsRouter);
   app.use(`${env.API_PREFIX}/admin`, adminPlatformRouter);
