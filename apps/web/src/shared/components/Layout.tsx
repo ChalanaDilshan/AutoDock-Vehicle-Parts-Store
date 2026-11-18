@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Wrench, ShieldCheck, User, LogOut, Shield, Heart, Layers, MessageSquare } from 'lucide-react';
+import { ShoppingCart, Wrench, ShieldCheck, User, LogOut, Shield, Heart, Layers, MessageSquare, Package, Truck } from 'lucide-react';
 import { useAuth } from '../../modules/identity/context/AuthContext.js';
 
 export const Layout: React.FC = () => {
@@ -55,6 +55,20 @@ export const Layout: React.FC = () => {
                   <span>Catalogue</span>
                 </Link>
                 <Link
+                  to="/admin/orders"
+                  className="flex items-center gap-1 text-slate-700 hover:text-blue-900 transition"
+                >
+                  <Package className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Orders</span>
+                </Link>
+                <Link
+                  to="/admin/delivery-proposals"
+                  className="flex items-center gap-1 text-slate-700 hover:text-blue-900 transition"
+                >
+                  <Truck className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Rates</span>
+                </Link>
+                <Link
                   to="/admin/reviews"
                   className="flex items-center gap-1 text-slate-700 hover:text-blue-900 transition"
                 >
@@ -77,15 +91,40 @@ export const Layout: React.FC = () => {
                 >
                   Inventory
                 </Link>
+                <Link
+                  to="/seller/orders"
+                  className="flex items-center gap-1 hover:text-blue-600 text-slate-700 transition"
+                >
+                  <Package className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Orders</span>
+                </Link>
+                <Link
+                  to="/seller/delivery-rates"
+                  className="flex items-center gap-1 hover:text-blue-600 text-slate-700 transition"
+                >
+                  <Truck className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Delivery Rates</span>
+                </Link>
               </div>
             ) : (
-              <Link
-                to="/sellers/register"
-                className="flex items-center gap-1 text-slate-600 hover:text-blue-600 transition"
-              >
-                <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                <span>Sell on AutoDock</span>
-              </Link>
+              <div className="flex items-center gap-4 text-xs font-semibold">
+                {isAuthenticated && (
+                  <Link
+                    to="/orders"
+                    className="flex items-center gap-1 text-slate-700 hover:text-blue-600 transition"
+                  >
+                    <Package className="w-3.5 h-3.5 text-blue-600" />
+                    <span>My Orders</span>
+                  </Link>
+                )}
+                <Link
+                  to="/sellers/register"
+                  className="flex items-center gap-1 text-slate-600 hover:text-blue-600 transition"
+                >
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                  <span>Sell on AutoDock</span>
+                </Link>
+              </div>
             )}
           </div>
 
