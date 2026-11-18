@@ -376,13 +376,22 @@ export const CartPage: React.FC = () => {
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-mono text-slate-600 text-left">
               Handoff Contract: ProductModulePublicService.getCartForCheckout()
             </div>
-            <button
-              type="button"
-              onClick={() => setCheckoutModalOpen(false)}
-              className="w-full py-2.5 bg-slate-900 text-white text-xs font-bold rounded-xl"
-            >
-              Back to Shopping Cart
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setCheckoutModalOpen(false)}
+                className="w-1/2 py-2.5 border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl"
+              >
+                Back to Cart
+              </button>
+              <Link
+                to="/checkout"
+                className="w-1/2 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1 shadow-sm"
+              >
+                <span>Continue to Checkout</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
         </div>
       )}

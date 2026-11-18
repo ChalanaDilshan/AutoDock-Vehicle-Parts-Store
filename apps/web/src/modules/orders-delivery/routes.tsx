@@ -1,30 +1,105 @@
-import React from 'react';
 import { RouteObject } from 'react-router-dom';
+import { ProtectedRoute } from '../identity/components/ProtectedRoute.js';
 
-/**
- * MOD-03 Orders, Payments & Delivery (Frontend Routes Placeholder)
- */
-const CartPage: React.FC = () => (
-  <div className="bg-white p-6 rounded-lg border border-slate-200 max-w-2xl mx-auto">
-    <h1 className="text-xl font-bold text-slate-900 mb-2">Shopping Cart</h1>
-    <p className="text-sm text-slate-600 mb-4">MOD-03 Orders Foundation</p>
-    <div className="p-3 bg-blue-50 text-blue-800 rounded text-xs">
-      Multi-seller cart interface placeholder. Will be implemented in Module 03.
-    </div>
-  </div>
-);
+// Customer Pages
+import { CheckoutPage } from './pages/CheckoutPage.js';
+import { OrderHistoryPage } from './pages/OrderHistoryPage.js';
+import { OrderDetailPage } from './pages/OrderDetailPage.js';
 
-const CheckoutPage: React.FC = () => (
-  <div className="bg-white p-6 rounded-lg border border-slate-200 max-w-2xl mx-auto">
-    <h1 className="text-xl font-bold text-slate-900 mb-2">Checkout</h1>
-    <p className="text-sm text-slate-600 mb-4">MOD-03 Checkout & Delivery Foundation</p>
-    <div className="p-3 bg-emerald-50 text-emerald-800 rounded text-xs">
-      Multi-vendor address & delivery fee quote placeholder. Will be implemented in Module 03.
-    </div>
-  </div>
-);
+// Seller Workstation Pages
+import { SellerOrdersPage } from './pages/seller/SellerOrdersPage.js';
+import { SellerSuborderDetailPage } from './pages/seller/SellerSuborderDetailPage.js';
+import { SellerDeliveryRatesPage } from './pages/seller/SellerDeliveryRatesPage.js';
+
+// Administrator Governance Pages
+import { AdminOrdersPage } from './pages/admin/AdminOrdersPage.js';
+import { AdminOrderDetailPage } from './pages/admin/AdminOrderDetailPage.js';
+import { AdminDeliveryProposalsPage } from './pages/admin/AdminDeliveryProposalsPage.js';
 
 export const ordersDeliveryRoutes: RouteObject[] = [
-  { path: 'cart', element: <CartPage /> },
-  { path: 'checkout', element: <CheckoutPage /> },
+  // Customer Checkout & Purchase Routes
+  {
+    path: 'checkout',
+    element: (
+      <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']}>
+        <CheckoutPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'orders',
+    element: (
+      <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']}>
+        <OrderHistoryPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'orders/:id',
+    element: (
+      <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']}>
+        <OrderDetailPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'orders/suborders/:suborderId',
+    element: (
+      <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']}>
+        <OrderDetailPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  // Seller Order Fulfillment & Delivery Rates Routes
+  {
+    path: 'seller/orders',
+    element: (
+      <ProtectedRoute allowedRoles={['SELLER', 'ADMIN']}>
+        <SellerOrdersPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'seller/orders/:suborderId',
+    element: (
+      <ProtectedRoute allowedRoles={['SELLER', 'ADMIN']}>
+        <SellerSuborderDetailPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'seller/delivery-rates',
+    element: (
+      <ProtectedRoute allowedRoles={['SELLER', 'ADMIN']}>
+        <SellerDeliveryRatesPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  // Administrator Orders & Rate Verification Routes
+  {
+    path: 'admin/orders',
+    element: (
+      <ProtectedRoute allowedRoles={['ADMIN']}>
+        <AdminOrdersPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'admin/orders/:id',
+    element: (
+      <ProtectedRoute allowedRoles={['ADMIN']}>
+        <AdminOrderDetailPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'admin/delivery-proposals',
+    element: (
+      <ProtectedRoute allowedRoles={['ADMIN']}>
+        <AdminDeliveryProposalsPage />
+      </ProtectedRoute>
+    ),
+  },
 ];
