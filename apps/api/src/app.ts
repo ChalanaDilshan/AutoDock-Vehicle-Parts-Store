@@ -31,7 +31,16 @@ import {
   adminProductRouter,
   adminReviewRouter,
 } from './modules/customer-experience/index.js';
-import { ordersDeliveryRouter } from './modules/orders-delivery/index.js';
+import {
+  ordersDeliveryRouter,
+  checkoutRouter,
+  orderRouter,
+  sellerOrderRouter,
+  sellerDeliveryRateRouter,
+  adminDeliveryRateRouter,
+  adminOrderRouter,
+  paymentRouter,
+} from './modules/orders-delivery/index.js';
 import { financePromotionsRouter } from './modules/finance-promotions/index.js';
 import { adminPlatformRouter } from './modules/admin-platform/index.js';
 
@@ -125,8 +134,19 @@ export function createApp(): Express {
   app.use(`${env.API_PREFIX}/admin/reviews`, adminReviewRouter);
   app.use(`${env.API_PREFIX}/customer-experience`, customerExperienceRouter);
 
+  // MOD-03 Orders, Payments & Delivery Routes
+  app.use(`${env.API_PREFIX}/checkout`, checkoutRouter);
+  app.use(`${env.API_PREFIX}/orders`, orderRouter);
+  app.use(`${env.API_PREFIX}/seller/suborders`, sellerOrderRouter);
+  app.use(`${env.API_PREFIX}/sellers/suborders`, sellerOrderRouter);
+  app.use(`${env.API_PREFIX}/seller/delivery-rates`, sellerDeliveryRateRouter);
+  app.use(`${env.API_PREFIX}/sellers/delivery-rates`, sellerDeliveryRateRouter);
+  app.use(`${env.API_PREFIX}/admin/delivery-rates`, adminDeliveryRateRouter);
+  app.use(`${env.API_PREFIX}/admin/orders`, adminOrderRouter);
+  app.use(`${env.API_PREFIX}/payments`, paymentRouter);
+  app.use(`${env.API_PREFIX}/orders-delivery`, ordersDeliveryRouter);
+
   // Future Module Route Placeholders
-  app.use(`${env.API_PREFIX}/orders`, ordersDeliveryRouter);
   app.use(`${env.API_PREFIX}/finance`, financePromotionsRouter);
   app.use(`${env.API_PREFIX}/admin`, adminPlatformRouter);
 
