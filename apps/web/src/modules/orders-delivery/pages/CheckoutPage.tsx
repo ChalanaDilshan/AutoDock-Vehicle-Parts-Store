@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   ShoppingBag,
-  Truck,
   ShieldCheck,
   CreditCard,
   Building2,
@@ -14,6 +13,8 @@ import {
   Store,
   ChevronRight,
   Info,
+  MapPin,
+  CheckCircle2,
 } from 'lucide-react';
 import {
   checkoutApi,
@@ -193,7 +194,25 @@ export const CheckoutPage: React.FC = () => {
         <span className="font-semibold text-slate-900">Checkout & Payment</span>
       </nav>
 
-      <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+      {/* Checkout Progress Stepper */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+          <div className="flex items-center justify-center gap-2 text-blue-600 font-bold border-r border-slate-100">
+            <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center">1</span>
+            <span className="hidden sm:inline">Delivery Address</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 text-blue-600 font-bold border-r border-slate-100">
+            <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center">2</span>
+            <span className="hidden sm:inline">Merchant Suborders</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 text-blue-600 font-bold">
+            <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center">3</span>
+            <span className="hidden sm:inline">Payment & Review</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
         <div>
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">
             Checkout & Order Confirmation
@@ -202,7 +221,7 @@ export const CheckoutPage: React.FC = () => {
             Authoritative multi-vendor quote partitioned across verified merchant stores
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 font-semibold">
+        <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 font-semibold self-start sm:self-auto">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
           <span>Authoritative Backend Quote</span>
         </div>
@@ -210,7 +229,7 @@ export const CheckoutPage: React.FC = () => {
 
       {submitError && (
         <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-xs text-rose-800">
-          <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
           <div>
             <span className="font-bold block">Checkout Request Rejected</span>
             <span>{submitError}</span>
@@ -218,20 +237,20 @@ export const CheckoutPage: React.FC = () => {
         </div>
       )}
 
-      <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Column: Shipping Address & Merchant Suborders */}
         <div className="lg:col-span-2 space-y-6">
           {/* Shipping Address Section */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <Truck className="w-5 h-5 text-blue-600" />
+              <MapPin className="w-5 h-5 text-blue-600" />
               <h2 className="text-sm font-bold text-slate-900">1. Delivery Address & District</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
-                  Recipient Full Name <span className="text-red-500">*</span>
+                  Recipient Full Name <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -241,13 +260,13 @@ export const CheckoutPage: React.FC = () => {
                   }
                   required
                   placeholder="e.g. Kasun Perera"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
-                  Contact Phone Number <span className="text-red-500">*</span>
+                  Contact Phone Number <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="tel"
@@ -257,13 +276,13 @@ export const CheckoutPage: React.FC = () => {
                   }
                   required
                   placeholder="e.g. 077 123 4567"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
               <div className="sm:col-span-2">
                 <label className="block font-bold text-slate-700 mb-1">
-                  Street Address <span className="text-red-500">*</span>
+                  Street Address <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -273,13 +292,13 @@ export const CheckoutPage: React.FC = () => {
                   }
                   required
                   placeholder="e.g. No. 45, Temple Road"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
-                  City / Town <span className="text-red-500">*</span>
+                  City / Town <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -289,18 +308,18 @@ export const CheckoutPage: React.FC = () => {
                   }
                   required
                   placeholder="e.g. Nugegoda"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
-                  Administrative District <span className="text-red-500">*</span>
+                  Administrative District <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={shippingAddress.district}
                   onChange={(e) => handleDistrictChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-semibold text-blue-700 bg-blue-50/40"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-semibold text-blue-700 bg-blue-50/50"
                 >
                   {SRI_LANKAN_DISTRICTS.map((dist) => (
                     <option key={dist} value={dist}>
@@ -312,7 +331,7 @@ export const CheckoutPage: React.FC = () => {
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">
-                  Postal Code <span className="text-red-500">*</span>
+                  Postal Code <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -322,11 +341,11 @@ export const CheckoutPage: React.FC = () => {
                   }
                   required
                   placeholder="e.g. 10250"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
-              <div>
+              <div className="sm:col-span-2">
                 <label className="block font-bold text-slate-700 mb-1">
                   Delivery Notes (Optional)
                 </label>
@@ -334,8 +353,8 @@ export const CheckoutPage: React.FC = () => {
                   type="text"
                   value={customerNotes}
                   onChange={(e) => setCustomerNotes(e.target.value)}
-                  placeholder="e.g. Deliver between 9 AM - 2 PM"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="e.g. Deliver between 9 AM - 2 PM or leave with security"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -362,18 +381,18 @@ export const CheckoutPage: React.FC = () => {
               >
                 {/* Seller Header */}
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center font-bold text-xs">
                       {idx + 1}
                     </div>
                     <div>
                       <h3 className="text-xs font-bold text-slate-900">{sub.sellerName}</h3>
-                      <span className="text-[10px] text-slate-400">Merchant Store</span>
+                      <span className="text-[10px] text-slate-400">Verified Merchant Store</span>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <span className="text-[11px] text-slate-500 block">Delivery Charge</span>
+                    <span className="text-[11px] text-slate-500 block">District Delivery Fee</span>
                     <span className="text-xs font-bold text-slate-900">
                       {formatLKR(sub.deliveryFeeInCents)}
                     </span>
@@ -383,21 +402,21 @@ export const CheckoutPage: React.FC = () => {
                 {/* Line Items */}
                 <div className="divide-y divide-slate-100">
                   {sub.items.map((item) => (
-                    <div key={item.productId} className="py-2.5 flex items-center justify-between gap-3 text-xs">
+                    <div key={item.productId} className="py-3 flex items-center justify-between gap-3 text-xs">
                       <div className="flex items-center gap-3">
                         {item.thumbnailUrl ? (
                           <img
                             src={item.thumbnailUrl}
                             alt={item.name}
-                            className="w-10 h-10 object-cover rounded-lg border border-slate-200"
+                            className="w-12 h-12 object-cover rounded-xl border border-slate-200"
                           />
                         ) : (
-                          <div className="w-10 h-10 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400">
+                          <div className="w-12 h-12 bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400">
                             <ShoppingBag className="w-5 h-5" />
                           </div>
                         )}
                         <div>
-                          <span className="font-semibold text-slate-900 block truncate max-w-[280px]">
+                          <span className="font-bold text-slate-900 block truncate max-w-[280px]">
                             {item.name}
                           </span>
                           <span className="text-[11px] text-slate-400 font-mono">
@@ -407,7 +426,7 @@ export const CheckoutPage: React.FC = () => {
                       </div>
 
                       <div className="text-right">
-                        <span className="font-bold text-slate-900 block">
+                        <span className="font-extrabold text-slate-900 block">
                           {formatLKR(item.lineTotalInCents)}
                         </span>
                       </div>
@@ -420,13 +439,13 @@ export const CheckoutPage: React.FC = () => {
                   <span className="text-xs font-bold text-slate-700 block">
                     Select Payment Method for {sub.sellerName}:
                   </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     {/* COD */}
                     <label
-                      className={`p-2.5 rounded-xl border cursor-pointer text-xs flex items-center gap-2 transition ${
+                      className={`p-3 rounded-xl border cursor-pointer text-xs flex items-center gap-2.5 transition ${
                         sellerPaymentMethods[sub.sellerId] === 'COD'
-                          ? 'border-blue-600 bg-blue-50/50 text-blue-900 font-bold'
-                          : 'border-slate-200 bg-white text-slate-700'
+                          ? 'border-blue-600 bg-blue-50/60 text-blue-900 font-bold shadow-xs'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                       }`}
                     >
                       <input
@@ -437,16 +456,19 @@ export const CheckoutPage: React.FC = () => {
                         onChange={() => handlePaymentMethodChange(sub.sellerId, 'COD')}
                         className="text-blue-600 focus:ring-blue-500"
                       />
-                      <DollarSign className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                      <span>Cash on Delivery</span>
+                      <DollarSign className="w-4 h-4 text-blue-600 shrink-0" />
+                      <div>
+                        <div className="leading-tight">Cash on Delivery</div>
+                        <span className="text-[10px] text-slate-400 font-normal">Pay driver</span>
+                      </div>
                     </label>
 
                     {/* Direct Bank Transfer */}
                     <label
-                      className={`p-2.5 rounded-xl border cursor-pointer text-xs flex items-center gap-2 transition ${
+                      className={`p-3 rounded-xl border cursor-pointer text-xs flex items-center gap-2.5 transition ${
                         sellerPaymentMethods[sub.sellerId] === 'DIRECT_BANK_TRANSFER'
-                          ? 'border-blue-600 bg-blue-50/50 text-blue-900 font-bold'
-                          : 'border-slate-200 bg-white text-slate-700'
+                          ? 'border-blue-600 bg-blue-50/60 text-blue-900 font-bold shadow-xs'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                       }`}
                     >
                       <input
@@ -459,16 +481,19 @@ export const CheckoutPage: React.FC = () => {
                         }
                         className="text-blue-600 focus:ring-blue-500"
                       />
-                      <Building2 className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                      <span>Direct Bank Deposit</span>
+                      <Building2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <div>
+                        <div className="leading-tight">Direct Bank Deposit</div>
+                        <span className="text-[10px] text-slate-400 font-normal">Upload slip</span>
+                      </div>
                     </label>
 
                     {/* Card Sandbox */}
                     <label
-                      className={`p-2.5 rounded-xl border cursor-pointer text-xs flex items-center gap-2 transition ${
+                      className={`p-3 rounded-xl border cursor-pointer text-xs flex items-center gap-2.5 transition ${
                         sellerPaymentMethods[sub.sellerId] === 'CARD'
-                          ? 'border-purple-600 bg-purple-50/50 text-purple-900 font-bold'
-                          : 'border-slate-200 bg-white text-slate-700'
+                          ? 'border-purple-600 bg-purple-50/60 text-purple-900 font-bold shadow-xs'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                       }`}
                     >
                       <input
@@ -479,8 +504,11 @@ export const CheckoutPage: React.FC = () => {
                         onChange={() => handlePaymentMethodChange(sub.sellerId, 'CARD')}
                         className="text-purple-600 focus:ring-purple-500"
                       />
-                      <CreditCard className="w-3.5 h-3.5 text-purple-600 flex-shrink-0" />
-                      <span>Card (Sandbox)</span>
+                      <CreditCard className="w-4 h-4 text-purple-600 shrink-0" />
+                      <div>
+                        <div className="leading-tight">Card (Sandbox)</div>
+                        <span className="text-[10px] text-slate-400 font-normal">Test simulation</span>
+                      </div>
                     </label>
                   </div>
                 </div>
@@ -532,33 +560,40 @@ export const CheckoutPage: React.FC = () => {
             </div>
 
             {/* Invariant disclaimer */}
-            <div className="p-3 bg-blue-50/70 border border-blue-200/60 rounded-xl text-[11px] text-blue-900 space-y-1">
-              <div className="font-bold flex items-center gap-1 text-blue-800">
-                <Info className="w-3.5 h-3.5" />
+            <div className="p-3.5 bg-blue-50/70 border border-blue-200/60 rounded-xl text-[11px] text-blue-900 space-y-1.5">
+              <div className="font-bold flex items-center gap-1.5 text-blue-800">
+                <Info className="w-3.5 h-3.5 text-blue-600" />
                 <span>Financial Invariant Guarantee</span>
               </div>
-              <p>
+              <p className="leading-relaxed">
                 Calculated strictly in integer Sri Lankan cents. Delivery charges are segregated per merchant and excluded from commission calculation.
               </p>
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting || isQuoteLoading}
-              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Confirming Order...</span>
-                </>
-              ) : (
-                <>
-                  <span>Confirm & Place Order</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
+            <div className="pt-1">
+              <button
+                type="submit"
+                disabled={isSubmitting || isQuoteLoading}
+                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Confirming Order...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Confirm & Place Order</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400 pt-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Safe & Secure Sri Lankan Checkout</span>
+            </div>
           </div>
         </div>
       </form>

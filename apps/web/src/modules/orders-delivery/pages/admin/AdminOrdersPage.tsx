@@ -111,6 +111,39 @@ export const AdminOrdersPage: React.FC = () => {
         </form>
       </div>
 
+      {/* KPI Metric Overview */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
+            <Package className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Orders</div>
+            <div className="text-xl font-black text-slate-900">{pagination.total}</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600">
+            <Loader2 className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Current View Status</div>
+            <div className="text-sm font-bold text-slate-800">{statusFilter || 'All Statuses'}</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
+            <Package className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Records on Page</div>
+            <div className="text-xl font-black text-slate-900">{orders.length}</div>
+          </div>
+        </div>
+      </div>
+
       {errorMessage && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-xs text-red-800">
           <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />

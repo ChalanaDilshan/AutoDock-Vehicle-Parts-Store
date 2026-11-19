@@ -120,6 +120,55 @@ export const SellerOrdersPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Seller Fulfillment KPI Overview */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
+            <Package className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Suborders</div>
+            <div className="text-lg font-black text-slate-900">{pagination.total}</div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600">
+            <Loader2 className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Awaiting Action</div>
+            <div className="text-lg font-black text-amber-600">
+              {suborders.filter((s) => s.fulfillmentStatus === 'AWAITING_FULFILLMENT').length}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
+            <CheckCircle className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Processing</div>
+            <div className="text-lg font-black text-indigo-600">
+              {suborders.filter((s) => s.fulfillmentStatus === 'PROCESSING').length}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
+            <Truck className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Dispatched</div>
+            <div className="text-lg font-black text-emerald-600">
+              {suborders.filter((s) => s.fulfillmentStatus === 'DISPATCHED').length}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {errorMessage && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-xs text-red-800">
           <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
