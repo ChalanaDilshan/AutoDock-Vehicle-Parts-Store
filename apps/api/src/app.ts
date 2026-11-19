@@ -41,7 +41,14 @@ import {
   adminOrderRouter,
   paymentRouter,
 } from './modules/orders-delivery/index.js';
-import { financePromotionsRouter } from './modules/finance-promotions/index.js';
+import {
+  financePromotionsRouter,
+  sellerFinanceRouter,
+  sellerPromotionRouter,
+  adminFinanceRouter,
+  adminPromotionRouter,
+  financePublicRouter,
+} from './modules/finance-promotions/index.js';
 import { adminPlatformRouter } from './modules/admin-platform/index.js';
 
 export function createApp(): Express {
@@ -146,8 +153,20 @@ export function createApp(): Express {
   app.use(`${env.API_PREFIX}/payments`, paymentRouter);
   app.use(`${env.API_PREFIX}/orders-delivery`, ordersDeliveryRouter);
 
+  // MOD-04 Finance & Promotion Management Routes
+  app.use(`${env.API_PREFIX}/seller/finance`, sellerFinanceRouter);
+  app.use(`${env.API_PREFIX}/sellers/finance`, sellerFinanceRouter);
+  app.use(`${env.API_PREFIX}/seller/promotions`, sellerPromotionRouter);
+  app.use(`${env.API_PREFIX}/sellers/promotions`, sellerPromotionRouter);
+  app.use(`${env.API_PREFIX}/seller/finance/promotions`, sellerPromotionRouter);
+  app.use(`${env.API_PREFIX}/sellers/finance/promotions`, sellerPromotionRouter);
+  app.use(`${env.API_PREFIX}/admin/finance`, adminFinanceRouter);
+  app.use(`${env.API_PREFIX}/admin/promotions`, adminPromotionRouter);
+  app.use(`${env.API_PREFIX}/admin/finance/promotions`, adminPromotionRouter);
+  app.use(`${env.API_PREFIX}/finance`, financePublicRouter);
+  app.use(`${env.API_PREFIX}/finance-promotions`, financePromotionsRouter);
+
   // Future Module Route Placeholders
-  app.use(`${env.API_PREFIX}/finance`, financePromotionsRouter);
   app.use(`${env.API_PREFIX}/admin`, adminPlatformRouter);
 
   // 404 & Centralized Error Handlers
