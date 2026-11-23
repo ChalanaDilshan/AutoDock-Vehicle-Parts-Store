@@ -324,13 +324,10 @@ export const CartPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 space-y-2">
-              <div className="flex items-center gap-2 font-semibold text-slate-800">
-                <Truck className="w-4 h-4 text-blue-600" />
-                <span>Multi-Seller Order Architecture</span>
-              </div>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                When purchasing from multiple sellers, AutoDock creates independent seller suborders so you can track dispatch, courier fees, and direct bank transfers per merchant store.
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600 flex items-center gap-2.5">
+              <Truck className="w-4 h-4 text-slate-500 shrink-0" />
+              <p className="text-[11px] text-slate-500 leading-normal">
+                Items from different sellers are dispatched individually by each store.
               </p>
             </div>
           </div>

@@ -50,7 +50,7 @@ export const LoginPage: React.FC = () => {
           </div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Sign in to AutoDock</h1>
           <p className="text-xs text-slate-500 mt-1">
-            Access your customer orders, merchant storefront, or administrative workstation
+            Sign in to continue
           </p>
         </div>
 
