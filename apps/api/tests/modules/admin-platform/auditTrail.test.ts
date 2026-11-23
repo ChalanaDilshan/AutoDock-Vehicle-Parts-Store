@@ -66,6 +66,19 @@ describe('MOD-05 Security Audit Trail Tests', () => {
     await expect(AuditEvent.deleteOne({ _id: record._id })).rejects.toThrow(
       'AUDIT_IMMUTABILITY_VIOLATION'
     );
+
+    // Attempting findOneAndDelete throws AUDIT_IMMUTABILITY_VIOLATION
+    await expect(AuditEvent.findOneAndDelete({ _id: record._id })).rejects.toThrow(
+      'AUDIT_IMMUTABILITY_VIOLATION'
+    );
+
+    // Attempting findOneAndReplace throws AUDIT_IMMUTABILITY_VIOLATION
+    await expect(
+      AuditEvent.findOneAndReplace({ _id: record._id }, { action: 'REPLACED' })
+    ).rejects.toThrow('AUDIT_IMMUTABILITY_VIOLATION');
+
+    // Attempting document-level deleteOne throws AUDIT_IMMUTABILITY_VIOLATION
+    await expect(record.deleteOne()).rejects.toThrow('AUDIT_IMMUTABILITY_VIOLATION');
   });
 
   it('TC-AUDIT-02: Sensitive keys in delta are automatically sanitized with [REDACTED]', async () => {
@@ -146,6 +159,14 @@ describe('MOD-05 Security Audit Trail Tests', () => {
 
     expect(resFiltered.body.data).toHaveLength(1);
     expect(resFiltered.body.data[0].action).toBe('COMMISSION_RATE_CONFIGURED');
+
+    // Filter by actorId as string matching ObjectId/string in database
+    const resActor = await request(app)
+      .get(`/api/v1/admin/audit-logs?actorId=${adminId}`)
+      .set('Authorization', `Bearer ${tokenAdmin}`)
+      .expect(200);
+
+    expect(resActor.body.data).toHaveLength(2);
   });
 
   it('TC-AUDIT-05: Admin retrieves audit log detail by ID', async () => {

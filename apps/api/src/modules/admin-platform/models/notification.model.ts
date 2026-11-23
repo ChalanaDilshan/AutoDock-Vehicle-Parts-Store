@@ -103,7 +103,13 @@ NotificationSchema.index({ recipientId: 1, isRead: 1, createdAt: -1 });
 NotificationSchema.index({ recipientId: 1, category: 1, createdAt: -1 });
 
 // TTL Indexes: Purge read notifications 90 days after readAt; fallback purge unread after 180 days
-NotificationSchema.index({ readAt: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 });
+NotificationSchema.index(
+  { readAt: 1 },
+  {
+    expireAfterSeconds: 90 * 24 * 60 * 60,
+    partialFilterExpression: { readAt: { $type: 'date' } },
+  }
+);
 NotificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: 180 * 24 * 60 * 60 });
 
 export const Notification = mongoose.model<INotification>('Notification', NotificationSchema);

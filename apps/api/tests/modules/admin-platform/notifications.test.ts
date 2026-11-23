@@ -240,6 +240,11 @@ describe('MOD-05 In-App Notifications & Admin Delivery API Tests', () => {
       attemptCount: 3,
       maxAttempts: 3,
       lastErrorMessage: 'SMTP Timeout',
+      payloadSnapshot: {
+        invoiceNumber: 'INV-202611-RETRY',
+        billingPeriod: '2026-11',
+        grossCommissionInCents: 1500000,
+      },
     });
 
     // Admin views delivery health

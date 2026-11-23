@@ -54,7 +54,7 @@ export class AdminPlatformEventService implements IAdminPlatformPublicService {
 
     for (const target of dispatchTargets) {
       // 2a. In-App Notification Delivery
-      if (target.channels.includes('IN_APP') && target.recipientId) {
+      if (target.channels.includes('IN_APP') && target.recipientId && mongoose.Types.ObjectId.isValid(target.recipientId)) {
         const inAppKey = this.generateIdempotencyKey(sourceModule, eventId, target.recipientId, 'IN_APP');
 
         const existingInApp = await NotificationDelivery.findOne({ idempotencyKey: inAppKey });
@@ -63,33 +63,42 @@ export class AdminPlatformEventService implements IAdminPlatformPublicService {
         } else {
           const { version, rendered } = templateRegistry.render(target.templateId, payload);
 
-          const inAppDoc = await Notification.create({
-            recipientId: new mongoose.Types.ObjectId(target.recipientId),
-            recipientRole: target.recipientRole,
-            title: rendered.inAppTitle,
-            message: rendered.inAppMessage,
-            category: target.category || 'SYSTEM',
-            priority: target.priority || 'NORMAL',
-            actionUrl: target.actionUrl || null,
-            targetEntityId: target.targetEntityId || null,
-            targetEntityType: target.targetEntityType || null,
-          });
+          try {
+            const inAppDoc = await Notification.create({
+              recipientId: new mongoose.Types.ObjectId(target.recipientId),
+              recipientRole: target.recipientRole,
+              title: rendered.inAppTitle,
+              message: rendered.inAppMessage,
+              category: target.category || 'SYSTEM',
+              priority: target.priority || 'NORMAL',
+              actionUrl: target.actionUrl || null,
+              targetEntityId: target.targetEntityId || null,
+              targetEntityType: target.targetEntityType || null,
+            });
 
-          await NotificationDelivery.create({
-            idempotencyKey: inAppKey,
-            sourceModule,
-            sourceEventId: eventId,
-            sourceEventName: eventName,
-            channel: 'IN_APP',
-            templateId: target.templateId,
-            templateVersion: version,
-            recipientId: new mongoose.Types.ObjectId(target.recipientId),
-            recipientAddress: target.recipientId,
-            status: 'DELIVERED',
-            attemptCount: 1,
-            maxAttempts: 1,
-            notificationId: inAppDoc._id,
-          });
+            await NotificationDelivery.create({
+              idempotencyKey: inAppKey,
+              sourceModule,
+              sourceEventId: eventId,
+              sourceEventName: eventName,
+              channel: 'IN_APP',
+              templateId: target.templateId,
+              templateVersion: version,
+              recipientId: new mongoose.Types.ObjectId(target.recipientId),
+              recipientAddress: target.recipientId,
+              status: 'DELIVERED',
+              attemptCount: 1,
+              maxAttempts: 1,
+              notificationId: inAppDoc._id,
+              payloadSnapshot: payload,
+            });
+          } catch (err: any) {
+            if (err.code === 11000) {
+              duplicateIgnored = true;
+            } else {
+              throw err;
+            }
+          }
         }
       }
 
@@ -103,37 +112,46 @@ export class AdminPlatformEventService implements IAdminPlatformPublicService {
         } else {
           const { version, rendered } = templateRegistry.render(target.templateId, payload);
 
-          const delivery = await NotificationDelivery.create({
-            idempotencyKey: emailKey,
-            sourceModule,
-            sourceEventId: eventId,
-            sourceEventName: eventName,
-            channel: 'EMAIL',
-            templateId: target.templateId,
-            templateVersion: version,
-            recipientId: target.recipientId
-              ? new mongoose.Types.ObjectId(target.recipientId)
-              : new mongoose.Types.ObjectId('000000000000000000000000'),
-            recipientAddress: target.recipientEmail,
-            status: 'QUEUED',
-            attemptCount: 0,
-            maxAttempts: 3,
-            nextAttemptAt: new Date(),
-          });
+          try {
+            const delivery = await NotificationDelivery.create({
+              idempotencyKey: emailKey,
+              sourceModule,
+              sourceEventId: eventId,
+              sourceEventName: eventName,
+              channel: 'EMAIL',
+              templateId: target.templateId,
+              templateVersion: version,
+              recipientId: target.recipientId && mongoose.Types.ObjectId.isValid(target.recipientId)
+                ? new mongoose.Types.ObjectId(target.recipientId)
+                : new mongoose.Types.ObjectId('000000000000000000000000'),
+              recipientAddress: target.recipientEmail,
+              status: 'QUEUED',
+              attemptCount: 0,
+              maxAttempts: 3,
+              nextAttemptAt: new Date(),
+              payloadSnapshot: payload,
+            });
 
-          // Asynchronously dispatch through email delivery service
-          setImmediate(async () => {
-            try {
-              await emailDeliveryService.dispatchDeliveryRecord(delivery, {
-                to: target.recipientEmail!,
-                subject: rendered.subject,
-                html: rendered.htmlBody,
-                text: rendered.textBody,
-              });
-            } catch (err: any) {
-              logger.warn(`[AdminPlatformEventService] Background dispatch error: ${err.message}`);
+            // Asynchronously dispatch through email delivery service
+            setImmediate(async () => {
+              try {
+                await emailDeliveryService.dispatchDeliveryRecord(delivery, {
+                  to: target.recipientEmail!,
+                  subject: rendered.subject,
+                  html: rendered.htmlBody,
+                  text: rendered.textBody,
+                });
+              } catch (err: any) {
+                logger.warn(`[AdminPlatformEventService] Background dispatch error: ${err.message}`);
+              }
+            });
+          } catch (err: any) {
+            if (err.code === 11000) {
+              duplicateIgnored = true;
+            } else {
+              throw err;
             }
-          });
+          }
         }
       }
     }
@@ -170,32 +188,37 @@ export class AdminPlatformEventService implements IAdminPlatformPublicService {
       if (!existing) {
         const { version, rendered } = templateRegistry.render(input.templateId, input.bodyData);
 
-        const inAppDoc = await Notification.create({
-          recipientId: new mongoose.Types.ObjectId(input.recipientId),
-          recipientRole: input.recipientRole || 'CUSTOMER',
-          title: rendered.inAppTitle || input.subject,
-          message: rendered.inAppMessage || input.bodyData.message || input.subject,
-          category: input.category || 'SYSTEM',
-          priority: input.priority || 'NORMAL',
-          actionUrl: input.actionUrl || null,
-        });
+        try {
+          const inAppDoc = await Notification.create({
+            recipientId: new mongoose.Types.ObjectId(input.recipientId),
+            recipientRole: input.recipientRole || 'CUSTOMER',
+            title: rendered.inAppTitle || input.subject,
+            message: rendered.inAppMessage || input.bodyData.message || input.subject,
+            category: input.category || 'SYSTEM',
+            priority: input.priority || 'NORMAL',
+            actionUrl: input.actionUrl || null,
+          });
 
-        await NotificationDelivery.create({
-          idempotencyKey: inAppKey,
-          sourceModule,
-          sourceEventId: eventId,
-          sourceEventName: eventName,
-          channel: 'IN_APP',
-          templateId: input.templateId,
-          templateVersion: version,
-          recipientId: new mongoose.Types.ObjectId(input.recipientId),
-          recipientAddress: input.recipientId,
-          status: 'DELIVERED',
-          attemptCount: 1,
-          maxAttempts: 1,
-          notificationId: inAppDoc._id,
-        });
-        inAppCreated = true;
+          await NotificationDelivery.create({
+            idempotencyKey: inAppKey,
+            sourceModule,
+            sourceEventId: eventId,
+            sourceEventName: eventName,
+            channel: 'IN_APP',
+            templateId: input.templateId,
+            templateVersion: version,
+            recipientId: new mongoose.Types.ObjectId(input.recipientId),
+            recipientAddress: input.recipientId,
+            status: 'DELIVERED',
+            attemptCount: 1,
+            maxAttempts: 1,
+            notificationId: inAppDoc._id,
+            payloadSnapshot: input.bodyData,
+          });
+          inAppCreated = true;
+        } catch (err: any) {
+          if (err.code !== 11000) throw err;
+        }
       }
     }
 
@@ -207,37 +230,42 @@ export class AdminPlatformEventService implements IAdminPlatformPublicService {
       if (!existing) {
         const { version, rendered } = templateRegistry.render(input.templateId, input.bodyData);
 
-        const delivery = await NotificationDelivery.create({
-          idempotencyKey: emailKey,
-          sourceModule,
-          sourceEventId: eventId,
-          sourceEventName: eventName,
-          channel: 'EMAIL',
-          templateId: input.templateId,
-          templateVersion: version,
-          recipientId: input.recipientId && mongoose.Types.ObjectId.isValid(input.recipientId)
-            ? new mongoose.Types.ObjectId(input.recipientId)
-            : new mongoose.Types.ObjectId('000000000000000000000000'),
-          recipientAddress: input.recipientEmail,
-          status: 'QUEUED',
-          attemptCount: 0,
-          maxAttempts: 3,
-          nextAttemptAt: new Date(),
-        });
+        try {
+          const delivery = await NotificationDelivery.create({
+            idempotencyKey: emailKey,
+            sourceModule,
+            sourceEventId: eventId,
+            sourceEventName: eventName,
+            channel: 'EMAIL',
+            templateId: input.templateId,
+            templateVersion: version,
+            recipientId: input.recipientId && mongoose.Types.ObjectId.isValid(input.recipientId)
+              ? new mongoose.Types.ObjectId(input.recipientId)
+              : new mongoose.Types.ObjectId('000000000000000000000000'),
+            recipientAddress: input.recipientEmail,
+            status: 'QUEUED',
+            attemptCount: 0,
+            maxAttempts: 3,
+            nextAttemptAt: new Date(),
+            payloadSnapshot: input.bodyData,
+          });
 
-        setImmediate(async () => {
-          try {
-            await emailDeliveryService.dispatchDeliveryRecord(delivery, {
-              to: input.recipientEmail!,
-              subject: rendered.subject || input.subject,
-              html: rendered.htmlBody,
-              text: rendered.textBody,
-            });
-          } catch (err: any) {
-            logger.warn(`[AdminPlatformEventService] Background programmatic dispatch error: ${err.message}`);
-          }
-        });
-        emailEnqueued = true;
+          setImmediate(async () => {
+            try {
+              await emailDeliveryService.dispatchDeliveryRecord(delivery, {
+                to: input.recipientEmail!,
+                subject: rendered.subject || input.subject,
+                html: rendered.htmlBody,
+                text: rendered.textBody,
+              });
+            } catch (err: any) {
+              logger.warn(`[AdminPlatformEventService] Background programmatic dispatch error: ${err.message}`);
+            }
+          });
+          emailEnqueued = true;
+        } catch (err: any) {
+          if (err.code !== 11000) throw err;
+        }
       }
     }
 

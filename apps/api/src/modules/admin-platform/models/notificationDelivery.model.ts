@@ -31,6 +31,7 @@ export interface INotificationDelivery extends Document {
   lastErrorCode?: string | null;
   lastErrorMessage?: string | null;
   notificationId?: mongoose.Types.ObjectId | null;
+  payloadSnapshot?: Record<string, unknown> | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -110,8 +111,7 @@ const NotificationDeliverySchema = new Schema<INotificationDelivery>(
       default: null,
     },
     providerResponse: {
-      type: Map,
-      of: Schema.Types.Mixed,
+      type: Schema.Types.Mixed,
       default: null,
     },
     lastErrorCode: {
@@ -125,6 +125,10 @@ const NotificationDeliverySchema = new Schema<INotificationDelivery>(
     notificationId: {
       type: Schema.Types.ObjectId,
       ref: 'Notification',
+      default: null,
+    },
+    payloadSnapshot: {
+      type: Schema.Types.Mixed,
       default: null,
     },
   },

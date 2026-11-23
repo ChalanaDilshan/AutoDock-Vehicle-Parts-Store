@@ -193,4 +193,31 @@ describe('MOD-05 Cross-Module Event Ingestion & Idempotency Tests', () => {
     expect(notif).toBeDefined();
     expect(notif?.title).toBe('Monthly Commission Invoice Issued');
   });
+
+  it('TC-XMOD-06: Gracefully handles non-ObjectId recipientId without throwing BSONError', async () => {
+    const eventId = new mongoose.Types.ObjectId().toString();
+    const result = await adminPlatformEventService.ingestDomainEvent({
+      eventId,
+      sourceModule: 'MOD-03',
+      eventName: 'MASTER_ORDER_PLACED',
+      timestamp: new Date(),
+      payload: {
+        customerId: 'NON_OBJECT_ID_EXTERNAL_CUSTOMER',
+        customerEmail: 'nonobj@example.com',
+        orderId: 'ORD_EXT_001',
+        orderNumber: 'ORD-20261123-9999',
+        grandTotalInCents: 500000,
+        paymentMethod: 'CARD',
+      },
+    });
+
+    expect(result.accepted).toBe(true);
+    // Email delivery should still be queued
+    const emailDelivery = await NotificationDelivery.findOne({
+      sourceEventId: eventId,
+      channel: 'EMAIL',
+    });
+    expect(emailDelivery).toBeDefined();
+    expect(emailDelivery?.recipientAddress).toBe('nonobj@example.com');
+  });
 });

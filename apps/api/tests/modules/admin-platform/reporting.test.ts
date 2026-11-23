@@ -108,4 +108,20 @@ describe('MOD-05 Consolidated Reporting & Dashboard Tests', () => {
     const exportAudits = await AuditEvent.find({ action: 'REPORT_EXPORTED' });
     expect(exportAudits.length).toBeGreaterThanOrEqual(1);
   });
+
+  it('TC-REP-05: Dynamic sales-velocity report generates correctly even on cold start', async () => {
+    const res = await request(app)
+      .get('/api/v1/admin/reports/sales-velocity')
+      .set('Authorization', `Bearer ${tokenAdmin}`)
+      .expect(200);
+
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toBeDefined();
+    expect(res.body.data).toHaveLength(4);
+    const metrics = res.body.data.map((r: any) => r.metric);
+    expect(metrics).toContain('Gross Merchandise Value (Cents)');
+    expect(metrics).toContain('Logistics Revenue (Cents)');
+    expect(metrics).toContain('Total Master Orders');
+    expect(metrics).toContain('Total Merchant Suborders');
+  });
 });

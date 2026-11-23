@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { Notification, INotification } from '../models/notification.model.js';
 import { NotificationDelivery, INotificationDelivery } from '../models/notificationDelivery.model.js';
 import { emailDeliveryService } from './emailDelivery.service.js';
+import { templateRegistry } from '../templates/templateRegistry.js';
 import { AppError } from '../../../shared/middleware/errorHandler.js';
 
 export interface UserNotificationQueryFilter {
@@ -195,13 +196,20 @@ export class NotificationService {
       delivery.lastErrorMessage = null;
       await delivery.save();
 
+      // Render accurate email content using payload snapshot if available
+      const payload = delivery.payloadSnapshot || {};
+      const { rendered } = templateRegistry.render(delivery.templateId, payload);
+      const subject = rendered.subject || delivery.sourceEventName;
+      const html = rendered.htmlBody || `<p>Retried AutoDock notification for ${delivery.sourceEventName}</p>`;
+      const text = rendered.textBody || `Retried notification for ${delivery.sourceEventName}`;
+
       // Trigger asynchronous dispatch
       setImmediate(async () => {
         await emailDeliveryService.dispatchDeliveryRecord(delivery, {
           to: delivery.recipientAddress,
-          subject: delivery.sourceEventName,
-          html: `<p>Retried AutoDock notification for ${delivery.sourceEventName}</p>`,
-          text: `Retried notification for ${delivery.sourceEventName}`,
+          subject,
+          html,
+          text,
         });
       });
     }
