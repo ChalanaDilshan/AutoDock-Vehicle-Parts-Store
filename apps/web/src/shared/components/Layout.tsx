@@ -19,6 +19,8 @@ import {
   Building2,
   Phone,
   CheckCircle2,
+  DollarSign,
+  Tag,
 } from 'lucide-react';
 import { useAuth } from '../../modules/identity/context/AuthContext.js';
 
@@ -179,6 +181,13 @@ export const Layout: React.FC = () => {
                   <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
                   <span>Reviews</span>
                 </Link>
+                <Link
+                  to="/admin/finance"
+                  className="flex items-center gap-1 hover:text-blue-600 text-slate-700 transition"
+                >
+                  <DollarSign className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Finance</span>
+                </Link>
               </div>
             ) : user?.role === 'SELLER' ? (
               <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
@@ -208,6 +217,20 @@ export const Layout: React.FC = () => {
                 >
                   <Truck className="w-3.5 h-3.5 text-blue-600" />
                   <span>Delivery Rates</span>
+                </Link>
+                <Link
+                  to="/seller/finance"
+                  className="flex items-center gap-1 hover:text-blue-600 text-slate-700 transition"
+                >
+                  <DollarSign className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Finance</span>
+                </Link>
+                <Link
+                  to="/seller/promotions"
+                  className="flex items-center gap-1 hover:text-blue-600 text-slate-700 transition"
+                >
+                  <Tag className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Promos</span>
                 </Link>
               </div>
             ) : (
@@ -384,6 +407,12 @@ export const Layout: React.FC = () => {
                     >
                       Customer Reviews Moderation
                     </Link>
+                    <Link
+                      to="/admin/finance"
+                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      Platform Finance & Settlements
+                    </Link>
                   </div>
                 )}
 
@@ -412,6 +441,18 @@ export const Layout: React.FC = () => {
                       className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
                     >
                       District Delivery Charge Proposals
+                    </Link>
+                    <Link
+                      to="/seller/finance"
+                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      Finance Overview & Invoices
+                    </Link>
+                    <Link
+                      to="/seller/promotions"
+                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      Seller Promotion Coupons
                     </Link>
                   </div>
                 )}
