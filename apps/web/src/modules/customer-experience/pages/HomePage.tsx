@@ -16,7 +16,6 @@ import {
   Droplets,
   Settings,
   Flame,
-  XCircle,
 } from 'lucide-react';
 import {
   ProductItem,
@@ -156,7 +155,7 @@ export const HomePage: React.FC = () => {
           </h1>
 
           <p className="text-sm text-slate-300 mb-6 max-w-xl leading-relaxed">
-            Eliminate wrong fitments. Search thousands of OEM and aftermarket parts verified by Sri Lankan vehicle merchants and vetted physical stores across 25 districts.
+            Find genuine OEM and aftermarket spare parts with guaranteed vehicle compatibility.
           </p>
 
           {/* Vehicle Quick Finder Box */}
@@ -243,53 +242,45 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Value Propositions */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-4 sm:p-5 rounded-lg border border-slate-200 flex items-start gap-3">
-          <div className="p-2.5 bg-slate-100 text-slate-700 rounded-md shrink-0">
-            <Wrench className="w-5 h-5 text-blue-600" />
+      {/* Value Highlights */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white p-3.5 sm:p-4 rounded-lg border border-slate-200 flex items-center gap-3">
+          <div className="p-2 bg-slate-100 text-slate-700 rounded-md shrink-0">
+            <Wrench className="w-4 h-4 text-blue-600" />
           </div>
           <div>
-            <h4 className="font-semibold text-sm text-slate-900">Guaranteed Fitment</h4>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-              Compatibility engine maps genuine parts to vehicle chassis and engine trims.
-            </p>
+            <h4 className="font-semibold text-xs sm:text-sm text-slate-900">Guaranteed Fitment</h4>
+            <p className="text-[11px] text-slate-500 mt-0.5">Matched to your vehicle chassis</p>
           </div>
         </div>
 
-        <div className="bg-white p-4 sm:p-5 rounded-lg border border-slate-200 flex items-start gap-3">
-          <div className="p-2.5 bg-slate-100 text-slate-700 rounded-md shrink-0">
-            <ShieldCheck className="w-5 h-5 text-emerald-600" />
+        <div className="bg-white p-3.5 sm:p-4 rounded-lg border border-slate-200 flex items-center gap-3">
+          <div className="p-2 bg-slate-100 text-slate-700 rounded-md shrink-0">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
           </div>
           <div>
-            <h4 className="font-semibold text-sm text-slate-900">Vetted Local Merchants</h4>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-              BR-registered physical spare-parts stores verified by in-person inspection.
-            </p>
+            <h4 className="font-semibold text-xs sm:text-sm text-slate-900">Verified Merchants</h4>
+            <p className="text-[11px] text-slate-500 mt-0.5">Vetted physical stores</p>
           </div>
         </div>
 
-        <div className="bg-white p-4 sm:p-5 rounded-lg border border-slate-200 flex items-start gap-3">
-          <div className="p-2.5 bg-slate-100 text-slate-700 rounded-md shrink-0">
-            <Truck className="w-5 h-5 text-blue-600" />
+        <div className="bg-white p-3.5 sm:p-4 rounded-lg border border-slate-200 flex items-center gap-3">
+          <div className="p-2 bg-slate-100 text-slate-700 rounded-md shrink-0">
+            <Truck className="w-4 h-4 text-blue-600" />
           </div>
           <div>
-            <h4 className="font-semibold text-sm text-slate-900">Island-wide Delivery</h4>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-              Transparent per-seller courier rates across all 25 districts in Sri Lanka.
-            </p>
+            <h4 className="font-semibold text-xs sm:text-sm text-slate-900">Island-wide Delivery</h4>
+            <p className="text-[11px] text-slate-500 mt-0.5">All 25 districts covered</p>
           </div>
         </div>
 
-        <div className="bg-white p-4 sm:p-5 rounded-lg border border-slate-200 flex items-start gap-3">
-          <div className="p-2.5 bg-slate-100 text-slate-700 rounded-md shrink-0">
-            <RotateCcw className="w-5 h-5 text-slate-700" />
+        <div className="bg-white p-3.5 sm:p-4 rounded-lg border border-slate-200 flex items-center gap-3">
+          <div className="p-2 bg-slate-100 text-slate-700 rounded-md shrink-0">
+            <RotateCcw className="w-4 h-4 text-slate-700" />
           </div>
           <div>
-            <h4 className="font-semibold text-sm text-slate-900">Direct Bank Settlement</h4>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-              Direct transfer to verified merchant bank accounts with uploadable proof of payment.
-            </p>
+            <h4 className="font-semibold text-xs sm:text-sm text-slate-900">Direct Settlement</h4>
+            <p className="text-[11px] text-slate-500 mt-0.5">Bank deposit & COD options</p>
           </div>
         </div>
       </section>
@@ -380,70 +371,6 @@ export const HomePage: React.FC = () => {
         </section>
       )}
 
-      {/* Why AutoDock Comparison Section */}
-      <section className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 space-y-6">
-        <div className="max-w-xl space-y-1">
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-            Why Buy Spare Parts on AutoDock?
-          </h2>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Traditional spare part hunting in Sri Lanka is prone to mismatch, counterfeit parts, and unpredictable pricing. We solve this end-to-end.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-          {/* Traditional Sourcing */}
-          <div className="p-5 bg-slate-50 rounded-lg border border-slate-200 space-y-3">
-            <div className="font-semibold text-xs uppercase tracking-wider text-slate-600">
-              Traditional Offline Sourcing
-            </div>
-            <ul className="space-y-2 text-xs text-slate-600">
-              <li className="flex items-start gap-2">
-                <XCircle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-                <span>Calling or traveling across multiple shops in Panchikawatta with no stock guarantee.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <XCircle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-                <span>Frequent wrong fitments due to unverified engine trim and chassis compatibility.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <XCircle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-                <span>Uncertain merchant reputation with lack of verified customer purchase reviews.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <XCircle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-                <span>Arbitrary courier charges and lack of tracking transparency across districts.</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* AutoDock Standard */}
-          <div className="p-5 bg-blue-50/50 rounded-lg border border-blue-200 space-y-3">
-            <div className="font-semibold text-xs uppercase tracking-wider text-blue-900">
-              The AutoDock Platform Standard
-            </div>
-            <ul className="space-y-2 text-xs text-slate-700">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                <span><strong>1-Click My Garage:</strong> Save up to 10 vehicles and filter only guaranteed matching parts.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                <span><strong>Vetted Merchants:</strong> Physical stores verified via in-person visits and business registration.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                <span><strong>Multi-Vendor Checkout:</strong> Independent seller suborders with clear courier rates per district.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                <span><strong>Direct Bank & COD:</strong> Direct bank account payments with digital receipt verification.</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
       {/* Featured Manufacturer Brands */}
       {brands.length > 0 && (
         <section className="space-y-4">
@@ -483,21 +410,18 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* Sell on AutoDock Banner */}
-      <section className="bg-slate-900 text-white rounded-xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
-        <div className="space-y-1.5 text-center md:text-left">
-          <div className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider">
-            Merchant Growth Program
-          </div>
-          <h3 className="text-xl sm:text-2xl font-bold tracking-tight">Own a Vehicle Spare-Parts Store in Sri Lanka?</h3>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
-            Register your physical shop or online enterprise to sell parts directly to thousands of vehicle owners and repair garages across the island with zero upfront setup fees.
+      <section className="bg-slate-900 text-white rounded-xl px-6 py-6 sm:py-7 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-800">
+        <div>
+          <h3 className="text-lg font-bold text-white tracking-tight">Sell Spare Parts on AutoDock</h3>
+          <p className="text-xs text-slate-400 mt-1">
+            Reach vehicle owners and repair workshops across all 25 districts.
           </p>
         </div>
         <Link
           to="/sellers/register"
-          className="shrink-0 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition"
+          className="shrink-0 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md transition"
         >
-          Register as Merchant
+          Become a Seller
         </Link>
       </section>
     </div>

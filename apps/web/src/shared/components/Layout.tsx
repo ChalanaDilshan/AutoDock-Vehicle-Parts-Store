@@ -424,124 +424,116 @@ export const Layout: React.FC = () => {
         <Outlet />
       </main>
 
-      {/* Clean Structured Footer */}
-      <footer className="bg-slate-900 text-slate-400 border-t border-slate-800 mt-auto pt-12 pb-8">
-        <div className="max-w-7xl mx-auto px-4 space-y-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Column 1: Brand & Purpose */}
-            <div className="space-y-3">
+      {/* Clean Modern Minimalist Footer */}
+      <footer className="bg-slate-900 text-slate-400 border-t border-slate-800 mt-auto pt-10 pb-8 text-xs">
+        <div className="max-w-7xl mx-auto px-4 space-y-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {/* Column 1: Brand */}
+            <div className="space-y-3 col-span-2 sm:col-span-1">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded bg-blue-600 flex items-center justify-center text-white font-bold">
-                  <Wrench className="w-4 h-4 text-white" />
+                <div className="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white">
+                  <Wrench className="w-3.5 h-3.5 text-white" />
                 </div>
-                <div className="text-lg font-bold tracking-tight text-white">
-                  AutoDock<span className="text-blue-500">.</span>
-                </div>
+                <span className="text-base font-bold text-white tracking-tight">AutoDock</span>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Sri Lanka's dedicated multi-vendor marketplace for automotive spare parts. Eliminating fitment mismatch with virtual garages and connecting vehicle owners directly with verified local merchants.
+              <p className="text-xs text-slate-400">
+                Genuine automotive spare parts with guaranteed vehicle fitment.
               </p>
-              <div className="pt-1 flex items-center gap-2 text-xs text-slate-300">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>25 Sri Lankan Districts Covered</span>
-              </div>
             </div>
 
-            {/* Column 2: Parts Categories */}
-            <div className="space-y-3">
+            {/* Column 2: Catalog & Categories */}
+            <div className="space-y-2.5">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
-                Popular Categories
+                Categories
               </h4>
-              <ul className="space-y-2 text-xs">
+              <ul className="space-y-1.5 text-slate-400">
                 <li>
                   <Link to="/products?category=engine-and-drivetrain" className="hover:text-white transition">
-                    Engine & Drivetrain Components
+                    Engine & Drivetrain
                   </Link>
                 </li>
                 <li>
                   <Link to="/products?category=brakes-and-suspension" className="hover:text-white transition">
-                    Brake Pads, Rotors & Suspension
+                    Brakes & Suspension
                   </Link>
                 </li>
                 <li>
                   <Link to="/products?category=filters-and-fluids" className="hover:text-white transition">
-                    Filters, Spark Plugs & Lubricants
+                    Filters & Fluids
                   </Link>
                 </li>
                 <li>
                   <Link to="/products?category=electrical-and-lighting" className="hover:text-white transition">
-                    Electrical, Sensors & Headlamps
+                    Electrical & Lights
                   </Link>
                 </li>
                 <li>
                   <Link to="/products?category=transmission" className="hover:text-white transition">
-                    Transmission & Clutch Kits
+                    Transmission
                   </Link>
                 </li>
               </ul>
             </div>
 
-            {/* Column 3: Customer Care & Services */}
-            <div className="space-y-3">
+            {/* Column 3: Customer Services */}
+            <div className="space-y-2.5">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
                 Customer Services
               </h4>
-              <ul className="space-y-2 text-xs">
+              <ul className="space-y-1.5 text-slate-400">
                 <li>
                   <Link to="/garage" className="hover:text-white transition">
-                    My Garage (Fitment Guarantee)
+                    My Garage
                   </Link>
                 </li>
                 <li>
                   <Link to="/orders" className="hover:text-white transition">
-                    Track Orders & Bank Receipts
+                    Track Orders
                   </Link>
                 </li>
                 <li>
                   <Link to="/cart" className="hover:text-white transition">
-                    Multi-Seller Shopping Cart
+                    Shopping Cart
                   </Link>
                 </li>
                 <li>
                   <Link to="/privacy-policy" className="hover:text-white transition">
-                    Privacy Policy & Verification Notice
+                    Privacy Policy
                   </Link>
                 </li>
               </ul>
             </div>
 
-            {/* Column 4: Merchant Storefront */}
-            <div className="space-y-3">
+            {/* Column 4: Merchants & Support */}
+            <div className="space-y-2.5">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
-                For Auto Merchants
+                Merchants & Support
               </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Operate a physical spare parts shop or enterprise in Sri Lanka? Register to sell genuine parts directly across all 25 districts.
-              </p>
-              <Link
-                to="/sellers/register"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Register as Merchant</span>
-              </Link>
+              <ul className="space-y-1.5 text-slate-400">
+                <li>
+                  <Link to="/sellers/register" className="hover:text-white text-blue-400 font-medium transition">
+                    Sell on AutoDock
+                  </Link>
+                </li>
+                <li>
+                  <a href="tel:+94112345678" className="hover:text-white transition">
+                    Hotline: +94 11 234 5678
+                  </a>
+                </li>
+                <li className="text-slate-500 pt-1">
+                  Island-wide delivery across all 25 districts
+                </li>
+              </ul>
             </div>
           </div>
 
           {/* Bottom Bar: Copyright & Payment Badges */}
-          <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-            <div className="space-y-1 text-center sm:text-left">
-              <p className="font-medium text-slate-300">
-                AutoDock — Sri Lanka Vehicle Spare-Parts Marketplace
-              </p>
-              <p className="text-slate-500">
-                © {new Date().getFullYear()} AutoDock Platform. Certified Sri Lankan Automotive Spare-Parts Network.
-              </p>
+          <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div>
+              AutoDock — Sri Lanka Vehicle Spare-Parts Marketplace &copy; {new Date().getFullYear()}
             </div>
 
-            {/* Payment Method Badges */}
-            <div className="flex items-center gap-3 text-xs text-slate-400 bg-slate-800/60 px-3 py-1.5 rounded-md border border-slate-700/60">
-              <span className="font-medium text-slate-300">Accepted:</span>
+            <div className="flex items-center gap-3 text-slate-400">
               <span className="inline-flex items-center gap-1">
                 <Truck className="w-3.5 h-3.5 text-blue-400" />
                 <span>Cash on Delivery</span>
@@ -549,12 +541,12 @@ export const Layout: React.FC = () => {
               <span>•</span>
               <span className="inline-flex items-center gap-1">
                 <Building2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Bank of Ceylon Deposit</span>
+                <span>Bank Deposit</span>
               </span>
               <span>•</span>
               <span className="inline-flex items-center gap-1">
-                <CreditCard className="w-3.5 h-3.5 text-slate-300" />
-                <span>Cards & Online</span>
+                <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+                <span>Cards</span>
               </span>
             </div>
           </div>
