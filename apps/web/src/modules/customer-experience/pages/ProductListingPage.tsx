@@ -6,7 +6,6 @@ import {
   ChevronLeft,
   ChevronRight,
   PackageOpen,
-  RotateCcw,
   AlertCircle,
 } from 'lucide-react';
 import {
@@ -240,8 +239,8 @@ export const ProductListingPage: React.FC = () => {
 
         {/* Results Stream */}
         <main className="flex-1 w-full space-y-4">
-          {/* Top Control Bar (Search, Count, Sort, Mobile Filter Button) */}
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+          {/* Top Control Bar */}
+          <div className="bg-white p-3.5 rounded-lg border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
             {/* Search Input */}
             <form onSubmit={handleSearchSubmit} className="relative w-full sm:max-w-xs">
               <input
@@ -249,9 +248,9 @@ export const ProductListingPage: React.FC = () => {
                 placeholder="Search part name, OEM, or SKU..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full text-xs pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full text-xs pl-8 pr-3 py-1.5 border border-slate-300 rounded focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none"
               />
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2 pointer-events-none" />
             </form>
 
             <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
@@ -263,7 +262,7 @@ export const ProductListingPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsMobileFiltersOpen(true)}
-                className="lg:hidden px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 flex items-center gap-1.5 hover:bg-slate-50"
+                className="lg:hidden px-3 py-1.5 border border-slate-300 rounded text-xs font-semibold text-slate-700 flex items-center gap-1.5 hover:bg-slate-50"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-blue-600" />
                 <span>Filters</span>
@@ -273,7 +272,7 @@ export const ProductListingPage: React.FC = () => {
               <select
                 value={sortBy}
                 onChange={(e) => updateParam('sortBy', e.target.value)}
-                className="text-xs px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white text-slate-700 font-medium focus:ring-2 focus:ring-blue-500 outline-none"
+                className="text-xs px-2.5 py-1.5 border border-slate-300 rounded bg-white text-slate-700 font-medium focus:border-blue-600 outline-none"
               >
                 <option value="RELEVANCE">Sort: Relevance</option>
                 <option value="PRICE_ASC">Price: Low to High</option>
@@ -286,150 +285,134 @@ export const ProductListingPage: React.FC = () => {
 
           {/* Active Filter Chips */}
           {(selectedCategory || selectedBrand || selectedCondition || minPrice || maxPrice || query) && (
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-xs text-slate-400 font-medium">Active filters:</span>
               {query && (
-                <span className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex items-center gap-1 border border-slate-200">
                   Query: {query}
                   <button onClick={() => updateParam('q', undefined)} className="hover:text-red-600 font-bold ml-1">×</button>
                 </span>
               )}
               {selectedCategory && (
-                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded flex items-center gap-1 border border-blue-200">
                   Category: {selectedCategory}
                   <button onClick={() => updateParam('category', undefined)} className="hover:text-red-600 font-bold ml-1">×</button>
                 </span>
               )}
               {selectedBrand && (
-                <span className="text-xs bg-amber-50 text-amber-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex items-center gap-1 border border-slate-200">
                   Brand: {selectedBrand}
                   <button onClick={() => updateParam('brand', undefined)} className="hover:text-red-600 font-bold ml-1">×</button>
                 </span>
               )}
               {selectedCondition && (
-                <span className="text-xs bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span className="text-xs bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded flex items-center gap-1 border border-emerald-200">
                   Condition: {selectedCondition}
                   <button onClick={() => updateParam('condition', undefined)} className="hover:text-red-600 font-bold ml-1">×</button>
                 </span>
               )}
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                className="text-xs text-blue-600 hover:underline font-semibold ml-1"
-              >
-                Clear all
-              </button>
+              {(minPrice || maxPrice) && (
+                <span className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded flex items-center gap-1 border border-slate-200">
+                  Rs. {minPrice || '0'} - {maxPrice || '∞'}
+                  <button
+                    onClick={() => {
+                      updateParam('minPrice', undefined);
+                      updateParam('maxPrice', undefined);
+                    }}
+                    className="hover:text-red-600 font-bold ml-1"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
             </div>
           )}
 
-          {/* Error Banner */}
-          {isError && (
-            <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-xs text-rose-800">
-              <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
-              <div className="flex-1">
-                <span className="font-bold">Error loading catalogue:</span> {isError}
-              </div>
-              <button
-                type="button"
-                onClick={fetchProducts}
-                className="font-bold underline hover:no-underline text-rose-900"
-              >
-                Retry
-              </button>
-            </div>
-          )}
-
-          {/* Product Grid / Loading / Empty */}
+          {/* Main Results Grid */}
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className="bg-white rounded-xl border border-slate-200 p-4 h-80 animate-pulse flex flex-col justify-between"
-                >
-                  <div className="bg-slate-200 aspect-video rounded-lg w-full mb-3" />
-                  <div className="space-y-2">
-                    <div className="bg-slate-200 h-3 w-1/3 rounded" />
-                    <div className="bg-slate-200 h-4 w-3/4 rounded" />
-                    <div className="bg-slate-200 h-3 w-1/2 rounded" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="bg-white rounded-lg border border-slate-200 p-4 h-72 animate-pulse flex flex-col justify-between">
+                  <div className="bg-slate-100 aspect-video rounded-md w-full" />
+                  <div className="space-y-2 py-3">
+                    <div className="bg-slate-100 h-3 w-1/3 rounded" />
+                    <div className="bg-slate-100 h-4 w-3/4 rounded" />
                   </div>
-                  <div className="bg-slate-200 h-8 rounded-lg mt-4" />
+                  <div className="bg-slate-100 h-8 rounded-md" />
                 </div>
               ))}
             </div>
-          ) : products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {products.map((product) => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  fitmentBadge={
-                    selectedMake && selectedModel
-                      ? {
-                          status: product.isUniversalFit ? 'UNIVERSAL_FIT' : 'EXACT_FIT',
-                          label: product.isUniversalFit
-                            ? 'Universal Fit'
-                            : `Fits ${selectedYear || ''} ${selectedMake}`,
-                        }
-                      : undefined
-                  }
-                  onAddToCart={handleAddToCart}
-                  onToggleWishlist={handleToggleWishlist}
-                />
-              ))}
+          ) : isError ? (
+            <div className="p-8 bg-white rounded-lg border border-red-200 text-center space-y-3">
+              <AlertCircle className="w-8 h-8 text-red-500 mx-auto" />
+              <p className="text-sm font-semibold text-red-800">{isError}</p>
+              <button
+                type="button"
+                onClick={fetchProducts}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition"
+              >
+                Retry Search
+              </button>
             </div>
-          ) : (
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-4">
-              <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto">
-                <PackageOpen className="w-8 h-8" />
+          ) : products.length === 0 ? (
+            <div className="p-12 bg-white rounded-lg border border-slate-200 text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mx-auto">
+                <PackageOpen className="w-6 h-6" />
               </div>
-              <div className="max-w-md mx-auto">
-                <h3 className="font-bold text-slate-900 text-base mb-1">
-                  No spare parts found matching your criteria
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Try broadening your keyword, resetting category/brand filters, or clearing vehicle fitment restrictions.
+              <div className="space-y-1">
+                <h4 className="font-semibold text-base text-slate-900">No matching spare parts found</h4>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  Try broadening your search keywords, clearing vehicle filters, or adjusting the price range.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition inline-flex items-center gap-1.5 shadow-sm"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset All Filters</span>
+                Reset All Filters
               </button>
             </div>
-          )}
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    onAddToCart={handleAddToCart}
+                    onToggleWishlist={handleToggleWishlist}
+                  />
+                ))}
+              </div>
 
-          {/* Pagination Bar */}
-          {!isLoading && totalPages > 1 && (
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-              <button
-                type="button"
-                disabled={page <= 1}
-                onClick={() => updateParam('page', (page - 1).toString())}
-                className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition flex items-center gap-1"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Previous</span>
-              </button>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="pt-6 flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    disabled={page <= 1}
+                    onClick={() => updateParam('page', (page - 1).toString())}
+                    className="p-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 text-slate-700 transition"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
 
-              <span className="text-xs font-medium text-slate-600">
-                Page <strong className="text-slate-900">{page}</strong> of{' '}
-                <strong className="text-slate-900">{totalPages}</strong>
-              </span>
+                  <span className="text-xs font-medium text-slate-700 px-3 py-1.5 bg-white rounded border border-slate-300">
+                    Page {page} of {totalPages}
+                  </span>
 
-              <button
-                type="button"
-                disabled={page >= totalPages}
-                onClick={() => updateParam('page', (page + 1).toString())}
-                className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition flex items-center gap-1"
-              >
-                <span>Next</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+                  <button
+                    type="button"
+                    disabled={page >= totalPages}
+                    onClick={() => updateParam('page', (page + 1).toString())}
+                    className="p-1.5 rounded border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-40 text-slate-700 transition"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </main>
       </div>
