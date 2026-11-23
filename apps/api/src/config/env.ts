@@ -14,6 +14,12 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRY: z.string().default('15m'),
   JWT_REFRESH_SECRET: z.string().min(16).default('autodock_dev_refresh_secret_min_32_characters_long_67890'),
   JWT_REFRESH_EXPIRY: z.string().default('7d'),
+  EMAIL_PROVIDER: z.enum(['mock', 'smtp', 'disabled']).default('mock'),
+  EMAIL_FROM: z.string().default('AutoDock Support <no-reply@autodock.lk>'),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().optional().default(1025),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
