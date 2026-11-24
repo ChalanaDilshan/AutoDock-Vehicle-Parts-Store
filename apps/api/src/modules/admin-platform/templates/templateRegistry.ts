@@ -22,8 +22,9 @@ export function escapeHtml(str: unknown): string {
     .replace(/'/g, '&#39;');
 }
 
-export function formatLkrCents(cents: number): string {
-  const rupees = (cents / 100).toFixed(2);
+export function formatLkrCents(cents: number | null | undefined): string {
+  const num = typeof cents === 'number' && !isNaN(cents) ? cents : 0;
+  const rupees = (Math.max(0, num) / 100).toFixed(2);
   return `LKR ${rupees.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 }
 

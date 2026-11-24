@@ -274,6 +274,9 @@ export class ReportingService {
 
       case 'sales-velocity':
         reportName = 'Multi-Vendor Sales Velocity Report';
+        if (!this.cachedSummary) {
+          await this.getDashboardSummary();
+        }
         // Aggregate available summary data
         records = [
           {
@@ -348,6 +351,9 @@ export class ReportingService {
     for (const row of records) {
       const values = headers.map((header) => {
         let val = row[header];
+        if (typeof val === 'object' && val !== null) {
+          val = JSON.stringify(val);
+        }
         if (typeof val === 'string') {
           // PII Masking: Mask phone numbers (+94 77 123 4567 -> +94 77 **** 4567)
           val = val.replace(/(\+94\s?\d{2})\s?\d{3,4}\s?(\d{3,4})/g, '$1 **** $2');

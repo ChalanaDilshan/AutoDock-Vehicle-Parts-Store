@@ -99,9 +99,21 @@ export class AuditService {
     if (filter.sourceModule) query.sourceModule = filter.sourceModule;
     if (filter.severity) query.severity = filter.severity;
     if (filter.actorRole) query['actor.actorRole'] = filter.actorRole;
-    if (filter.actorId) query['actor.actorId'] = filter.actorId;
+    if (filter.actorId) {
+      if (mongoose.Types.ObjectId.isValid(filter.actorId)) {
+        query['actor.actorId'] = { $in: [filter.actorId, new mongoose.Types.ObjectId(filter.actorId)] };
+      } else {
+        query['actor.actorId'] = filter.actorId;
+      }
+    }
     if (filter.targetEntityType) query['targetEntity.entityType'] = filter.targetEntityType;
-    if (filter.targetEntityId) query['targetEntity.entityId'] = filter.targetEntityId;
+    if (filter.targetEntityId) {
+      if (mongoose.Types.ObjectId.isValid(filter.targetEntityId)) {
+        query['targetEntity.entityId'] = { $in: [filter.targetEntityId, new mongoose.Types.ObjectId(filter.targetEntityId)] };
+      } else {
+        query['targetEntity.entityId'] = filter.targetEntityId;
+      }
+    }
 
     if (filter.startDate || filter.endDate) {
       const timeQuery: Record<string, Date> = {};

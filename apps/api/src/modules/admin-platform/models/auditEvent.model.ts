@@ -101,8 +101,16 @@ const AuditEventSchema = new Schema<IAuditEvent>(
   }
 );
 
-// Append-Only Protection: Disallow modifications or deletions on audit records
-AuditEventSchema.pre(['updateOne', 'updateMany', 'findOneAndUpdate', 'deleteOne', 'deleteMany'], function () {
+// Append-Only Protection: Disallow query modifications or deletions on audit records
+AuditEventSchema.pre(
+  ['updateOne', 'updateMany', 'findOneAndUpdate', 'findOneAndReplace', 'findOneAndDelete', 'deleteOne', 'deleteMany'],
+  function () {
+    throw new Error('AUDIT_IMMUTABILITY_VIOLATION: AuditEvent documents are append-only and cannot be mutated or deleted.');
+  }
+);
+
+// Append-Only Protection: Disallow document-instance deletions
+AuditEventSchema.pre('deleteOne', { document: true, query: false }, function () {
   throw new Error('AUDIT_IMMUTABILITY_VIOLATION: AuditEvent documents are append-only and cannot be mutated or deleted.');
 });
 
