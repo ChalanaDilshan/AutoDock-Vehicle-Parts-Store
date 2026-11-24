@@ -49,7 +49,10 @@ import {
   adminPromotionRouter,
   financePublicRouter,
 } from './modules/finance-promotions/index.js';
-import { adminPlatformRouter } from './modules/admin-platform/index.js';
+import {
+  adminPlatformRouter,
+  notificationRouter,
+} from './modules/admin-platform/index.js';
 
 export function createApp(): Express {
   const app = express();
@@ -166,7 +169,8 @@ export function createApp(): Express {
   app.use(`${env.API_PREFIX}/finance`, financePublicRouter);
   app.use(`${env.API_PREFIX}/finance-promotions`, financePromotionsRouter);
 
-  // Future Module Route Placeholders
+  // MOD-05 Administration, Notifications & Reporting Routes
+  app.use(`${env.API_PREFIX}/notifications`, notificationRouter);
   app.use(`${env.API_PREFIX}/admin`, adminPlatformRouter);
 
   // 404 & Centralized Error Handlers
