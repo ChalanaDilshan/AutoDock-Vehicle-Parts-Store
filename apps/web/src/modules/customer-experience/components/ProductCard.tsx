@@ -10,6 +10,8 @@ interface ProductCardProps {
     status: 'EXACT_FIT' | 'DOES_NOT_FIT' | 'UNIVERSAL_FIT' | 'UNCERTAIN';
     label?: string;
   };
+  badge?: string;
+  variant?: 'grid' | 'compact';
   onAddToCart?: (product: ProductItem) => void;
   onToggleWishlist?: (product: ProductItem) => void;
   isWishlisted?: boolean;
@@ -18,17 +20,22 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   fitmentBadge,
+  badge,
+  variant = 'grid',
   onAddToCart,
   onToggleWishlist,
   isWishlisted = false,
 }) => {
+  const productId = product._id || (product as any).id || '';
+  const productName = product.name || (product as any).title || 'Auto Part';
   const primaryImage =
-    product.images?.find((img) => img.isPrimary)?.url || product.images?.[0]?.url;
+    product.images?.find((img) => img.isPrimary)?.url ||
+    product.images?.[0]?.url ||
+    (product as any).primaryImageUrl;
 
+  const rawBrand = product.brandId ?? (product as any).brand;
   const brandName =
-    typeof product.brandId === 'object' && product.brandId !== null
-      ? product.brandId.name
-      : undefined;
+    typeof rawBrand === 'object' && rawBrand !== null ? rawBrand.name : undefined;
 
   const conditionLabel =
     product.condition === 'NEW' || (product.condition as string) === 'BRAND_NEW'
@@ -39,18 +46,84 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   const outOfStock = product.stock <= 0;
 
+  if (variant === 'compact') {
+    return (
+      <article className="bg-white border border-slate-200 rounded-lg p-3.5 flex items-center gap-3.5 hover:border-blue-300 hover:shadow-sm transition-[border-color,box-shadow] duration-150">
+        <Link
+          to={`/products/${productId}`}
+          className="relative w-24 h-24 shrink-0 rounded-md bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center"
+        >
+          {primaryImage ? (
+            <img
+              src={primaryImage}
+              alt={productName}
+              className="w-full h-full object-contain p-1.5"
+              loading="lazy"
+            />
+          ) : (
+            <Package className="w-8 h-8 text-slate-400 stroke-[1.5]" aria-hidden="true" />
+          )}
+          {badge && (
+            <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded bg-blue-600 text-white">
+              {badge}
+            </span>
+          )}
+        </Link>
+
+        <div className="min-w-0 flex-1 flex flex-col gap-1">
+          <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500">
+            <span className="truncate font-medium text-slate-600">
+              {brandName || 'OEM / Aftermarket'}
+            </span>
+            <span className="inline-flex items-center gap-1 shrink-0">
+              <Star className="w-3 h-3 text-amber-500 fill-amber-500" aria-hidden="true" />
+              <span className="font-medium text-slate-700">
+                {product.averageRating ? product.averageRating.toFixed(1) : 'New'}
+              </span>
+            </span>
+          </div>
+
+          <Link
+            to={`/products/${productId}`}
+            className="text-sm font-semibold text-slate-900 hover:text-blue-700 transition-colors line-clamp-2 leading-snug"
+          >
+            {productName}
+          </Link>
+
+          <div className="flex items-center justify-between gap-2 pt-1.5 mt-auto">
+            <span className="text-sm font-bold text-slate-900 tabular-nums">
+              {formatLKR(product.priceInCents)}
+            </span>
+
+            {onAddToCart && (
+              <button
+                type="button"
+                disabled={outOfStock}
+                onClick={() => onAddToCart(product)}
+                aria-label={`Add ${productName} to cart`}
+                className="text-xs font-semibold uppercase tracking-wide text-blue-700 hover:text-blue-800 underline underline-offset-2 disabled:text-slate-400 disabled:no-underline shrink-0"
+              >
+                {outOfStock ? 'Out of stock' : 'Add to Cart'}
+              </button>
+            )}
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   return (
     <article className="bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col hover:border-slate-300 hover:shadow-sm transition-[border-color,box-shadow] duration-150">
       {/* Image */}
       <Link
-        to={`/products/${product._id}`}
-        className="relative block aspect-[4/3] bg-slate-100 overflow-hidden border-b border-slate-100"
+        to={`/products/${productId}`}
+        className="relative block aspect-[4/3] bg-slate-50 overflow-hidden border-b border-slate-100"
       >
         {primaryImage ? (
           <img
             src={primaryImage}
-            alt={product.name}
-            className="w-full h-full object-cover"
+            alt={productName}
+            className="w-full h-full object-contain p-2"
             loading="lazy"
           />
         ) : (
@@ -60,6 +133,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         )}
 
         <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5">
+          {badge && (
+            <span className="px-2 py-0.5 text-xs font-semibold rounded bg-emerald-600 text-white">
+              {badge}
+            </span>
+          )}
           <span className="px-2 py-0.5 text-xs font-medium rounded bg-white/95 text-slate-700 border border-slate-200">
             {conditionLabel}
           </span>
@@ -102,10 +180,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         <Link
-          to={`/products/${product._id}`}
+          to={`/products/${productId}`}
           className="text-sm font-semibold text-slate-900 hover:text-blue-700 transition-colors line-clamp-2 leading-snug"
         >
-          {product.name}
+          {productName}
         </Link>
 
         {/* Fitment indicator */}

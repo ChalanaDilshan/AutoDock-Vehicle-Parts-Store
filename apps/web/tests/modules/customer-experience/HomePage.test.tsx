@@ -25,6 +25,7 @@ vi.mock('../../../src/modules/customer-experience/api/customerExperienceApi.js',
     ...actual,
     productsApi: {
       getRecommendations: vi.fn(),
+      search: vi.fn(),
     },
     taxonomyApi: {
       getCategories: vi.fn(),
@@ -90,6 +91,10 @@ describe('HomePage Component Tests', () => {
     vi.mocked(productsApi.getRecommendations).mockResolvedValue({
       success: true,
       data: sampleProducts as any,
+    });
+    vi.mocked(productsApi.search).mockResolvedValue({
+      success: true,
+      data: { items: [], pagination: { total: 0, page: 1, limit: 8, pages: 1 } },
     });
     vi.mocked(taxonomyApi.getCategories).mockResolvedValue({
       success: true,
@@ -230,6 +235,51 @@ describe('HomePage Component Tests', () => {
     await waitFor(() => {
       expect(screen.getByText('Unable to load featured products right now.')).toBeDefined();
       expect(screen.getByText('Categories are currently unavailable.')).toBeDefined();
+    });
+  });
+
+  it('renders Latest Products, Popular Products, and Popular Brands sections when catalog data is returned', async () => {
+    const latestItem = {
+      ...sampleProducts[0],
+      _id: 'p-latest',
+      name: 'Iridium Spark Plug Set',
+      sku: 'SPK-004',
+      priceInCents: 1180000,
+    };
+    const popularItem = {
+      ...sampleProducts[0],
+      _id: 'p-popular',
+      name: 'Spin-On Oil Filter',
+      sku: 'FLT-003',
+      priceInCents: 285000,
+    };
+
+    vi.mocked(productsApi.search).mockImplementation(async (query) => {
+      if (query?.sortBy === 'NEWEST') {
+        return {
+          success: true,
+          data: { items: [latestItem as any], pagination: { total: 1, page: 1, limit: 8, pages: 1 } },
+        };
+      }
+      return {
+        success: true,
+        data: { items: [popularItem as any], pagination: { total: 1, page: 1, limit: 6, pages: 1 } },
+      };
+    });
+
+    render(
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Latest Products')).toBeDefined();
+      expect(screen.getByText('Iridium Spark Plug Set')).toBeDefined();
+      expect(screen.getByText('Popular Products')).toBeDefined();
+      expect(screen.getByText('Spin-On Oil Filter')).toBeDefined();
+      expect(screen.getByText('Popular Manufacturers & Brands')).toBeDefined();
+      expect(screen.getByText('Denso')).toBeDefined();
     });
   });
 });
