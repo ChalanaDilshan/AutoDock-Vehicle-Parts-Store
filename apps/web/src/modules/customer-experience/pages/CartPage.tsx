@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  ShoppingCart,
   Trash2,
   Minus,
   Plus,
@@ -14,6 +13,7 @@ import {
 import { CartData, cartApi } from '../api/customerExperienceApi.js';
 import { formatLKR } from '../utils/formatters.js';
 import { useAuth } from '../../identity/context/AuthContext.js';
+import { CartLoginPrompt } from '../../identity/components/CartLoginPrompt.js';
 import {
   Alert,
   Button,
@@ -22,12 +22,19 @@ import {
 } from '../../../shared/components/index.js';
 
 export const CartPage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
   const [cart, setCart] = useState<CartData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasSettledAuth, setHasSettledAuth] = useState(!isAuthLoading);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isAuthLoading) {
+      setHasSettledAuth(true);
+    }
+  }, [isAuthLoading]);
 
   const loadCart = async () => {
     setIsLoading(true);
@@ -95,21 +102,17 @@ export const CartPage: React.FC = () => {
   const totalItemsCount =
     cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
-  if (!isAuthenticated) {
+  if (isAuthLoading && !hasSettledAuth) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        <EmptyState
-          icon={<ShoppingCart className="w-6 h-6" />}
-          title="Sign in to view your cart"
-          description="Sign in to save spare parts across sessions and proceed to LKR checkout."
-          action={
-            <Link to="/login">
-              <Button variant="primary">Sign In</Button>
-            </Link>
-          }
-        />
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-4">
+        <div className="h-8 w-72 bg-slate-200 rounded animate-pulse" />
+        <div className="h-96 bg-white border border-slate-200 rounded-lg" />
       </div>
     );
+  }
+
+  if (!isAuthenticated) {
+    return <CartLoginPrompt />;
   }
 
   return (
