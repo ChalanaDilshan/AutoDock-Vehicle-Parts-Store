@@ -153,7 +153,7 @@ describe('HomePage Component Tests', () => {
     // Promotional Banners
     expect(screen.getByText(/Genuine Parts/)).toBeDefined();
     expect(screen.getByText('Special Offers')).toBeDefined();
-    expect(screen.getByText('Learn More')).toBeDefined();
+    expect(screen.getByText('Compare Lowest Prices')).toBeDefined();
   });
 
   it('submits Find Parts for Your Vehicle form with selected Make, Model, and Year', async () => {
