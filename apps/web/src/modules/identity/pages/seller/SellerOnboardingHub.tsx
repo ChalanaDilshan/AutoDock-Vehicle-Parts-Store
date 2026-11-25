@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Building2, CheckCircle2, FileText } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  AlertCircle,
+  Building2,
+  CheckCircle2,
+  Circle,
+  Clock,
+  FileText,
+} from 'lucide-react';
 import {
   sellerApi,
   SellerProfileData,
@@ -52,7 +59,10 @@ export const SellerOnboardingHub: React.FC = () => {
           setAccountHolderName(profileRes.data.bankDetails.accountHolderName || '');
           setBranchName(profileRes.data.bankDetails.branchName || '');
         }
-        if (profileRes.data.hasPrivacyAcknowledgement) {
+        if (
+          profileRes.data.hasPrivacyAcknowledgement ||
+          profileRes.data.privacyAcknowledged
+        ) {
           setPrivacyAgreed(true);
         }
       }
@@ -100,7 +110,12 @@ export const SellerOnboardingHub: React.FC = () => {
     setActionError(null);
     setActionSuccess(null);
 
-    if (!bankName.trim() || !accountHolderName.trim() || !accountNumber.trim() || !branchName.trim()) {
+    if (
+      !bankName.trim() ||
+      !accountHolderName.trim() ||
+      !accountNumber.trim() ||
+      !branchName.trim()
+    ) {
       setActionError('All bank account fields are required.');
       return;
     }
@@ -128,13 +143,27 @@ export const SellerOnboardingHub: React.FC = () => {
 
   const handlePrivacyToggle = async (checked: boolean) => {
     setPrivacyAgreed(checked);
-    if (checked && seller && !seller.hasPrivacyAcknowledgement) {
+    if (
+      checked &&
+      seller &&
+      !seller.hasPrivacyAcknowledgement &&
+      !seller.privacyAcknowledged
+    ) {
       setIsAcknowledgingPrivacy(true);
       try {
         await sellerApi.acknowledgePrivacy({
           noticeVersion: 'v1.2',
           acknowledged: true,
         });
+        setSeller((prev) =>
+          prev
+            ? {
+                ...prev,
+                hasPrivacyAcknowledgement: true,
+                privacyAcknowledged: true,
+              }
+            : prev
+        );
       } catch (err: any) {
         setActionError(err?.message || 'Failed to record privacy acknowledgement.');
         setPrivacyAgreed(false);
@@ -177,21 +206,200 @@ export const SellerOnboardingHub: React.FC = () => {
   const faceDoc = findDoc('SELLER_FACE_PHOTO');
   const storeDoc = findDoc('STORE_PHOTO');
 
-  const docsComplete =
-    Boolean(brDoc && idDoc && faceDoc) && (!isPhysical || Boolean(storeDoc));
-  const bankComplete = Boolean(seller.bankDetails);
-  const canSubmit = docsComplete && bankComplete && privacyAgreed;
+  const requiredDocsCount = isPhysical ? 4 : 3;
+  const uploadedRequiredDocsCount =
+    Number(Boolean(brDoc)) +
+    Number(Boolean(idDoc)) +
+    Number(Boolean(faceDoc)) +
+    (isPhysical ? Number(Boolean(storeDoc)) : 0);
+
+  const docsComplete = uploadedRequiredDocsCount === requiredDocsCount;
+  const bankComplete =
+    Boolean(seller.bankDetails) ||
+    (Boolean(seller.bankVerificationStatus) &&
+      seller.bankVerificationStatus !== 'UNSUBMITTED');
+  const privacyComplete = Boolean(
+    privacyAgreed ||
+      seller.hasPrivacyAcknowledgement ||
+      seller.privacyAcknowledged
+  );
+  const isApproved = seller.verificationStatus === 'APPROVED';
+  const isAdditionalInfoRequired =
+    seller.verificationStatus === 'ADDITIONAL_INFO_REQUIRED';
+  const isRejected = seller.verificationStatus === 'REJECTED';
+  const isSubmittedOrLater =
+    seller.verificationStatus === 'PENDING' ||
+    seller.verificationStatus === 'UNDER_VERIFICATION' ||
+    isApproved;
+
+  const canSubmit = docsComplete && bankComplete && privacyComplete && !isApproved;
+
+  const checklistItems = [
+    {
+      id: 'profile',
+      label: 'Store profile created',
+      detail: `${seller.businessName} (${isPhysical ? 'Physical Store' : 'Online-Only'})`,
+      done: true,
+      needsAttention: false,
+    },
+    {
+      id: 'documents',
+      label: 'Required verification documents uploaded',
+      detail: `${uploadedRequiredDocsCount} of ${requiredDocsCount} required documents uploaded`,
+      done: docsComplete,
+      needsAttention: false,
+    },
+    {
+      id: 'bank',
+      label: 'Bank account details saved',
+      detail: bankComplete
+        ? seller.bankDetails?.maskedAccountNumber
+          ? `Saved (${seller.bankDetails.maskedAccountNumber})`
+          : `Status: ${seller.bankVerificationStatus || 'Saved'}`
+        : 'Add Sri Lankan bank account details below',
+      done: bankComplete,
+      needsAttention: seller.bankVerificationStatus === 'REJECTED' || seller.bankDetails?.verificationStatus === 'REJECTED',
+    },
+    {
+      id: 'privacy',
+      label: 'Privacy notice acknowledged',
+      detail: privacyComplete ? 'Version 1.2 accepted' : 'Review and accept notice below',
+      done: privacyComplete,
+      needsAttention: false,
+    },
+    {
+      id: 'submitted',
+      label: 'Application submitted',
+      detail: isApproved
+        ? 'Store approved'
+        : isSubmittedOrLater
+          ? `Current status: ${seller.verificationStatus}`
+          : isAdditionalInfoRequired
+            ? 'Updates requested: update items and resubmit'
+            : isRejected
+              ? 'Not approved: update items and resubmit'
+              : 'Pending submission',
+      done: isSubmittedOrLater,
+      needsAttention: isAdditionalInfoRequired || isRejected,
+    },
+  ];
+
+  const completedStepsCount = checklistItems.filter((item) => item.done).length;
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6">
       <PageHeader
         title={seller.businessName}
         subtitle={`${isPhysical ? 'Physical Retail Store' : 'Online-Only Merchant'} · Registration: ${seller.businessRegistrationNumber}`}
-        badge={<Badge variant="primary">{seller.verificationStatus}</Badge>}
+        badge={
+          <Badge variant={isApproved ? 'success' : isAdditionalInfoRequired || isRejected ? 'warning' : 'primary'}>
+            {seller.verificationStatus}
+          </Badge>
+        }
       />
 
       {actionError && <Alert variant="danger">{actionError}</Alert>}
       {actionSuccess && <Alert variant="success">{actionSuccess}</Alert>}
+
+      {isAdditionalInfoRequired && (
+        <Alert variant="warning" title="Additional Information Requested">
+          {seller.additionalInfoRequested ||
+            'An administrator requested updates to your verification details. Update the relevant documents or bank details below and resubmit.'}
+        </Alert>
+      )}
+
+      {isRejected && (
+        <Alert variant="danger" title="Application Requires Updates">
+          {seller.rejectionReason ||
+            'Your previous submission was not approved. Update the affected documents or bank details and resubmit your application.'}
+        </Alert>
+      )}
+
+      {(seller.verificationStatus === 'PENDING' ||
+        seller.verificationStatus === 'UNDER_VERIFICATION') && (
+        <Alert variant="info" title="Application Submitted for Review">
+          Your store dossier is queued for administrative verification.{' '}
+          <Link to="/seller/onboarding/status" className="font-semibold underline">
+            View application status
+          </Link>
+        </Alert>
+      )}
+
+      {isApproved && (
+        <Alert variant="success" title="Store Verification Approved">
+          Your store profile has been approved.{' '}
+          <Link to="/seller/dashboard" className="font-semibold underline">
+            Open Seller Portal
+          </Link>
+        </Alert>
+      )}
+
+      {/* Visual Onboarding Completion Checklist */}
+      <section
+        aria-label="Onboarding completion checklist"
+        className="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 space-y-4"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">
+              Onboarding Completion Checklist
+            </h2>
+            <p className="text-xs text-slate-600 mt-0.5">
+              Complete all steps below to submit your merchant store for verification.
+            </p>
+          </div>
+          <Badge variant={completedStepsCount === 5 ? 'success' : 'primary'}>
+            {completedStepsCount} of 5 completed
+          </Badge>
+        </div>
+
+        <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {checklistItems.map((item, idx) => (
+            <li
+              key={item.id}
+              className={`rounded-lg border p-3 flex flex-col justify-between gap-2 ${
+                item.done
+                  ? 'border-emerald-200 bg-emerald-50/50'
+                  : item.needsAttention
+                    ? 'border-amber-200 bg-amber-50/60'
+                    : 'border-slate-200 bg-slate-50/60'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-[11px] font-semibold text-slate-500">
+                  STEP 0{idx + 1}
+                </span>
+                {item.done ? (
+                  <CheckCircle2
+                    className="w-4 h-4 text-emerald-700 shrink-0"
+                    aria-label="Completed"
+                  />
+                ) : item.needsAttention ? (
+                  <AlertCircle
+                    className="w-4 h-4 text-amber-700 shrink-0"
+                    aria-label="Action needed"
+                  />
+                ) : item.id === 'submitted' && isSubmittedOrLater ? (
+                  <Clock className="w-4 h-4 text-blue-700 shrink-0" aria-hidden="true" />
+                ) : (
+                  <Circle
+                    className="w-4 h-4 text-slate-400 shrink-0"
+                    aria-label="Pending"
+                  />
+                )}
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-slate-900 leading-snug">
+                  {item.label}
+                </p>
+                <p className="text-[11px] text-slate-600 leading-snug">
+                  {item.detail}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
 
       {/* Storefront Exemption Notice for Online-Only */}
       {!isPhysical && (
@@ -243,17 +451,22 @@ export const SellerOnboardingHub: React.FC = () => {
 
       {/* Step 2: Bank Account Details */}
       <section className="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
           <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
             <Building2 className="w-4 h-4 text-blue-700" />
             <h2>2. Payout &amp; Direct Transfer Bank Account</h2>
           </div>
-          {seller.bankDetails && (
+          {seller.bankDetails ? (
             <Badge variant="success">
               <CheckCircle2 className="w-3 h-3" />
               <span>Saved ({seller.bankDetails.maskedAccountNumber})</span>
             </Badge>
-          )}
+          ) : bankComplete ? (
+            <Badge variant="success">
+              <CheckCircle2 className="w-3 h-3" />
+              <span>Saved ({seller.bankVerificationStatus})</span>
+            </Badge>
+          ) : null}
         </div>
 
         <form onSubmit={handleSaveBank} className="space-y-4">
@@ -281,10 +494,14 @@ export const SellerOnboardingHub: React.FC = () => {
             />
             <Input
               label="Account Number"
-              required={!seller.bankDetails}
+              required={!bankComplete}
               value={accountNumber}
               onChange={(e) => setAccountNumber(e.target.value)}
-              placeholder={seller.bankDetails ? 'Enter new number to replace' : 'Enter bank account number'}
+              placeholder={
+                bankComplete
+                  ? 'Enter new number to replace'
+                  : 'Enter bank account number'
+              }
             />
           </div>
           <div className="flex justify-end">
@@ -320,11 +537,17 @@ export const SellerOnboardingHub: React.FC = () => {
           </div>
         </div>
 
-        <div className="pt-2 border-t border-slate-200 flex justify-end">
+        <div className="pt-2 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <p className="text-xs text-slate-600">
+            {isAdditionalInfoRequired
+              ? 'After updating your requested documents or bank details, resubmit your application for review.'
+              : 'All required documents, bank details, and privacy notice must be completed before submission.'}
+          </p>
           <Button
             type="button"
             variant="primary"
             size="lg"
+            className="min-h-[44px]"
             disabled={!canSubmit}
             isLoading={isSubmittingApp}
             onClick={handleSubmitApplication}

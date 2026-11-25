@@ -5,10 +5,12 @@ import React from 'react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { LoginPage } from '../../../src/modules/identity/pages/LoginPage.js';
 import { RegisterPage } from '../../../src/modules/identity/pages/RegisterPage.js';
+import { ProfilePage } from '../../../src/modules/identity/pages/ProfilePage.js';
 import { ProtectedRoute } from '../../../src/modules/identity/components/ProtectedRoute.js';
 import { CartLoginPrompt } from '../../../src/modules/identity/components/CartLoginPrompt.js';
 import { AuthProvider } from '../../../src/modules/identity/context/AuthContext.js';
 import { authApi } from '../../../src/modules/identity/api/identityApi.js';
+import { getSafeRedirectPath } from '../../../src/modules/identity/utils/navigation.js';
 
 // Mock authApi
 vi.mock('../../../src/modules/identity/api/identityApi.js', () => {
@@ -18,6 +20,7 @@ vi.mock('../../../src/modules/identity/api/identityApi.js', () => {
       register: vi.fn(),
       logout: vi.fn(),
       getMe: vi.fn(),
+      updateMe: vi.fn(),
     },
   };
 });
@@ -169,5 +172,132 @@ describe('MOD-01 Authentication UI Tests', () => {
       email: 'customer@autodock.lk',
       password: 'WrongPass123!',
     });
+  });
+
+  it('LoginPage honors safe ?next=/sellers/register and blocks unsafe open redirects', async () => {
+    expect(getSafeRedirectPath('/sellers/register')).toBe('/sellers/register');
+    expect(getSafeRedirectPath('//evil.example/steal')).toBe('/');
+    expect(getSafeRedirectPath('https://evil.example/steal')).toBe('/');
+
+    vi.mocked(authApi.login).mockResolvedValueOnce({
+      success: true,
+      data: {
+        accessToken: 'token_abc',
+        tokenType: 'Bearer',
+        expiresInSeconds: 3600,
+        user: {
+          id: 'u1',
+          email: 'buyer@autodock.lk',
+          firstName: 'Nimal',
+          lastName: 'Perera',
+          role: 'CUSTOMER',
+          sellerId: null,
+        },
+      },
+    });
+    vi.mocked(authApi.getMe).mockResolvedValueOnce({
+      success: true,
+      data: {
+        id: 'u1',
+        email: 'buyer@autodock.lk',
+        firstName: 'Nimal',
+        lastName: 'Perera',
+        phone: '+94771234567',
+        role: 'CUSTOMER',
+        accountStatus: 'ACTIVE',
+        isEmailVerified: true,
+        sellerId: null,
+      },
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/login?next=/sellers/register']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/sellers/register" element={<div>Step 1 Store Registration</div>} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    const createAccountLink = screen.getByRole('link', { name: /Create an account/i });
+    expect(createAccountLink.getAttribute('href')).toBe('/register?next=%2Fsellers%2Fregister');
+
+    fireEvent.change(screen.getByLabelText(/Email Address/i), {
+      target: { value: 'buyer@autodock.lk' },
+    });
+    fireEvent.change(screen.getByLabelText(/^Password/i), {
+      target: { value: 'Pass1234!' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Sign In/i }));
+
+    expect(await screen.findByText('Step 1 Store Registration')).toBeDefined();
+  });
+
+  it('RegisterPage preserves safe ?next=/sellers/register when redirecting to login', async () => {
+    vi.mocked(authApi.register).mockResolvedValueOnce({
+      success: true,
+      data: {
+        userId: 'u2',
+        email: 'new@autodock.lk',
+        role: 'CUSTOMER',
+        isEmailVerified: false,
+      },
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/register?next=/sellers/register']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    const signInLink = screen.getByRole('link', { name: /Sign in/i });
+    expect(signInLink.getAttribute('href')).toBe('/login?next=%2Fsellers%2Fregister');
+
+    fireEvent.change(screen.getByLabelText(/First Name/i), { target: { value: 'Kasun' } });
+    fireEvent.change(screen.getByLabelText(/Last Name/i), { target: { value: 'Silva' } });
+    fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: 'new@autodock.lk' } });
+    fireEvent.change(screen.getByLabelText(/Phone/i), { target: { value: '+94771234567' } });
+    fireEvent.change(screen.getByLabelText(/^Password/i), { target: { value: 'Password123!' } });
+    fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'Password123!' } });
+    fireEvent.click(screen.getByRole('button', { name: /Create Account/i }));
+
+    expect(await screen.findByRole('heading', { name: /Sign in to AutoDock/i })).toBeDefined();
+  });
+
+  it('ProfilePage displays Register as a Merchant CTA for CUSTOMER without sellerId', async () => {
+    sessionStorage.setItem('accessToken', 'token_cust');
+    vi.mocked(authApi.getMe).mockResolvedValueOnce({
+      success: true,
+      data: {
+        id: 'u3',
+        email: 'cust@autodock.lk',
+        firstName: 'Amal',
+        lastName: 'Fernando',
+        phone: '+94771234567',
+        role: 'CUSTOMER',
+        accountStatus: 'ACTIVE',
+        isEmailVerified: true,
+        sellerId: null,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ProfilePage />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText(/Register as a Merchant/i)).toBeDefined();
+    const registerStoreLink = screen.getByRole('link', { name: /Register Store/i });
+    expect(registerStoreLink.getAttribute('href')).toBe('/sellers/register');
   });
 });
