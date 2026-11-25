@@ -247,13 +247,13 @@ export const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <div className="lg:col-span-7 space-y-5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-400">
+              <p className="text-xs font-semibold text-blue-300">
                 Sri Lanka Vehicle Spare-Parts Marketplace
               </p>
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
                 Quality Vehicle Parts for a Smoother Ride
               </h1>
-              <p className="text-base text-slate-300 max-w-xl leading-relaxed">
+              <p className="text-base text-slate-200 max-w-xl leading-relaxed">
                 Find the right parts for your vehicle. Wide range. Trusted sellers.
               </p>
               <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -284,35 +284,38 @@ export const HomePage: React.FC = () => {
         <div
           id="categories"
           aria-labelledby="shop-by-category-heading"
-          className="bg-slate-950/85 border-t border-slate-800"
+          className="scroll-mt-32 bg-slate-950/85 border-t border-slate-800"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div className="flex items-center justify-between gap-4 mb-3">
               <h2
                 id="shop-by-category-heading"
-                className="text-xs font-semibold uppercase tracking-wider text-slate-300"
+                className="text-xs font-semibold text-slate-200"
               >
                 Shop by Category
               </h2>
               <Link
                 to="/products"
-                className="text-xs font-medium text-blue-400 hover:text-blue-300 inline-flex items-center gap-1 shrink-0"
+                className="min-h-[44px] px-1 text-xs font-medium text-blue-300 hover:text-blue-200 inline-flex items-center gap-1 shrink-0"
               >
                 <span>View All Categories</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
               </Link>
             </div>
 
             {taxonomyError ? (
               <Alert variant="warning">{taxonomyError}</Alert>
             ) : isLoadingTaxonomy ? (
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-                {[...Array(7)].map((_, idx) => (
-                  <div
-                    key={idx}
-                    className="h-20 bg-slate-900 rounded-lg border border-slate-800 animate-pulse"
-                  />
-                ))}
+              <div role="status" aria-live="polite" className="space-y-2">
+                <p className="sr-only">Loading vehicle system categories...</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                  {[...Array(7)].map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="h-20 bg-slate-900 rounded-lg border border-slate-800"
+                    />
+                  ))}
+                </div>
               </div>
             ) : stripCategories.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
@@ -320,9 +323,9 @@ export const HomePage: React.FC = () => {
                   <Link
                     key={cat._id || cat.slug}
                     to={`/products?category=${encodeURIComponent(cat.slug)}`}
-                    className="group flex flex-col items-center text-center gap-2 px-3 py-2.5 rounded-lg border border-transparent hover:border-slate-700 hover:bg-slate-800/80 transition-colors"
+                    className="group min-h-[44px] flex flex-col items-center text-center gap-2 px-3 py-2.5 rounded-lg border border-transparent hover:border-slate-700 hover:bg-slate-800/80 transition-colors"
                   >
-                    <span className="w-10 h-10 rounded-full border border-slate-700 bg-slate-900 text-blue-400 group-hover:border-blue-500 group-hover:text-white flex items-center justify-center transition-colors">
+                    <span className="w-10 h-10 rounded-full border border-slate-700 bg-slate-900 text-blue-300 group-hover:border-blue-500 group-hover:text-white flex items-center justify-center transition-colors">
                       {getCategoryIcon(cat.slug || cat.name)}
                     </span>
                     <span className="text-xs font-medium text-slate-200 group-hover:text-white line-clamp-1">
@@ -332,7 +335,7 @@ export const HomePage: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="p-4 text-center border border-slate-800 rounded-lg text-xs text-slate-400">
+              <div className="p-4 text-center border border-slate-800 rounded-lg text-xs text-slate-300">
                 Categories will appear here once added by administrators.
               </div>
             )}
@@ -349,16 +352,16 @@ export const HomePage: React.FC = () => {
                 <h2 className="text-sm font-semibold text-slate-900">
                   Find Parts for Your Vehicle
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-600">
                   Filter parts confirmed to fit your specific model and production year
                 </p>
               </div>
               <Link
                 to="/garage"
-                className="text-xs font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1"
+                className="min-h-[44px] px-1 text-xs font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1"
               >
                 <span>Open My Garage</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
               </Link>
             </div>
 
@@ -401,48 +404,48 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Dual Promotional Sub-Banners */}
+      {/* Dual Promotional Sub-Banners (Asymmetric Contrast) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="rounded-lg bg-slate-900 text-white border border-slate-800 p-6 flex flex-col justify-between gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+          <div className="md:col-span-7 rounded-lg bg-slate-900 text-white border border-slate-800 p-6 flex flex-col justify-between gap-4">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-blue-400">
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-300">
                 <ShieldCheck className="w-4 h-4" aria-hidden="true" />
                 <span>Verified Quality</span>
               </div>
               <h3 className="text-xl font-semibold text-white">
                 Genuine Parts &amp; Clear Warranty Terms
               </h3>
-              <p className="text-sm text-slate-300 leading-relaxed">
+              <p className="text-sm text-slate-200 leading-relaxed max-w-xl">
                 Every seller passes business registration and bank verification before listing parts on AutoDock.
               </p>
             </div>
             <div>
               <Link to="/products">
-                <Button variant="primary" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
-                  Shop Now
+                <Button variant="primary" size="md">
+                  Browse Verified Parts
                 </Button>
               </Link>
             </div>
           </div>
 
-          <div className="rounded-lg bg-slate-900 text-white border border-slate-800 p-6 flex flex-col justify-between gap-4">
+          <div className="md:col-span-5 rounded-lg bg-blue-50 text-slate-900 border border-blue-200 p-6 flex flex-col justify-between gap-4">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-amber-400">
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700">
                 <Tag className="w-4 h-4" aria-hidden="true" />
                 <span>Special Offers</span>
               </div>
-              <h3 className="text-xl font-semibold text-white">
+              <h3 className="text-xl font-semibold text-slate-900">
                 Compare Prices Across Suppliers
               </h3>
-              <p className="text-sm text-slate-300 leading-relaxed">
+              <p className="text-sm text-slate-700 leading-relaxed">
                 Sort parts by price, condition, or rating and view delivery charges upfront by district.
               </p>
             </div>
             <div>
               <Link to="/products?sortBy=PRICE_ASC">
-                <Button variant="secondary-dark" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
-                  Learn More
+                <Button variant="outline" size="md">
+                  Compare Lowest Prices
                 </Button>
               </Link>
             </div>
@@ -470,21 +473,24 @@ export const HomePage: React.FC = () => {
             </div>
             <Link
               to="/products?sortBy=NEWEST"
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 shrink-0"
+              className="min-h-[44px] px-1 text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 shrink-0"
             >
               <span>Browse Latest</span>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           </div>
 
           {isLoadingLatest ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {[...Array(4)].map((_, idx) => (
-                <div
-                  key={idx}
-                  className="h-72 bg-slate-100 rounded-lg border border-slate-200 animate-pulse"
-                />
-              ))}
+            <div role="status" aria-live="polite" className="space-y-3">
+              <p className="text-xs text-slate-600">Loading latest spare parts...</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                {[...Array(4)].map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="h-72 bg-slate-100 rounded-lg border border-slate-200"
+                  />
+                ))}
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -492,7 +498,6 @@ export const HomePage: React.FC = () => {
                 <ProductCard
                   key={`latest-${product._id}`}
                   product={product}
-                  badge="NEW"
                   onAddToCart={handleAddToCart}
                   onToggleWishlist={handleToggleWishlist}
                   isWishlisted={wishlistedIds.has(product._id)}
@@ -522,26 +527,29 @@ export const HomePage: React.FC = () => {
           </div>
           <Link
             to="/products"
-            className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 shrink-0"
+            className="min-h-[44px] px-1 text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 shrink-0"
           >
             <span>View All</span>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4" aria-hidden="true" />
           </Link>
         </div>
 
         {productsError ? (
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 flex items-center gap-3 text-sm text-slate-700">
-            <AlertCircle className="w-4 h-4 text-slate-500 shrink-0" />
+            <AlertCircle className="w-4 h-4 text-slate-600 shrink-0" aria-hidden="true" />
             <span>{productsError}</span>
           </div>
         ) : isLoadingProducts ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {[...Array(4)].map((_, idx) => (
-              <div
-                key={idx}
-                className="h-72 bg-slate-100 rounded-lg border border-slate-200 animate-pulse"
-              />
-            ))}
+          <div role="status" aria-live="polite" className="space-y-3">
+            <p className="text-xs text-slate-600">Loading featured spare parts...</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {[...Array(4)].map((_, idx) => (
+                <div
+                  key={idx}
+                  className="h-72 bg-slate-100 rounded-lg border border-slate-200"
+                />
+              ))}
+            </div>
           </div>
         ) : featuredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -583,7 +591,7 @@ export const HomePage: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-4 mb-6">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-amber-400">
+                <p className="text-xs font-semibold text-amber-300">
                   Top Rated by Buyers
                 </p>
                 <h2
@@ -595,10 +603,10 @@ export const HomePage: React.FC = () => {
               </div>
               <Link
                 to="/products?sortBy=RATING_DESC"
-                className="text-sm font-medium text-blue-400 hover:text-blue-300 inline-flex items-center gap-1 shrink-0"
+                className="min-h-[44px] px-1 text-sm font-medium text-blue-300 hover:text-blue-200 inline-flex items-center gap-1 shrink-0"
               >
                 <span>Top Rated Catalog</span>
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </Link>
             </div>
 
@@ -688,10 +696,10 @@ export const HomePage: React.FC = () => {
             </div>
             <Link
               to="/products"
-              className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 shrink-0"
+              className="min-h-[44px] px-1 text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 shrink-0"
             >
               <span>All Parts</span>
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           </div>
 
@@ -700,13 +708,13 @@ export const HomePage: React.FC = () => {
               <Link
                 key={b._id || b.slug}
                 to={`/products?brand=${encodeURIComponent(b.slug)}`}
-                className="p-4 border-r border-b border-slate-200 bg-white hover:bg-blue-50/40 hover:text-blue-700 transition-colors flex flex-col items-center justify-center text-center gap-1"
+                className="min-h-[64px] p-4 border-r border-b border-slate-200 bg-white hover:bg-blue-50/40 hover:text-blue-700 transition-colors flex flex-col items-center justify-center text-center gap-1"
               >
                 <span className="text-sm font-bold text-slate-900 tracking-tight">
                   {b.name}
                 </span>
                 {b.countryOfOrigin && (
-                  <span className="text-xs text-slate-500">{b.countryOfOrigin}</span>
+                  <span className="text-xs text-slate-600">{b.countryOfOrigin}</span>
                 )}
               </Link>
             ))}

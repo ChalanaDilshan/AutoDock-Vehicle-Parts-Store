@@ -16,14 +16,22 @@ export const StorefrontCategoryBar: React.FC = () => {
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [activeMenu, setActiveMenu] = useState<ActiveMenuKey>(null);
+  const [hoveredMenu, setHoveredMenu] = useState<ActiveMenuKey>(null);
+  const [pinnedMenu, setPinnedMenu] = useState<ActiveMenuKey>(null);
+  const activeMenu = pinnedMenu ?? hoveredMenu;
+
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [brands, setBrands] = useState<BrandItem[]>([]);
   const [makes, setMakes] = useState<string[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<ProductItem[]>([]);
 
+  const closeAllMenus = () => {
+    setPinnedMenu(null);
+    setHoveredMenu(null);
+  };
+
   useEffect(() => {
-    setActiveMenu(null);
+    closeAllMenus();
   }, [location.pathname, location.search]);
 
   useEffect(() => {
@@ -66,12 +74,12 @@ export const StorefrontCategoryBar: React.FC = () => {
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setActiveMenu(null);
+        closeAllMenus();
       }
     };
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setActiveMenu(null);
+        closeAllMenus();
       }
     };
     document.addEventListener('mousedown', handleOutsideClick);
@@ -86,8 +94,19 @@ export const StorefrontCategoryBar: React.FC = () => {
   const leftCategories = categories.slice(0, midpoint);
   const rightCategories = categories.slice(midpoint);
 
-  const toggleMenu = (key: ActiveMenuKey) => {
-    setActiveMenu((prev) => (prev === key ? null : key));
+  const handleMenuEnter = (key: Exclude<ActiveMenuKey, null>) => {
+    setHoveredMenu(key);
+    setPinnedMenu((prev) => (prev && prev !== key ? null : prev));
+  };
+
+  const handleMenuClick = (key: Exclude<ActiveMenuKey, null>) => {
+    setPinnedMenu((prev) => {
+      if (prev === key) {
+        setHoveredMenu(null);
+        return null;
+      }
+      return key;
+    });
   };
 
   const isMegaMenuOpen = activeMenu === 'auto-parts' || activeMenu === 'categories';
@@ -95,110 +114,101 @@ export const StorefrontCategoryBar: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      onMouseLeave={() => setActiveMenu(null)}
+      onMouseLeave={() => setHoveredMenu(null)}
       className="hidden lg:block relative bg-white border-t border-slate-200"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="h-11 flex items-center gap-6">
+        <div className="min-h-[44px] flex items-center gap-6">
           {/* Left SHOP BY CATEGORY Trigger */}
           <button
             type="button"
-            onClick={() => toggleMenu('shop-cat')}
-            onMouseEnter={() => setActiveMenu('shop-cat')}
+            onClick={() => handleMenuClick('shop-cat')}
+            onMouseEnter={() => handleMenuEnter('shop-cat')}
             aria-expanded={activeMenu === 'shop-cat'}
-            className="h-full flex items-center gap-2.5 pr-6 border-r border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-900 hover:text-blue-700 transition-colors shrink-0"
+            className="min-h-[44px] flex items-center gap-2.5 pr-6 border-r border-slate-200 text-xs font-bold text-slate-900 hover:text-blue-700 active:text-blue-800 transition-colors shrink-0"
           >
             <Menu className="w-4 h-4 text-slate-700" aria-hidden="true" />
             <span>Shop By Category</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500 ml-1" aria-hidden="true" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-600 ml-1" aria-hidden="true" />
           </button>
 
-          {/* Horizontal Nav Links + Badges */}
-          <nav aria-label="Storefront category navigation" className="flex items-center gap-6 h-full">
+          {/* Horizontal Nav Links */}
+          <nav aria-label="Storefront category navigation" className="flex items-center gap-5 min-h-[44px]">
             <button
               type="button"
-              onClick={() => toggleMenu('auto-parts')}
-              onMouseEnter={() => setActiveMenu('auto-parts')}
+              onClick={() => handleMenuClick('auto-parts')}
+              onMouseEnter={() => handleMenuEnter('auto-parts')}
               aria-expanded={activeMenu === 'auto-parts'}
-              className={`relative h-full inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
+              className={`min-h-[44px] px-1 inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
                 activeMenu === 'auto-parts' ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'
               }`}
             >
               <span>Auto Parts</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
-              <span className="absolute top-1 right-0 translate-x-1/2 px-1.5 py-0.5 text-[9px] leading-none font-bold uppercase rounded-sm bg-rose-600 text-white">
-                Sale
-              </span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-600" aria-hidden="true" />
             </button>
 
             <button
               type="button"
-              onClick={() => toggleMenu('categories')}
-              onMouseEnter={() => setActiveMenu('categories')}
+              onClick={() => handleMenuClick('categories')}
+              onMouseEnter={() => handleMenuEnter('categories')}
               aria-expanded={activeMenu === 'categories'}
-              className={`relative h-full inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
+              className={`min-h-[44px] px-1 inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
                 activeMenu === 'categories' ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'
               }`}
             >
               <span>Categories</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
-              <span className="absolute top-1 right-0 translate-x-1/2 px-1.5 py-0.5 text-[9px] leading-none font-bold uppercase rounded-sm bg-amber-500 text-slate-950">
-                Hot
-              </span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-600" aria-hidden="true" />
             </button>
 
             <button
               type="button"
-              onClick={() => toggleMenu('brands')}
-              onMouseEnter={() => setActiveMenu('brands')}
+              onClick={() => handleMenuClick('brands')}
+              onMouseEnter={() => handleMenuEnter('brands')}
               aria-expanded={activeMenu === 'brands'}
-              className={`h-full inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
+              className={`min-h-[44px] px-1 inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
                 activeMenu === 'brands' ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'
               }`}
             >
               <span>Brands</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
+              <ChevronDown className="w-3.5 h-3.5 text-slate-600" aria-hidden="true" />
             </button>
 
             <button
               type="button"
-              onClick={() => toggleMenu('products')}
-              onMouseEnter={() => setActiveMenu('products')}
+              onClick={() => handleMenuClick('products')}
+              onMouseEnter={() => handleMenuEnter('products')}
               aria-expanded={activeMenu === 'products'}
-              className={`relative h-full inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
+              className={`min-h-[44px] px-1 inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
                 activeMenu === 'products' ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'
               }`}
             >
               <span>Products</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
-              <span className="absolute top-1 right-0 translate-x-1/2 px-1.5 py-0.5 text-[9px] leading-none font-bold uppercase rounded-sm bg-emerald-600 text-white">
-                New
-              </span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-600" aria-hidden="true" />
             </button>
 
             <button
               type="button"
-              onClick={() => toggleMenu('makes')}
-              onMouseEnter={() => setActiveMenu('makes')}
+              onClick={() => handleMenuClick('makes')}
+              onMouseEnter={() => handleMenuEnter('makes')}
               aria-expanded={activeMenu === 'makes'}
-              className={`h-full inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide transition-colors ${
+              className={`min-h-[44px] px-1 inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
                 activeMenu === 'makes' ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'
               }`}
             >
               <span>Vehicles</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
+              <ChevronDown className="w-3.5 h-3.5 text-slate-600" aria-hidden="true" />
             </button>
 
             <Link
               to="/products?sortBy=NEWEST"
-              className="text-xs font-semibold uppercase tracking-wide text-slate-800 hover:text-blue-700 transition-colors"
+              className="min-h-[44px] px-1 inline-flex items-center text-xs font-semibold text-slate-800 hover:text-blue-700 transition-colors"
             >
               New Arrivals
             </Link>
 
             <Link
               to="/products?sortBy=RATING_DESC"
-              className="text-xs font-semibold uppercase tracking-wide text-slate-800 hover:text-blue-700 transition-colors"
+              className="min-h-[44px] px-1 inline-flex items-center text-xs font-semibold text-slate-800 hover:text-blue-700 transition-colors"
             >
               Top Rated
             </Link>
@@ -210,24 +220,24 @@ export const StorefrontCategoryBar: React.FC = () => {
       {activeMenu === 'shop-cat' && (
         <div className="absolute left-0 right-0 top-full z-50 pointer-events-none">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="w-72 bg-white border border-slate-200 rounded-b-lg shadow-lg py-2 pointer-events-auto">
+            <div className="w-72 bg-white border border-slate-200 rounded-b-lg shadow-lg py-1.5 pointer-events-auto">
               {categories.length > 0 ? (
                 categories.map((cat) => (
                   <Link
                     key={cat._id || cat.slug}
                     to={`/products?category=${encodeURIComponent(cat.slug)}`}
-                    onClick={() => setActiveMenu(null)}
-                    className="flex items-center justify-between px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                    onClick={closeAllMenus}
+                    className="min-h-[44px] flex items-center justify-between px-4 py-2 text-sm text-slate-800 hover:bg-blue-50 hover:text-blue-700 transition-colors"
                   >
                     <span>{cat.name}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                   </Link>
                 ))
               ) : (
                 <Link
                   to="/products"
-                  onClick={() => setActiveMenu(null)}
-                  className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                  onClick={closeAllMenus}
+                  className="min-h-[44px] flex items-center px-4 py-2 text-sm text-slate-800 hover:bg-slate-50"
                 >
                   Browse All Parts
                 </Link>
@@ -248,13 +258,13 @@ export const StorefrontCategoryBar: React.FC = () => {
                   <h3 className="text-sm font-bold text-slate-900 mb-3">
                     Core Systems
                   </h3>
-                  <ul className="space-y-2">
+                  <ul className="space-y-1">
                     {leftCategories.map((cat) => (
                       <li key={cat._id || cat.slug}>
                         <Link
                           to={`/products?category=${encodeURIComponent(cat.slug)}`}
-                          onClick={() => setActiveMenu(null)}
-                          className="text-xs text-slate-600 hover:text-blue-700 transition-colors block"
+                          onClick={closeAllMenus}
+                          className="min-h-[36px] flex items-center text-xs text-slate-700 hover:text-blue-700 transition-colors"
                         >
                           {cat.name}
                         </Link>
@@ -267,13 +277,13 @@ export const StorefrontCategoryBar: React.FC = () => {
                   <h3 className="text-sm font-bold text-slate-900 mb-3">
                     Service &amp; Wear
                   </h3>
-                  <ul className="space-y-2">
+                  <ul className="space-y-1">
                     {rightCategories.map((cat) => (
                       <li key={cat._id || cat.slug}>
                         <Link
                           to={`/products?category=${encodeURIComponent(cat.slug)}`}
-                          onClick={() => setActiveMenu(null)}
-                          className="text-xs text-slate-600 hover:text-blue-700 transition-colors block"
+                          onClick={closeAllMenus}
+                          className="min-h-[36px] flex items-center text-xs text-slate-700 hover:text-blue-700 transition-colors"
                         >
                           {cat.name}
                         </Link>
@@ -298,7 +308,7 @@ export const StorefrontCategoryBar: React.FC = () => {
                         <Link
                           key={product._id}
                           to={`/products/${product._id}`}
-                          onClick={() => setActiveMenu(null)}
+                          onClick={closeAllMenus}
                           className="bg-white border border-slate-200 hover:border-blue-300 rounded-md p-2 flex items-center gap-2.5 transition-colors"
                         >
                           <div className="w-12 h-12 rounded bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden">
@@ -306,10 +316,12 @@ export const StorefrontCategoryBar: React.FC = () => {
                               <img
                                 src={thumb}
                                 alt={product.name}
+                                width={48}
+                                height={48}
                                 className="w-full h-full object-contain p-1"
                               />
                             ) : (
-                              <Package className="w-5 h-5 text-slate-400" aria-hidden="true" />
+                              <Package className="w-5 h-5 text-slate-500" aria-hidden="true" />
                             )}
                           </div>
                           <div className="min-w-0">
@@ -325,7 +337,7 @@ export const StorefrontCategoryBar: React.FC = () => {
                     })}
                   </div>
                 ) : (
-                  <div className="text-center py-6 text-xs text-slate-500">
+                  <div className="text-center py-6 text-xs text-slate-600">
                     Explore verified parts in our catalog.
                   </div>
                 )}
@@ -335,29 +347,30 @@ export const StorefrontCategoryBar: React.FC = () => {
               <div className="col-span-4">
                 <Link
                   to="/products?sortBy=NEWEST"
-                  onClick={() => setActiveMenu(null)}
+                  onClick={closeAllMenus}
                   className="relative block h-full min-h-[175px] rounded-lg overflow-hidden bg-slate-900 border border-slate-800 group"
                 >
                   <img
                     src="/hero-wheel.jpg"
                     alt="AutoDock Genuine Spare Parts"
-                    className="absolute inset-0 w-full h-full object-cover opacity-45 group-hover:scale-105 transition-transform duration-300"
+                    width={400}
+                    height={300}
+                    className="absolute inset-0 w-full h-full object-cover opacity-40"
                   />
-                  <div className="relative z-10 h-full p-5 flex flex-col justify-between bg-gradient-to-r from-slate-950/90 via-slate-900/70 to-transparent">
+                  <div className="relative z-10 h-full p-5 flex flex-col justify-between bg-slate-950/75">
                     <div className="space-y-1.5">
-                      <span className="inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded bg-blue-600 text-white">
-                        New Arrivals
-                      </span>
+                      <p className="text-xs font-semibold text-blue-300">
+                        Latest Inventory
+                      </p>
                       <h4 className="text-lg font-bold text-white leading-snug">
                         OEM &amp; Aftermarket Parts
                       </h4>
                       <p className="text-xs text-slate-200">
-                        Verified Sri Lankan sellers &amp; LKR checkout
+                        Verified Sri Lankan sellers and LKR checkout
                       </p>
                     </div>
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-400 underline underline-offset-4">
-                      <span>Shop Now</span>
-                      <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span className="inline-flex items-center text-xs font-bold text-amber-300 underline underline-offset-4">
+                      Browse Latest Parts
                     </span>
                   </div>
                 </Link>
@@ -373,15 +386,15 @@ export const StorefrontCategoryBar: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-white border border-slate-200 rounded-b-lg shadow-lg p-5 pointer-events-auto max-w-2xl">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                <h3 className="text-xs font-bold text-slate-900">
                   Manufacturers &amp; Brands
                 </h3>
                 <Link
                   to="/products"
-                  onClick={() => setActiveMenu(null)}
+                  onClick={closeAllMenus}
                   className="text-xs font-medium text-blue-700 hover:text-blue-800"
                 >
-                  View All Parts &rarr;
+                  View All Parts
                 </Link>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -389,12 +402,12 @@ export const StorefrontCategoryBar: React.FC = () => {
                   <Link
                     key={brand._id || brand.slug}
                     to={`/products?brand=${encodeURIComponent(brand.slug)}`}
-                    onClick={() => setActiveMenu(null)}
-                    className="px-3 py-2 rounded-md border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 text-xs font-semibold text-slate-800 flex items-center justify-between"
+                    onClick={closeAllMenus}
+                    className="min-h-[44px] px-3 py-2 rounded-md border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 text-xs font-semibold text-slate-800 flex items-center justify-between"
                   >
                     <span>{brand.name}</span>
                     {brand.countryOfOrigin && (
-                      <span className="text-[11px] font-normal text-slate-500">
+                      <span className="text-[11px] font-normal text-slate-600">
                         {brand.countryOfOrigin}
                       </span>
                     )}
@@ -410,39 +423,39 @@ export const StorefrontCategoryBar: React.FC = () => {
       {activeMenu === 'products' && (
         <div className="absolute left-0 right-0 top-full z-50 pointer-events-none">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pl-80">
-            <div className="w-64 bg-white border border-slate-200 rounded-b-lg shadow-lg py-2 pointer-events-auto">
+            <div className="w-64 bg-white border border-slate-200 rounded-b-lg shadow-lg py-1.5 pointer-events-auto">
               <Link
                 to="/products?sortBy=NEWEST"
-                onClick={() => setActiveMenu(null)}
-                className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                onClick={closeAllMenus}
+                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
               >
                 Latest Arrivals
               </Link>
               <Link
                 to="/products?sortBy=RATING_DESC"
-                onClick={() => setActiveMenu(null)}
-                className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                onClick={closeAllMenus}
+                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
               >
                 Top Rated Spare Parts
               </Link>
               <Link
                 to="/products?condition=NEW"
-                onClick={() => setActiveMenu(null)}
-                className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                onClick={closeAllMenus}
+                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
               >
                 Brand New Parts
               </Link>
               <Link
                 to="/products?condition=RECONDITIONED"
-                onClick={() => setActiveMenu(null)}
-                className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                onClick={closeAllMenus}
+                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
               >
                 Reconditioned Parts
               </Link>
               <Link
                 to="/products?sortBy=PRICE_ASC"
-                onClick={() => setActiveMenu(null)}
-                className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                onClick={closeAllMenus}
+                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
               >
                 Price: Low to High
               </Link>
@@ -455,30 +468,30 @@ export const StorefrontCategoryBar: React.FC = () => {
       {activeMenu === 'makes' && (
         <div className="absolute left-0 right-0 top-full z-50 pointer-events-none">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pl-96">
-            <div className="w-64 bg-white border border-slate-200 rounded-b-lg shadow-lg py-2 pointer-events-auto">
+            <div className="w-64 bg-white border border-slate-200 rounded-b-lg shadow-lg py-1.5 pointer-events-auto">
               {makes.length > 0 ? (
                 makes.map((make) => (
                   <Link
                     key={make}
                     to={`/products?make=${encodeURIComponent(make)}`}
-                    onClick={() => setActiveMenu(null)}
-                    className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    onClick={closeAllMenus}
+                    className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
                   >
                     {make} Parts
                   </Link>
                 ))
               ) : (
-                <div className="px-4 py-2 text-xs text-slate-500">
+                <div className="px-4 py-3 text-xs text-slate-600">
                   Use Vehicle Finder to filter by model
                 </div>
               )}
               <div className="border-t border-slate-100 mt-1 pt-1">
                 <Link
                   to="/garage"
-                  onClick={() => setActiveMenu(null)}
-                  className="block px-4 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                  onClick={closeAllMenus}
+                  className="min-h-[44px] flex items-center px-4 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50"
                 >
-                  Open Saved Vehicles &rarr;
+                  Open Saved Vehicles
                 </Link>
               </div>
             </div>
