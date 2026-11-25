@@ -11,41 +11,36 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const PADDING_CLASSES: Record<NonNullable<CardProps['padding']>, string> = {
   none: '',
-  sm: 'p-3 sm:p-4',
-  md: 'p-4 sm:p-6',
+  sm: 'p-4',
+  md: 'p-5 sm:p-6',
   lg: 'p-6 sm:p-8',
 };
 
 const VARIANT_CLASSES: Record<NonNullable<CardProps['variant']>, string> = {
-  default: 'bg-white border-slate-200 text-slate-900',
-  dark: 'bg-slate-900 border-slate-800 text-white',
+  default: 'bg-white border border-slate-200 text-slate-900 shadow-xs',
+  dark: 'bg-slate-900 border border-slate-800 text-white shadow-sm',
 };
 
-/**
- * Reusable Card container component with consistent borders, rounding, and spacing.
- */
 export const Card: React.FC<CardProps> = ({
+  children,
   padding = 'md',
   variant = 'default',
   hoverable = false,
   className = '',
-  children,
-  ...rest
+  ...props
 }) => {
   return (
     <div
       className={[
-        'rounded-lg border shadow-xs',
+        'rounded-lg',
         VARIANT_CLASSES[variant],
         PADDING_CLASSES[padding],
-        hoverable
-          ? 'transition-all duration-150 hover:border-slate-300 hover:shadow-sm'
-          : '',
+        hoverable ? 'hover:shadow-sm hover:border-slate-300 transition-[box-shadow,border-color] duration-150' : '',
         className,
       ]
         .filter(Boolean)
         .join(' ')}
-      {...rest}
+      {...props}
     >
       {children}
     </div>

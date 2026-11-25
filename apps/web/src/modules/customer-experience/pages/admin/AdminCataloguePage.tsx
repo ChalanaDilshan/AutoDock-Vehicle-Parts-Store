@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Layers,
-  Award,
-  Plus,
-  Edit2,
-  AlertCircle,
-  Loader2,
-} from 'lucide-react';
+import { Tags, Plus, Edit3, FolderTree, Award } from 'lucide-react';
 import {
   CategoryItem,
   BrandItem,
@@ -14,308 +7,249 @@ import {
 } from '../../api/customerExperienceApi.js';
 import { CategoryModal } from '../../components/CategoryModal.js';
 import { BrandModal } from '../../components/BrandModal.js';
+import {
+  Alert,
+  Badge,
+  Button,
+  PageHeader,
+} from '../../../../shared/components/index.js';
 
 export const AdminCataloguePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'CATEGORIES' | 'BRANDS'>('CATEGORIES');
-
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [brands, setBrands] = useState<BrandItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Modals
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryItem | null>(null);
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
+  const [brandModalOpen, setBrandModalOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState<BrandItem | null>(null);
-  const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
 
-  const loadData = async () => {
+  const loadTaxonomy = async () => {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      const [catRes, brandRes] = await Promise.allSettled([
+      const [catRes, brandRes] = await Promise.all([
         taxonomyApi.getCategories(),
         taxonomyApi.getBrands(),
       ]);
-
-      if (catRes.status === 'fulfilled' && catRes.value.success) {
-        setCategories(catRes.value.data || []);
-      }
-      if (brandRes.status === 'fulfilled' && brandRes.value.success) {
-        setBrands(brandRes.value.data || []);
-      }
+      if (catRes.success && Array.isArray(catRes.data)) setCategories(catRes.data);
+      if (brandRes.success && Array.isArray(brandRes.data)) setBrands(brandRes.data);
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to load catalogue taxonomies.');
+      setErrorMessage(err?.message || 'Unable to load catalog taxonomy.');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadData();
+    loadTaxonomy();
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-20">
-      {/* Header */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Admin Platform
-            </span>
-            <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-              Taxonomy Manager
-            </span>
-          </div>
-          <h1 className="text-2xl font-black text-slate-900">Catalogue Categories & Brands</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Configure vehicle spare-part hierarchies, manufacturer brands, and public browsing taxonomies.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {activeTab === 'CATEGORIES' ? (
-            <button
-              type="button"
+    <div className="space-y-6">
+      <PageHeader
+        title="Catalogue Taxonomy"
+        subtitle="Manage marketplace spare-part categories and supported manufacturer brands"
+        actions={
+          activeTab === 'CATEGORIES' ? (
+            <Button
+              variant="primary"
+              size="sm"
+              leftIcon={<Plus className="w-4 h-4" />}
               onClick={() => {
                 setEditingCategory(null);
-                setIsCategoryModalOpen(true);
+                setCategoryModalOpen(true);
               }}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm"
             >
-              <Plus className="w-4 h-4" />
-              <span>Add Category</span>
-            </button>
+              Add Category
+            </Button>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              size="sm"
+              leftIcon={<Plus className="w-4 h-4" />}
               onClick={() => {
                 setEditingBrand(null);
-                setIsBrandModalOpen(true);
+                setBrandModalOpen(true);
               }}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm"
             >
-              <Plus className="w-4 h-4" />
-              <span>Add Brand</span>
-            </button>
-          )}
-        </div>
-      </div>
+              Add Brand
+            </Button>
+          )
+        }
+      />
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200">
+      {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+
+      {/* Tab Switcher */}
+      <div className="border-b border-slate-200 flex gap-6">
         <button
           type="button"
           onClick={() => setActiveTab('CATEGORIES')}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition ${
+          className={`pb-3 text-sm font-medium border-b-2 transition-colors inline-flex items-center gap-2 ${
             activeTab === 'CATEGORIES'
-              ? 'border-blue-600 text-blue-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'border-blue-700 text-blue-700'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
-          <Layers className="w-4 h-4" />
-          <span>Part Categories ({categories.length})</span>
+          <FolderTree className="w-4 h-4" />
+          <span>Part Categories</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('BRANDS')}
-          className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition ${
+          className={`pb-3 text-sm font-medium border-b-2 transition-colors inline-flex items-center gap-2 ${
             activeTab === 'BRANDS'
-              ? 'border-blue-600 text-blue-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'border-blue-700 text-blue-700'
+              : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
           <Award className="w-4 h-4" />
-          <span>Manufacturer Brands ({brands.length})</span>
+          <span>Manufacturer Brands</span>
         </button>
       </div>
 
-      {errorMessage && (
-        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-rose-600" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {/* Categories Tab Content */}
-      {activeTab === 'CATEGORIES' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
-              <p className="text-xs font-medium">Loading categories...</p>
-            </div>
-          ) : categories.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    <th className="px-5 py-3.5">Category Name</th>
-                    <th className="px-4 py-3.5">Slug</th>
-                    <th className="px-4 py-3.5">Parent Level</th>
-                    <th className="px-4 py-3.5">Display Order</th>
-                    <th className="px-4 py-3.5">Status</th>
-                    <th className="px-5 py-3.5 text-right">Actions</th>
+      {isLoading ? (
+        <div className="h-64 bg-white border border-slate-200 rounded-lg" />
+      ) : activeTab === 'CATEGORIES' ? (
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-4">Category Name</th>
+                  <th className="py-3 px-4">Slug</th>
+                  <th className="py-3 px-4">Hierarchy</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {categories.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-slate-500">
+                      No categories configured yet.
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs">
-                  {categories.map((c) => {
-                    const parent = categories.find((p) => p._id === c.parentId);
-
+                ) : (
+                  categories.map((cat) => {
+                    const parent = cat.parentId
+                      ? categories.find((c) => c._id === cat.parentId)?.name || 'Sub-category'
+                      : 'Top-Level';
                     return (
-                      <tr key={c._id} className="hover:bg-slate-50/70 transition">
-                        <td className="px-5 py-3.5 font-bold text-slate-900">
-                          {c.name}
-                          {c.description && (
-                            <span className="block text-[11px] font-normal text-slate-400 truncate max-w-xs">
-                              {c.description}
-                            </span>
-                          )}
+                      <tr key={cat._id} className="hover:bg-slate-50/60">
+                        <td className="py-3 px-4 font-medium text-slate-900">
+                          {cat.name}
                         </td>
-                        <td className="px-4 py-3.5 font-mono text-slate-600">{c.slug}</td>
-                        <td className="px-4 py-3.5">
-                          {parent ? (
-                            <span className="font-semibold text-slate-700">{parent.name}</span>
-                          ) : (
-                            <span className="text-[10px] uppercase font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
-                              Top-Level
-                            </span>
-                          )}
+                        <td className="py-3 px-4 font-mono text-xs text-slate-600">
+                          {cat.slug}
                         </td>
-                        <td className="px-4 py-3.5 font-mono text-slate-600">{c.displayOrder}</td>
-                        <td className="px-4 py-3.5">
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                              c.isActive
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-slate-100 text-slate-600'
-                            }`}
-                          >
-                            {c.isActive ? 'Active' : 'Hidden'}
-                          </span>
+                        <td className="py-3 px-4 text-slate-600">{parent}</td>
+                        <td className="py-3 px-4">
+                          <Badge variant={cat.isActive ? 'success' : 'default'}>
+                            {cat.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
                         </td>
-                        <td className="px-5 py-3.5 text-right">
-                          <button
-                            type="button"
+                        <td className="py-3 px-4 text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            leftIcon={<Edit3 className="w-3.5 h-3.5" />}
                             onClick={() => {
-                              setEditingCategory(c);
-                              setIsCategoryModalOpen(true);
+                              setEditingCategory(cat);
+                              setCategoryModalOpen(true);
                             }}
-                            className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                            title="Edit Category"
                           >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
+                            Edit
+                          </Button>
                         </td>
                       </tr>
                     );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="p-16 text-center text-xs text-slate-500">
-              No categories created yet. Click "Add Category" to initialize the taxonomy.
-            </div>
-          )}
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      )}
-
-      {/* Brands Tab Content */}
-      {activeTab === 'BRANDS' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
-              <p className="text-xs font-medium">Loading manufacturer brands...</p>
-            </div>
-          ) : brands.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    <th className="px-5 py-3.5">Brand</th>
-                    <th className="px-4 py-3.5">Slug</th>
-                    <th className="px-4 py-3.5">Country of Origin</th>
-                    <th className="px-4 py-3.5">Status</th>
-                    <th className="px-5 py-3.5 text-right">Actions</th>
+      ) : (
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-4">Brand Name</th>
+                  <th className="py-3 px-4">Slug</th>
+                  <th className="py-3 px-4">Country</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {brands.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-slate-500">
+                      No manufacturer brands configured yet.
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs">
-                  {brands.map((b) => (
-                    <tr key={b._id} className="hover:bg-slate-50/70 transition">
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-3">
-                          {b.logoUrl ? (
-                            <img
-                              src={b.logoUrl}
-                              alt={b.name}
-                              className="w-8 h-8 object-contain rounded border border-slate-200"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 bg-amber-50 text-amber-600 rounded flex items-center justify-center">
-                              <Award className="w-4 h-4" />
-                            </div>
-                          )}
-                          <span className="font-bold text-slate-900">{b.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3.5 font-mono text-slate-600">{b.slug}</td>
-                      <td className="px-4 py-3.5 text-slate-700">{b.countryOfOrigin || 'International'}</td>
-                      <td className="px-4 py-3.5">
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                            b.isActive
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-slate-100 text-slate-600'
-                          }`}
-                        >
-                          {b.isActive ? 'Active' : 'Hidden'}
+                ) : (
+                  brands.map((brand) => (
+                    <tr key={brand._id} className="hover:bg-slate-50/60">
+                      <td className="py-3 px-4 font-medium text-slate-900">
+                        <span className="inline-flex items-center gap-2">
+                          <Tags className="w-3.5 h-3.5 text-slate-400" />
+                          {brand.name}
                         </span>
                       </td>
-                      <td className="px-5 py-3.5 text-right">
-                        <button
-                          type="button"
+                      <td className="py-3 px-4 font-mono text-xs text-slate-600">
+                        {brand.slug}
+                      </td>
+                      <td className="py-3 px-4 text-slate-600">
+                        {brand.countryOfOrigin || '—'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge variant={brand.isActive ? 'success' : 'default'}>
+                          {brand.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          leftIcon={<Edit3 className="w-3.5 h-3.5" />}
                           onClick={() => {
-                            setEditingBrand(b);
-                            setIsBrandModalOpen(true);
+                            setEditingBrand(brand);
+                            setBrandModalOpen(true);
                           }}
-                          className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title="Edit Brand"
                         >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
+                          Edit
+                        </Button>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="p-16 text-center text-xs text-slate-500">
-              No manufacturer brands registered yet.
-            </div>
-          )}
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      {/* Modals */}
       <CategoryModal
         category={editingCategory}
         parentCategories={categories}
-        isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
-        onSuccess={loadData}
+        isOpen={categoryModalOpen}
+        onClose={() => setCategoryModalOpen(false)}
+        onSuccess={loadTaxonomy}
       />
 
       <BrandModal
         brand={editingBrand}
-        isOpen={isBrandModalOpen}
-        onClose={() => setIsBrandModalOpen(false)}
-        onSuccess={loadData}
+        isOpen={brandModalOpen}
+        onClose={() => setBrandModalOpen(false)}
+        onSuccess={loadTaxonomy}
       />
     </div>
   );

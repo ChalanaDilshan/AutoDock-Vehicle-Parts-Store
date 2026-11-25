@@ -1,64 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Plus, Trash2, Save } from 'lucide-react';
 import {
-  ArrowLeft,
-  Save,
-  Plus,
-  Trash2,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Car,
-} from 'lucide-react';
-import {
-  ProductItem,
+  sellerProductsApi,
+  taxonomyApi,
   CategoryItem,
   BrandItem,
   ProductCondition,
-  sellerProductsApi,
-  taxonomyApi,
 } from '../../api/customerExperienceApi.js';
 import { centsToRupees, rupeesToCents } from '../../utils/formatters.js';
+import {
+  Alert,
+  Button,
+  Input,
+  PageHeader,
+  Select,
+} from '../../../../shared/components/index.js';
 
 export const SellerProductEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = Boolean(id);
 
-  // Form state
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
   const [partNumber, setPartNumber] = useState('');
   const [oemNumber, setOemNumber] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [brandId, setBrandId] = useState('');
-  const [condition, setCondition] = useState<ProductCondition>('NEW');
-  const [priceRupees, setPriceRupees] = useState<number | string>('');
-  const [stock, setStock] = useState<number | string>(10);
-  const [lowStockThreshold, setLowStockThreshold] = useState<number | string>(3);
-  const [warrantyMonths, setWarrantyMonths] = useState<number | string>(6);
+  const [condition, setCondition] = useState<string>('BRAND_NEW');
+  const [priceRupees, setPriceRupees] = useState<string>('');
+  const [stock, setStock] = useState<string>('10');
+  const [lowStockThreshold, setLowStockThreshold] = useState<string>('3');
+  const [warrantyMonths, setWarrantyMonths] = useState<string>('6');
   const [description, setDescription] = useState('');
   const [isUniversalFit, setIsUniversalFit] = useState(false);
 
-  // Dynamic specs key-values
   const [specs, setSpecs] = useState<Array<{ key: string; value: string }>>([
     { key: '', value: '' },
   ]);
-
-  // Images list
-  const [imageUrls, setImageUrls] = useState<string[]>([
-    'https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=600&q=80',
-  ]);
+  const [imageUrls, setImageUrls] = useState<string[]>(['']);
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
 
-  // New compatibility entry
   const [compMake, setCompMake] = useState('');
   const [compModel, setCompModel] = useState('');
   const [compYearFrom, setCompYearFrom] = useState(2015);
-  const [compYearTo, setCompYearTo] = useState(2022);
+  const [compYearTo, setCompYearTo] = useState(new Date().getFullYear());
   const [compEngine, setCompEngine] = useState('');
 
-  // Taxonomies
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [brands, setBrands] = useState<BrandItem[]>([]);
   const [makes, setMakes] = useState<string[]>([]);
@@ -67,196 +56,147 @@ export const SellerProductEditorPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(isEditing);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    taxonomyApi.getCategories().then((r) => {
-      if (r.success && Array.isArray(r.data)) setCategories(r.data);
-    }).catch(() => {});
-
-    taxonomyApi.getBrands().then((r) => {
-      if (r.success && Array.isArray(r.data)) setBrands(r.data);
-    }).catch(() => {});
-
-    taxonomyApi.getMakes().then((r) => {
-      if (r.success && Array.isArray(r.data)) setMakes(r.data);
-    }).catch(() => {});
+    Promise.allSettled([
+      taxonomyApi.getCategories(),
+      taxonomyApi.getBrands(),
+      taxonomyApi.getMakes(),
+    ]).then(([catRes, brandRes, makeRes]) => {
+      if (catRes.status === 'fulfilled' && catRes.value.success) setCategories(catRes.value.data);
+      if (brandRes.status === 'fulfilled' && brandRes.value.success) setBrands(brandRes.value.data);
+      if (makeRes.status === 'fulfilled' && makeRes.value.success) setMakes(makeRes.value.data);
+    });
   }, []);
 
   useEffect(() => {
-    if (compMake) {
-      taxonomyApi.getModels(compMake).then((r) => {
-        if (r.success && Array.isArray(r.data)) setModels(r.data);
-      }).catch(() => {});
-    } else {
+    if (!compMake) {
       setModels([]);
+      return;
     }
+    taxonomyApi
+      .getModels(compMake)
+      .then((res) => {
+        if (res.success && Array.isArray(res.data)) setModels(res.data);
+      })
+      .catch(() => {});
   }, [compMake]);
 
-  // Load existing product if editing
   useEffect(() => {
-    if (isEditing && id) {
-      setIsLoading(true);
-      sellerProductsApi.getById(id)
-        .then((res) => {
-          if (res.success && res.data) {
-            const p = res.data;
-            setName(p.name);
-            setSku(p.sku);
-            setPartNumber(p.partNumber || '');
-            setOemNumber(p.oemNumber || '');
-            setCategoryId(typeof p.categoryId === 'object' && p.categoryId ? p.categoryId._id : (p.categoryId as string) || '');
-            setBrandId(typeof p.brandId === 'object' && p.brandId ? p.brandId._id : (p.brandId as string) || '');
-            setCondition(p.condition);
-            setPriceRupees(centsToRupees(p.priceInCents));
-            setStock(p.stock);
-            setLowStockThreshold(p.lowStockThreshold || 3);
-            setWarrantyMonths(p.warrantyMonths || 0);
-            setDescription(p.description);
-            setIsUniversalFit(p.isUniversalFit || false);
+    if (!id) return;
+    setIsLoading(true);
+    sellerProductsApi
+      .getById(id)
+      .then((res) => {
+        if (res.success && res.data) {
+          const p = res.data;
+          setName(p.name);
+          setSku(p.sku);
+          setPartNumber(p.partNumber || '');
+          setOemNumber(p.oemNumber || '');
+          setCategoryId(
+            typeof p.categoryId === 'object' && p.categoryId
+              ? p.categoryId._id
+              : (p.categoryId as string) || ''
+          );
+          setBrandId(
+            typeof p.brandId === 'object' && p.brandId
+              ? p.brandId._id
+              : (p.brandId as string) || ''
+          );
+          setCondition(
+            p.condition === 'NEW' ? 'BRAND_NEW' : p.condition || 'BRAND_NEW'
+          );
+          setPriceRupees(String(centsToRupees(p.priceInCents)));
+          setStock(String(p.stock));
+          setLowStockThreshold(String(p.lowStockThreshold ?? 3));
+          setWarrantyMonths(String(p.warrantyMonths ?? 6));
+          setDescription(p.description || '');
+          setIsUniversalFit(Boolean(p.isUniversalFit));
 
-            if (p.specifications && Object.keys(p.specifications).length > 0) {
-              setSpecs(
-                Object.entries(p.specifications).map(([key, value]) => ({ key, value }))
-              );
-            }
+          const specEntries = Object.entries(p.specifications || {}).map(
+            ([key, value]) => ({ key, value })
+          );
+          setSpecs(specEntries.length ? specEntries : [{ key: '', value: '' }]);
 
-            if (p.images && p.images.length > 0) {
-              setImageUrls(p.images.map((img) => img.url));
-              const primaryIdx = p.images.findIndex((img) => img.isPrimary);
-              setPrimaryImageIndex(primaryIdx >= 0 ? primaryIdx : 0);
-            }
+          if (p.images?.length) {
+            setImageUrls(p.images.map((img) => img.url));
+            const idx = p.images.findIndex((img) => img.isPrimary);
+            setPrimaryImageIndex(idx >= 0 ? idx : 0);
           }
-        })
-        .catch((err) => {
-          setErrorMessage(err?.message || 'Failed to load product details.');
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
-  }, [isEditing, id]);
-
-  const handleAddSpec = () => {
-    setSpecs((prev) => [...prev, { key: '', value: '' }]);
-  };
-
-  const handleRemoveSpec = (index: number) => {
-    setSpecs((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSpecChange = (index: number, field: 'key' | 'value', text: string) => {
-    setSpecs((prev) => {
-      const copy = [...prev];
-      copy[index][field] = text;
-      return copy;
-    });
-  };
-
-  const handleAddImageUrl = () => {
-    setImageUrls((prev) => [...prev, '']);
-  };
-
-  const handleRemoveImageUrl = (index: number) => {
-    setImageUrls((prev) => prev.filter((_, i) => i !== index));
-    if (primaryImageIndex >= imageUrls.length - 1) {
-      setPrimaryImageIndex(0);
-    }
-  };
+        }
+      })
+      .catch((err: any) => {
+        setErrorMessage(err?.message || 'Unable to load product.');
+      })
+      .finally(() => setIsLoading(false));
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
-    setSuccessMessage(null);
 
-    const priceCents = rupeesToCents(priceRupees);
-    if (priceCents < 100) {
-      setErrorMessage('Price must be at least Rs. 1.00 (100 cents).');
-      return;
-    }
-
-    if (Number(stock) < 0) {
-      setErrorMessage('Stock cannot be negative.');
-      return;
-    }
-
+    const parsedPrice = Number(priceRupees);
     if (!name.trim() || !sku.trim() || !categoryId || !brandId) {
-      setErrorMessage('Name, SKU, Category, and Brand are mandatory fields.');
+      setErrorMessage('Name, SKU, category, and manufacturer brand are required.');
+      return;
+    }
+    if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
+      setErrorMessage('Enter a valid selling price in LKR.');
       return;
     }
 
-    setIsSubmitting(true);
-
-    // Build specs record
-    const specRecord: Record<string, string> = {};
-    specs.forEach((s) => {
-      if (s.key.trim() && s.value.trim()) {
-        specRecord[s.key.trim()] = s.value.trim();
+    const specMap: Record<string, string> = {};
+    specs.forEach((row) => {
+      if (row.key.trim() && row.value.trim()) {
+        specMap[row.key.trim()] = row.value.trim();
       }
     });
 
-    // Build images array
-    const validImages = imageUrls
-      .filter((u) => u.trim().length > 0)
+    const formattedImages = imageUrls
+      .map((u) => u.trim())
+      .filter(Boolean)
       .map((url, idx) => ({
-        url: url.trim(),
+        url,
         isPrimary: idx === primaryImageIndex,
       }));
 
-    if (validImages.length === 0) {
-      validImages.push({
-        url: 'https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=600&q=80',
-        isPrimary: true,
-      });
-    }
-
-    const payload: Partial<ProductItem> = {
+    const payload: any = {
       name: name.trim(),
-      sku: sku.trim(),
+      sku: sku.trim().toUpperCase(),
       partNumber: partNumber.trim() || undefined,
       oemNumber: oemNumber.trim() || undefined,
       categoryId,
       brandId,
-      condition,
-      priceInCents: priceCents,
-      stock: Number(stock),
-      lowStockThreshold: Number(lowStockThreshold),
-      warrantyMonths: Number(warrantyMonths),
+      condition: (condition === 'NEW' ? 'BRAND_NEW' : condition) as ProductCondition,
+      priceInCents: rupeesToCents(parsedPrice),
+      stock: Math.max(0, parseInt(stock, 10) || 0),
+      lowStockThreshold: Math.max(0, parseInt(lowStockThreshold, 10) || 0),
+      warrantyMonths: parseInt(warrantyMonths, 10) || undefined,
       description: description.trim(),
       isUniversalFit,
-      specifications: specRecord,
-      images: validImages,
+      specifications: specMap,
+      images: formattedImages,
     };
 
+    setIsSubmitting(true);
     try {
-      let savedProduct: ProductItem;
-      if (isEditing && id) {
-        const res = await sellerProductsApi.update(id, payload);
-        savedProduct = res.data;
-      } else {
-        const res = await sellerProductsApi.create(payload);
-        savedProduct = res.data;
+      const res = isEditing && id
+        ? await sellerProductsApi.update(id, payload)
+        : await sellerProductsApi.create(payload);
+
+      const savedProduct = res.data;
+      if (!isUniversalFit && savedProduct?._id && compMake && compModel) {
+        await sellerProductsApi.addCompatibility(savedProduct._id, {
+          make: compMake,
+          model: compModel,
+          yearFrom: compYearFrom,
+          yearTo: compYearTo,
+          engine: compEngine.trim() || undefined,
+        });
       }
 
-      // If compatibility row was filled, add compatibility mapping
-      if (compMake && compModel) {
-        try {
-          await sellerProductsApi.addCompatibility(savedProduct._id, {
-            make: compMake,
-            model: compModel,
-            yearFrom: Number(compYearFrom),
-            yearTo: Number(compYearTo),
-            engine: compEngine.trim() || undefined,
-          });
-        } catch {
-          // Compatibility addition non-blocking
-        }
-      }
-
-      setSuccessMessage('Product listing saved successfully!');
-      setTimeout(() => {
-        navigate('/seller/products');
-      }, 1200);
+      navigate('/seller/products');
     } catch (err: any) {
       setErrorMessage(err?.message || 'Failed to save product listing.');
     } finally {
@@ -266,298 +206,248 @@ export const SellerProductEditorPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
-        <p className="text-xs font-medium">Loading product form...</p>
+      <div className="max-w-4xl mx-auto px-4 py-10">
+        <div className="h-96 bg-white border border-slate-200 rounded-lg" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/seller/products"
-            className="p-2 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 transition"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900">
-              {isEditing ? 'Edit Spare Part Listing' : 'Create Spare Part Listing'}
-            </h1>
-            <p className="text-xs text-slate-500">
-              {isEditing
-                ? `Updating inventory record SKU: ${sku}`
-                : 'Publish an OEM or aftermarket spare part to the AutoDock marketplace.'}
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <PageHeader
+        title={isEditing ? 'Edit Spare Part' : 'Add New Spare Part'}
+        subtitle="Provide accurate part numbers, pricing in LKR, and vehicle fitment details"
+        backTo="/seller/products"
+        backLabel="Back to Inventory"
+      />
 
-      {successMessage && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-semibold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          <span>{successMessage}</span>
-        </div>
-      )}
-
-      {errorMessage && (
-        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-semibold flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-rose-600" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
+      {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Section 1: Basic Identifiers */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100">
-            1. Basic Part Information
-          </h3>
+        {/* Core Identity */}
+        <section className="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 space-y-4">
+          <h2 className="text-base font-semibold text-slate-900 border-b border-slate-200 pb-3">
+            Basic Part Details
+          </h2>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                Product Title *
-              </label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Front Ceramic Brake Pads for Toyota Corolla 2014-2019"
-                className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
+          <Input
+            label="Product Title"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Front Ceramic Brake Pads Set"
+          />
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  SKU (Store Part Code) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={sku}
-                  onChange={(e) => setSku(e.target.value)}
-                  placeholder="e.g. BRK-PAD-TY14"
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Part Number (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={partNumber}
-                  onChange={(e) => setPartNumber(e.target.value)}
-                  placeholder="e.g. 04465-02220"
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  OEM Reference (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={oemNumber}
-                  onChange={(e) => setOemNumber(e.target.value)}
-                  placeholder="e.g. OEM-TY-0987"
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Category *
-                </label>
-                <select
-                  required
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Brand / Manufacturer *
-                </label>
-                <select
-                  required
-                  value={brandId}
-                  onChange={(e) => setBrandId(e.target.value)}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                >
-                  <option value="">Select Brand</option>
-                  {brands.map((b) => (
-                    <option key={b._id} value={b._id}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Condition *
-                </label>
-                <select
-                  value={condition}
-                  onChange={(e) => setCondition(e.target.value as ProductCondition)}
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                >
-                  <option value="NEW">Brand New</option>
-                  <option value="RECONDITIONED">Reconditioned</option>
-                  <option value="USED">Used / Tested</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                Technical Description *
-              </label>
-              <textarea
-                rows={4}
-                required
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Comprehensive technical details, materials, installation tips, and included accessories..."
-                className="w-full text-xs p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Input
+              label="Store SKU"
+              required
+              value={sku}
+              onChange={(e) => setSku(e.target.value)}
+              placeholder="e.g. BRK-TOY-01"
+            />
+            <Input
+              label="Part Number"
+              value={partNumber}
+              onChange={(e) => setPartNumber(e.target.value)}
+              placeholder="Manufacturer part #"
+            />
+            <Input
+              label="OEM Number"
+              value={oemNumber}
+              onChange={(e) => setOemNumber(e.target.value)}
+              placeholder="Original OEM ref"
+            />
           </div>
-        </div>
 
-        {/* Section 2: Pricing & Inventory */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wider pb-2 border-b border-slate-100">
-            2. Pricing & Stock
-          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Select
+              label="Category"
+              required
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              placeholder="Select category"
+              options={categories.map((c) => ({ value: c._id, label: c.name }))}
+            />
+            <Select
+              label="Brand"
+              required
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
+              placeholder="Select brand"
+              options={brands.map((b) => ({ value: b._id, label: b.name }))}
+            />
+            <Select
+              label="Condition"
+              required
+              value={condition}
+              onChange={(e) => setCondition(e.target.value)}
+              options={[
+                { value: 'BRAND_NEW', label: 'Brand New' },
+                { value: 'RECONDITIONED', label: 'Reconditioned' },
+                { value: 'USED', label: 'Used / Tested' },
+              ]}
+            />
+          </div>
 
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              Description <span className="text-rose-600">*</span>
+            </label>
+            <textarea
+              rows={4}
+              required
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe part materials, packaging, and installation notes (min 20 characters)"
+              className="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+            />
+          </div>
+        </section>
+
+        {/* Pricing & Inventory */}
+        <section className="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 space-y-4">
+          <h2 className="text-base font-semibold text-slate-900 border-b border-slate-200 pb-3">
+            Pricing &amp; Inventory
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                Price in LKR (Rs.) *
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min={1}
-                required
-                value={priceRupees}
-                onChange={(e) => setPriceRupees(e.target.value)}
-                placeholder="e.g. 14500.00"
-                className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                Stock Quantity *
-              </label>
-              <input
-                type="number"
-                min={0}
-                required
-                value={stock}
-                onChange={(e) => setStock(e.target.value)}
-                className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                Low Stock Warning Level
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={lowStockThreshold}
-                onChange={(e) => setLowStockThreshold(e.target.value)}
-                className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                Warranty (Months)
-              </label>
-              <input
-                type="number"
-                min={0}
-                value={warrantyMonths}
-                onChange={(e) => setWarrantyMonths(e.target.value)}
-                className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
+            <Input
+              label="Price (LKR)"
+              type="number"
+              required
+              min={1}
+              step="0.01"
+              value={priceRupees}
+              onChange={(e) => setPriceRupees(e.target.value)}
+              placeholder="12500.00"
+            />
+            <Input
+              label="Stock Units"
+              type="number"
+              required
+              min={0}
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+            />
+            <Input
+              label="Low-Stock Alert"
+              type="number"
+              min={0}
+              value={lowStockThreshold}
+              onChange={(e) => setLowStockThreshold(e.target.value)}
+            />
+            <Input
+              label="Warranty (Months)"
+              type="number"
+              min={0}
+              value={warrantyMonths}
+              onChange={(e) => setWarrantyMonths(e.target.value)}
+            />
           </div>
-        </div>
+        </section>
 
-        {/* Section 3: Media Gallery */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wider">
-              3. Product Images
-            </h3>
-            <button
+        {/* Technical Specifications */}
+        <section className="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+            <h2 className="text-base font-semibold text-slate-900">
+              Specifications
+            </h2>
+            <Button
               type="button"
-              onClick={handleAddImageUrl}
-              className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"
+              variant="outline"
+              size="sm"
+              leftIcon={<Plus className="w-3.5 h-3.5" />}
+              onClick={() => setSpecs([...specs, { key: '', value: '' }])}
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Image URL</span>
-            </button>
+              Add Row
+            </Button>
           </div>
+          <div className="space-y-2.5">
+            {specs.map((row, idx) => (
+              <div key={idx} className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                <div className="sm:col-span-5">
+                  <Input
+                    placeholder="Property (e.g. Material)"
+                    value={row.key}
+                    onChange={(e) => {
+                      const next = [...specs];
+                      next[idx].key = e.target.value;
+                      setSpecs(next);
+                    }}
+                  />
+                </div>
+                <div className="sm:col-span-6">
+                  <Input
+                    placeholder="Value (e.g. Ceramic Composite)"
+                    value={row.value}
+                    onChange={(e) => {
+                      const next = [...specs];
+                      next[idx].value = e.target.value;
+                      setSpecs(next);
+                    }}
+                  />
+                </div>
+                <div className="sm:col-span-1 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setSpecs(specs.filter((_, i) => i !== idx))}
+                    className="p-2 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                    aria-label="Remove specification row"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-          <div className="space-y-3">
+        {/* Images */}
+        <section className="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+            <h2 className="text-base font-semibold text-slate-900">
+              Product Images
+            </h2>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              leftIcon={<Plus className="w-3.5 h-3.5" />}
+              onClick={() => setImageUrls([...imageUrls, ''])}
+            >
+              Add Image URL
+            </Button>
+          </div>
+          <div className="space-y-2.5">
             {imageUrls.map((url, idx) => (
               <div key={idx} className="flex items-center gap-3">
                 <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => {
-                    const copy = [...imageUrls];
-                    copy[idx] = e.target.value;
-                    setImageUrls(copy);
-                  }}
-                  placeholder="https://example.com/part-photo.jpg"
-                  className="flex-1 text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  type="radio"
+                  name="primaryImage"
+                  checked={primaryImageIndex === idx}
+                  onChange={() => setPrimaryImageIndex(idx)}
+                  aria-label={`Set image ${idx + 1} as primary`}
+                  className="text-blue-700"
                 />
-
-                <label className="flex items-center gap-1.5 text-xs text-slate-600 shrink-0 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="primary-image"
-                    checked={primaryImageIndex === idx}
-                    onChange={() => setPrimaryImageIndex(idx)}
-                    className="text-blue-600"
+                <div className="flex-1">
+                  <Input
+                    placeholder="https://example.com/part-image.jpg"
+                    value={url}
+                    onChange={(e) => {
+                      const next = [...imageUrls];
+                      next[idx] = e.target.value;
+                      setImageUrls(next);
+                    }}
                   />
-                  <span>Primary</span>
-                </label>
-
+                </div>
                 {imageUrls.length > 1 && (
                   <button
                     type="button"
-                    onClick={() => handleRemoveImageUrl(idx)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded"
+                    onClick={() => {
+                      setImageUrls(imageUrls.filter((_, i) => i !== idx));
+                      setPrimaryImageIndex(0);
+                    }}
+                    className="p-2 rounded-md text-slate-400 hover:text-rose-600"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -565,163 +455,81 @@ export const SellerProductEditorPage: React.FC = () => {
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Section 4: Specifications Key-Values */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wider">
-              4. Technical Attributes
-            </h3>
-            <button
-              type="button"
-              onClick={handleAddSpec}
-              className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Specification</span>
-            </button>
-          </div>
-
-          <div className="space-y-2.5">
-            {specs.map((s, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <input
-                  type="text"
-                  placeholder="Attribute (e.g. Material)"
-                  value={s.key}
-                  onChange={(e) => handleSpecChange(index, 'key', e.target.value)}
-                  className="w-1/3 text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="Value (e.g. Ceramic Composite)"
-                  value={s.value}
-                  onChange={(e) => handleSpecChange(index, 'value', e.target.value)}
-                  className="flex-1 text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-                {specs.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSpec(index)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Section 5: Vehicle Compatibility */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <Car className="w-4 h-4 text-blue-600" />
-              <span>5. Vehicle Fitment Compatibility</span>
-            </h3>
-            <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isUniversalFit}
-                onChange={(e) => setIsUniversalFit(e.target.checked)}
-                className="rounded border-slate-300 text-blue-600"
-              />
-              <span className="font-bold">Universal Vehicle Fitment</span>
-            </label>
-          </div>
+        {/* Fitment */}
+        <section className="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 space-y-4">
+          <h2 className="text-base font-semibold text-slate-900 border-b border-slate-200 pb-3">
+            Vehicle Compatibility
+          </h2>
+          <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isUniversalFit}
+              onChange={(e) => setIsUniversalFit(e.target.checked)}
+              className="rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+            />
+            <span>Universal fit (fits most passenger vehicles)</span>
+          </label>
 
           {!isUniversalFit && (
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-              <span className="text-xs font-bold text-slate-700 block">
-                Add Compatible Vehicle Model
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                <select
-                  value={compMake}
-                  onChange={(e) => {
-                    setCompMake(e.target.value);
-                    setCompModel('');
-                  }}
-                  className="text-xs px-2.5 py-2 border border-slate-300 rounded-lg bg-white"
-                >
-                  <option value="">Make</option>
-                  {makes.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={compModel}
-                  disabled={!compMake}
-                  onChange={(e) => setCompModel(e.target.value)}
-                  className="text-xs px-2.5 py-2 border border-slate-300 rounded-lg bg-white disabled:opacity-50"
-                >
-                  <option value="">Model</option>
-                  {models.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))}
-                </select>
-
-                <input
-                  type="number"
-                  placeholder="Year From"
-                  value={compYearFrom}
-                  onChange={(e) => setCompYearFrom(parseInt(e.target.value, 10) || 2010)}
-                  className="text-xs px-2.5 py-2 border border-slate-300 rounded-lg"
-                />
-
-                <input
-                  type="number"
-                  placeholder="Year To"
-                  value={compYearTo}
-                  onChange={(e) => setCompYearTo(parseInt(e.target.value, 10) || 2025)}
-                  className="text-xs px-2.5 py-2 border border-slate-300 rounded-lg"
-                />
-
-                <input
-                  type="text"
-                  placeholder="Engine / Trim"
-                  value={compEngine}
-                  onChange={(e) => setCompEngine(e.target.value)}
-                  className="text-xs px-2.5 py-2 border border-slate-300 rounded-lg"
-                />
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2">
+              <Select
+                label="Make"
+                value={compMake}
+                onChange={(e) => {
+                  setCompMake(e.target.value);
+                  setCompModel('');
+                }}
+                placeholder="Select Make"
+                options={makes.map((m) => ({ value: m, label: m }))}
+              />
+              <Select
+                label="Model"
+                disabled={!compMake}
+                value={compModel}
+                onChange={(e) => setCompModel(e.target.value)}
+                placeholder="Select Model"
+                options={models.map((m) => ({ value: m, label: m }))}
+              />
+              <Input
+                label="Year From"
+                type="number"
+                value={compYearFrom}
+                onChange={(e) => setCompYearFrom(Number(e.target.value))}
+              />
+              <Input
+                label="Year To"
+                type="number"
+                value={compYearTo}
+                onChange={(e) => setCompYearTo(Number(e.target.value))}
+              />
+              <Input
+                label="Engine (Opt)"
+                value={compEngine}
+                onChange={(e) => setCompEngine(e.target.value)}
+                placeholder="e.g. 1.5L"
+              />
             </div>
           )}
-        </div>
+        </section>
 
-        {/* Submit Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
-          <Link
-            to="/seller/products"
-            className="px-5 py-2.5 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+        <div className="flex items-center justify-end gap-3">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/seller/products')}
           >
             Cancel
-          </Link>
-
-          <button
+          </Button>
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm"
+            variant="primary"
+            size="lg"
+            isLoading={isSubmitting}
+            leftIcon={<Save className="w-4 h-4" />}
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Saving Product...</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                <span>{isEditing ? 'Update Listing' : 'Publish to Catalogue'}</span>
-              </>
-            )}
-          </button>
+            {isEditing ? 'Save Changes' : 'Publish Spare Part'}
+          </Button>
         </div>
       </form>
     </div>

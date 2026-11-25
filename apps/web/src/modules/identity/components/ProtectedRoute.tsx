@@ -1,47 +1,62 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { ShieldAlert, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 import { UserRole } from '../api/identityApi.js';
-import { ShieldAlert, Loader2 } from 'lucide-react';
+import { Button } from '../../../shared/components/index.js';
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+  children: React.ReactNode;
   allowedRoles?: UserRole[];
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  allowedRoles,
+}) => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] text-slate-500" data-testid="auth-loading">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
-        <p className="text-sm">Verifying session...</p>
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-sm text-slate-500">Verifying session...</div>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
     return (
-      <div className="max-w-lg mx-auto my-12 bg-white p-6 rounded-lg border border-red-200 shadow-sm text-center" data-testid="auth-forbidden">
-        <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-3">
-          <ShieldAlert className="w-6 h-6" />
+      <div
+        data-testid="auth-forbidden"
+        className="max-w-lg mx-auto my-12 bg-white border border-slate-200 rounded-lg p-8 text-center space-y-4"
+      >
+        <div className="w-11 h-11 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto">
+          <Lock className="w-5 h-5" aria-hidden="true" />
         </div>
-        <h2 className="text-lg font-bold text-slate-900 mb-1">Access Restricted (403)</h2>
-        <p className="text-sm text-slate-600 mb-4">
-          Your account role (<span className="font-semibold">{user.role}</span>) does not have permission to access this workstation.
-        </p>
-        <a
-          href="/"
-          className="inline-block px-4 py-2 bg-slate-900 text-white rounded-md text-sm font-medium hover:bg-slate-800 transition"
-        >
-          Return to Marketplace
-        </a>
+        <div className="space-y-1">
+          <h1 className="text-lg font-semibold text-slate-900">
+            Access Restricted (403)
+          </h1>
+          <p className="text-sm text-slate-600">
+            Your current role (<span className="font-semibold text-slate-900">{user.role}</span>) does not have permission to view this page.
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <a href="/">
+            <Button variant="outline" size="sm">
+              Return Home
+            </Button>
+          </a>
+        </div>
+        <div className="text-xs text-slate-400 flex items-center justify-center gap-1">
+          <ShieldAlert className="w-3.5 h-3.5" />
+          <span>Role-based access check</span>
+        </div>
       </div>
     );
   }

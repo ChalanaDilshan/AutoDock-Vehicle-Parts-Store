@@ -3,6 +3,7 @@ import {
   SuborderFulfillmentStatus,
   SuborderPaymentStatus,
 } from '../api/ordersDeliveryApi.js';
+import { Badge } from '../../../shared/components/index.js';
 
 interface SuborderStatusBadgeProps {
   fulfillmentStatus?: SuborderFulfillmentStatus;
@@ -18,94 +19,38 @@ export const SuborderStatusBadge: React.FC<SuborderStatusBadgeProps> = ({
   if (type === 'fulfillment' && fulfillmentStatus) {
     switch (fulfillmentStatus) {
       case 'PENDING_PAYMENT':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-            Awaiting Payment
-          </span>
-        );
+        return <Badge variant="warning">Awaiting Payment</Badge>;
       case 'AWAITING_FULFILLMENT':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
-            Awaiting Fulfillment
-          </span>
-        );
+        return <Badge variant="primary">Awaiting Fulfillment</Badge>;
       case 'PROCESSING':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200">
-            Processing
-          </span>
-        );
+        return <Badge variant="info">Processing</Badge>;
       case 'READY_FOR_DISPATCH':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-800 border border-purple-200">
-            Ready for Dispatch
-          </span>
-        );
+        return <Badge variant="info">Ready to Dispatch</Badge>;
       case 'DISPATCHED':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-50 text-cyan-800 border border-cyan-200">
-            Dispatched (In Transit)
-          </span>
-        );
+        return <Badge variant="primary">Dispatched</Badge>;
       case 'DELIVERED':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-            Delivered
-          </span>
-        );
+        return <Badge variant="success">Delivered</Badge>;
       case 'CANCELLED':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200">
-            Cancelled
-          </span>
-        );
+        return <Badge variant="danger">Cancelled</Badge>;
       default:
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
-            {fulfillmentStatus}
-          </span>
-        );
+        return <Badge variant="default">{fulfillmentStatus}</Badge>;
     }
   }
 
   if (type === 'payment' && paymentStatus) {
     switch (paymentStatus) {
       case 'PENDING':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-            Payment Pending
-          </span>
-        );
+        return <Badge variant="warning">Payment Pending</Badge>;
       case 'RECEIPT_UPLOADED':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-200">
-            Slip Under Review
-          </span>
-        );
+        return <Badge variant="info">Receipt Submitted</Badge>;
       case 'PAID':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-            Paid
-          </span>
-        );
+        return <Badge variant="success">Paid</Badge>;
       case 'COLLECTED':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200">
-            COD Cash Collected
-          </span>
-        );
+        return <Badge variant="success">COD Collected</Badge>;
       case 'REFUNDED':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-300">
-            Refunded
-          </span>
-        );
+        return <Badge variant="default">Refunded</Badge>;
       default:
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
-            {paymentStatus}
-          </span>
-        );
+        return <Badge variant="default">{paymentStatus}</Badge>;
     }
   }
 

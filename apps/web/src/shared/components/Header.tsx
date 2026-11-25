@@ -1,497 +1,424 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
-  ShoppingCart,
   Wrench,
-  ShieldCheck,
-  LogOut,
-  Heart,
-  Layers,
-  Package,
   Search,
+  ShoppingCart,
+  Heart,
+  LogOut,
   Menu,
   X,
-  Building2,
-  Phone,
-  CheckCircle2,
-  LayoutDashboard,
   Car,
-  Shield,
+  Package,
+  Store,
+  ShieldCheck,
+  User as UserIcon,
 } from 'lucide-react';
 import { useAuth } from '../../modules/identity/context/AuthContext.js';
 import { NotificationBell } from '../../modules/admin-platform/components/NotificationBell.js';
 import { Button } from './Button.js';
 
-/**
- * Shared application Header including the top utility trust bar,
- * main navigation bar, search bar, role-based links, and mobile menu drawer.
- */
 export const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const handleLogout = async () => {
-    await logout();
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname, location.search]);
+
+  const handleLogout = () => {
+    logout();
     setMobileMenuOpen(false);
     navigate('/login');
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?q=${encodeURIComponent(searchQuery.trim())}`);
-      setMobileMenuOpen(false);
+    const trimmed = searchQuery.trim();
+    if (trimmed) {
+      navigate(`/products?q=${encodeURIComponent(trimmed)}`);
+    } else {
+      navigate('/products');
     }
+    setMobileMenuOpen(false);
   };
 
-  // Close mobile drawer on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname]);
+  const role = user?.role;
+  const isSeller = isAuthenticated && role === 'SELLER';
+  const isAdmin = isAuthenticated && role === 'ADMIN';
+  const isCustomer = isAuthenticated && role === 'CUSTOMER';
+
+  const navLinkClass = (active: boolean) =>
+    `text-sm font-medium whitespace-nowrap transition-colors ${
+      active ? 'text-blue-700' : 'text-slate-600 hover:text-slate-900'
+    }`;
 
   return (
-    <>
-      {/* Top Utility & Trust Bar */}
-      <div className="bg-slate-900 text-slate-300 text-xs py-2 px-4 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-[11px] text-slate-300">
-            <span className="inline-flex items-center gap-1 font-semibold text-emerald-400">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Verified Merchants</span>
-            </span>
-            <span className="text-slate-600 hidden sm:inline">•</span>
-            <span className="font-medium text-slate-200">
-              Sri Lanka Vehicle Spare-Parts Marketplace
-            </span>
-            <span className="text-slate-600 hidden md:inline">•</span>
-            <span className="text-slate-400 hidden md:inline">
-              Delivery across all 25 districts
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4 text-[11px] text-slate-300">
-            <a
-              href="tel:+94112345678"
-              className="inline-flex items-center gap-1.5 hover:text-white transition"
-              title="Customer Support Hotline"
-            >
-              <Phone className="w-3 h-3 text-blue-400" />
-              <span>Hotline: +94 11 234 5678</span>
-            </a>
-            <span className="text-slate-700 hidden sm:inline">|</span>
-            <span className="inline-flex items-center gap-1 text-slate-300 hidden sm:inline-flex">
-              <Building2 className="w-3 h-3 text-amber-400" />
-              <span>Direct Bank Deposit & COD Supported</span>
-            </span>
+    <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
+      {/* Subtle announcement bar on larger viewports */}
+      <div className="hidden sm:block bg-slate-900 text-slate-300 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-8 flex items-center justify-between gap-4">
+          <p className="truncate">
+            Island-wide spare parts delivery across Sri Lanka &middot; LKR checkout
+          </p>
+          <div className="flex items-center gap-4 shrink-0">
+            <span className="text-slate-400">Support: +94 11 234 5678</span>
+            {isAdmin && (
+              <Link
+                to="/admin/dashboard"
+                className="text-white font-medium hover:text-blue-300 transition-colors"
+              >
+                Admin Console &rarr;
+              </Link>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Main Navigation Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4 sm:gap-6">
-          {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="w-8 h-8 rounded-md bg-slate-900 text-white flex items-center justify-center shadow-xs">
-              <Wrench className="w-4 h-4 text-blue-400" />
-            </div>
-            <div className="flex flex-col">
-              <div className="text-lg font-bold tracking-tight leading-none text-slate-900 flex items-center">
-                <span>AUTO</span>
-                <span className="text-blue-600">DOCK</span>
-              </div>
-              <span className="text-[10px] text-slate-500 font-medium tracking-wide">
-                Genuine Parts LK
-              </span>
-            </div>
+      {/* Main Navigation Row */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3 lg:gap-6">
+        {/* Brand */}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 shrink-0 focus-visible:outline-none"
+        >
+          <span className="w-8 h-8 rounded-md bg-blue-700 text-white flex items-center justify-center shrink-0">
+            <Wrench className="w-4 h-4" aria-hidden="true" />
+          </span>
+          <span className="text-lg font-bold tracking-tight leading-none">
+            <span className="text-slate-900">AUTO</span>
+            <span className="text-blue-700">DOCK</span>
+          </span>
+        </Link>
+
+        {/* Desktop Search */}
+        <form
+          onSubmit={handleSearchSubmit}
+          className="hidden md:flex flex-1 max-w-md lg:max-w-lg items-center"
+        >
+          <div className="relative w-full">
+            <Search
+              className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search parts, OEM numbers, or brands..."
+              aria-label="Search parts"
+              className="w-full h-9 pl-9 pr-20 rounded-lg border border-slate-300 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15 transition-colors"
+            />
+            <button
+              type="submit"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 px-3 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition-colors"
+            >
+              Search
+            </button>
+          </div>
+        </form>
+
+        {/* Desktop Primary Navigation */}
+        <nav
+          aria-label="Primary navigation"
+          className="hidden lg:flex items-center gap-5 shrink-0"
+        >
+          <Link
+            to="/products"
+            className={navLinkClass(location.pathname.startsWith('/products'))}
+          >
+            Parts Catalog
+          </Link>
+          <Link
+            to="/garage"
+            className={navLinkClass(location.pathname.startsWith('/garage'))}
+          >
+            My Garage
+          </Link>
+          {isCustomer && (
+            <Link
+              to="/orders"
+              className={navLinkClass(location.pathname.startsWith('/orders'))}
+            >
+              My Orders
+            </Link>
+          )}
+          {isSeller && (
+            <Link
+              to="/seller/dashboard"
+              className={navLinkClass(location.pathname.startsWith('/seller'))}
+            >
+              Seller Portal
+            </Link>
+          )}
+          {!isSeller && !isAdmin && (
+            <Link
+              to="/seller/register"
+              className={navLinkClass(location.pathname.startsWith('/seller'))}
+            >
+              Sell on AutoDock
+            </Link>
+          )}
+          {isAdmin && (
+            <Link
+              to="/admin/dashboard"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium whitespace-nowrap transition-colors"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Admin Console</span>
+            </Link>
+          )}
+        </nav>
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <NotificationBell />
+
+          <Link
+            to="/wishlist"
+            aria-label="Wishlist"
+            title="Saved Wishlist"
+            className="hidden sm:inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+          >
+            <Heart className="w-4 h-4" aria-hidden="true" />
           </Link>
 
-          {/* Desktop Practical Search Bar */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="hidden md:flex flex-1 max-w-lg mx-2 relative items-center"
+          <Link
+            to="/cart"
+            aria-label="Shopping Cart"
+            title="Shopping Cart"
+            className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
           >
-            <div className="relative w-full flex items-center">
-              <input
-                type="text"
-                placeholder="Search by part name, OEM number, or brand..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Search parts"
-                className="w-full text-xs pl-9 pr-20 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 rounded-md focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition outline-none text-slate-800 placeholder:text-slate-400"
-              />
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm"
-                className="absolute right-1 !py-1 !rounded"
+            <ShoppingCart className="w-4 h-4" aria-hidden="true" />
+          </Link>
+
+          {isAuthenticated ? (
+            <>
+              <Link
+                to="/account/profile"
+                className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-slate-700 transition-colors max-w-[200px]"
               >
-                Search
-              </Button>
+                <span className="w-5 h-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center font-semibold shrink-0">
+                  {(user?.firstName?.[0] || 'U').toUpperCase()}
+                </span>
+                <span className="truncate">{user?.firstName || 'Account'}</span>
+                <span className="text-[10px] font-semibold uppercase text-slate-500 shrink-0">
+                  {user?.role}
+                </span>
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                aria-label="Sign Out"
+                title="Sign Out"
+                className="hidden sm:inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-500 hover:text-rose-700 hover:bg-rose-50 transition-colors"
+              >
+                <LogOut className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </>
+          ) : (
+            <div className="hidden sm:flex items-center gap-2">
+              <Link to="/login">
+                <Button variant="ghost" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button variant="primary" size="sm">
+                  Register
+                </Button>
+              </Link>
             </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label="Toggle Navigation Menu"
+            aria-expanded={mobileMenuOpen}
+            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-4 h-4" aria-hidden="true" />
+            ) : (
+              <Menu className="w-4 h-4" aria-hidden="true" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Seller Workspace Quick Bar (Desktop) */}
+      {isSeller && (
+        <div className="hidden lg:block bg-slate-50 border-t border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-10 flex items-center gap-6 text-xs font-medium text-slate-600 overflow-x-auto">
+            <span className="text-slate-400 uppercase tracking-wider font-semibold shrink-0">
+              Merchant Tools
+            </span>
+            <Link to="/seller/products" className="hover:text-blue-700 whitespace-nowrap">
+              Inventory
+            </Link>
+            <Link to="/seller/orders" className="hover:text-blue-700 whitespace-nowrap">
+              Orders
+            </Link>
+            <Link to="/seller/promotions" className="hover:text-blue-700 whitespace-nowrap">
+              Promos
+            </Link>
+            <Link to="/seller/delivery-rates" className="hover:text-blue-700 whitespace-nowrap">
+              Delivery Rates
+            </Link>
+            <Link to="/seller/finance" className="hover:text-blue-700 whitespace-nowrap">
+              Finance &amp; Invoices
+            </Link>
+            <Link to="/seller/reviews" className="hover:text-blue-700 whitespace-nowrap">
+              Reviews
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Navigation & Search Drawer */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-4 shadow-md">
+          <form onSubmit={handleSearchSubmit} className="relative flex items-center md:hidden">
+            <Search
+              className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search spare parts, SKU, OEM..."
+              aria-label="Mobile search parts"
+              className="w-full h-9 pl-9 pr-16 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="absolute right-1 h-7 px-2.5 rounded-md bg-slate-900 text-white text-xs font-medium"
+            >
+              Go
+            </button>
           </form>
 
-          {/* Desktop Navigation Links */}
-          <div className="hidden lg:flex items-center gap-5 text-xs font-medium text-slate-700">
+          <nav className="grid grid-cols-1 gap-1" aria-label="Mobile navigation">
             <Link
               to="/products"
-              className="text-slate-700 hover:text-blue-600 transition flex items-center gap-1.5"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
-              <Layers className="w-3.5 h-3.5 text-slate-400" />
+              <Package className="w-4 h-4 text-slate-500" />
               <span>Parts Catalog</span>
             </Link>
-
             <Link
               to="/garage"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition"
-              title="Access your saved vehicles for guaranteed fitment"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"
             >
-              <Car className="w-3.5 h-3.5 text-blue-600" />
+              <Car className="w-4 h-4 text-slate-500" />
               <span>My Garage</span>
             </Link>
-
-            {/* Role-Specific Workstations */}
-            {user?.role === 'ADMIN' ? (
-              <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
-                <Link
-                  to="/admin/dashboard"
-                  className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 hover:bg-blue-100 transition"
-                >
-                  Admin Console
-                </Link>
-                <Link
-                  to="/admin/dashboard"
-                  className="flex items-center gap-1 hover:text-blue-600 text-slate-700 transition"
-                >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Dashboard</span>
-                </Link>
-                <Link
-                  to="/admin/sellers/verification"
-                  className="flex items-center gap-1 hover:text-blue-600 text-slate-700 transition"
-                >
-                  <Shield className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Sellers</span>
-                </Link>
-                <Link to="/admin/catalogue" className="text-slate-700 hover:text-blue-600 transition">
-                  Catalogue
-                </Link>
-                <Link to="/admin/orders" className="text-slate-700 hover:text-blue-600 transition">
-                  Orders
-                </Link>
-                <Link to="/admin/delivery-proposals" className="text-slate-700 hover:text-blue-600 transition">
-                  Rates
-                </Link>
-                <Link to="/admin/reviews" className="text-slate-700 hover:text-blue-600 transition">
-                  Reviews
-                </Link>
-                <Link to="/admin/finance" className="text-slate-700 hover:text-blue-600 transition">
-                  Finance
-                </Link>
-              </div>
-            ) : user?.role === 'SELLER' ? (
-              <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
+            {isAuthenticated && (
+              <Link
+                to="/wishlist"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"
+              >
+                <Heart className="w-4 h-4 text-slate-500" />
+                <span>Saved Wishlist</span>
+              </Link>
+            )}
+            {isCustomer && (
+              <Link
+                to="/orders"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"
+              >
+                <Package className="w-4 h-4 text-slate-500" />
+                <span>My Orders</span>
+              </Link>
+            )}
+            {isSeller && (
+              <>
                 <Link
                   to="/seller/dashboard"
-                  className="flex items-center gap-1 text-emerald-800 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 transition font-medium"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-blue-700 bg-blue-50"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <Store className="w-4 h-4" />
                   <span>Seller Portal</span>
                 </Link>
-                <Link to="/seller/products" className="text-slate-700 hover:text-blue-600 transition">
-                  Inventory
-                </Link>
-                <Link to="/seller/orders" className="text-slate-700 hover:text-blue-600 transition">
-                  Orders
-                </Link>
-                <Link to="/seller/finance" className="text-slate-700 hover:text-blue-600 transition">
-                  Finance
-                </Link>
-                <Link to="/seller/promotions" className="text-slate-700 hover:text-blue-600 transition">
-                  Promos
-                </Link>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                {isAuthenticated && (
-                  <Link
-                    to="/orders"
-                    className="flex items-center gap-1 text-slate-700 hover:text-blue-600 transition"
-                  >
-                    <Package className="w-3.5 h-3.5 text-slate-400" />
-                    <span>My Orders</span>
+                <div className="pl-9 grid grid-cols-2 gap-1 py-1 text-xs font-medium text-slate-600">
+                  <Link to="/seller/products" className="py-1.5 hover:text-slate-900">
+                    Inventory
                   </Link>
-                )}
-                <Link
-                  to="/sellers/register"
-                  className="flex items-center gap-1 text-slate-700 hover:text-blue-600 transition"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Sell on AutoDock</span>
-                </Link>
-              </div>
+                  <Link to="/seller/orders" className="py-1.5 hover:text-slate-900">
+                    Orders
+                  </Link>
+                  <Link to="/seller/promotions" className="py-1.5 hover:text-slate-900">
+                    Promos
+                  </Link>
+                  <Link to="/seller/finance" className="py-1.5 hover:text-slate-900">
+                    Finance
+                  </Link>
+                </div>
+              </>
             )}
-          </div>
+            {!isSeller && !isAdmin && (
+              <Link
+                to="/seller/register"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100"
+              >
+                <Store className="w-4 h-4 text-slate-500" />
+                <span>Sell on AutoDock</span>
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                to="/admin/dashboard"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-white bg-slate-900"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Admin Console</span>
+              </Link>
+            )}
+          </nav>
 
-          {/* User Actions */}
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-
-            <Link
-              to="/wishlist"
-              className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition"
-              title="Saved Wishlist"
-              aria-label="Wishlist"
-            >
-              <Heart className="w-5 h-5" />
-            </Link>
-
-            <Link
-              to="/cart"
-              className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md relative transition"
-              aria-label="Shopping Cart"
-              title="Shopping Cart"
-            >
-              <ShoppingCart className="w-5 h-5" />
-            </Link>
-
-            {isAuthenticated && user ? (
-              <div className="flex items-center gap-2 ml-1">
+          <div className="border-t border-slate-200 pt-3">
+            {isAuthenticated ? (
+              <div className="flex items-center justify-between gap-3">
                 <Link
                   to="/account/profile"
-                  className="flex items-center gap-2 px-2.5 py-1 bg-slate-100 hover:bg-slate-200/80 rounded-md text-xs font-medium text-slate-800 transition border border-slate-200"
-                  title={`${user.firstName} ${user.lastName} (${user.role})`}
+                  className="flex items-center gap-2.5 text-sm font-medium text-slate-800"
                 >
-                  <span className="font-semibold text-slate-900">{user.firstName}</span>
-                  <span className="text-[10px] text-blue-700 font-bold uppercase">
-                    {user.role}
+                  <UserIcon className="w-4 h-4 text-slate-500" />
+                  <span>
+                    {user?.firstName} {user?.lastName}
                   </span>
                 </Link>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition"
-                  title="Sign Out"
-                  aria-label="Sign Out"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 ml-1">
-                <Link
-                  to="/login"
-                  className="px-3 py-1.5 border border-slate-300 rounded-md text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  className="hidden sm:inline-flex px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition"
-                >
-                  Register
-                </Link>
-              </div>
-            )}
-
-            {/* Mobile Menu Button */}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 lg:hidden text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition"
-              aria-label="Toggle Navigation Menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-3">
-            <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-              <input
-                type="text"
-                placeholder="Search parts or OEM numbers..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Mobile search parts"
-                className="w-full text-xs pl-8 pr-14 py-2 bg-slate-50 border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
-              />
-              <Search className="w-4 h-4 text-slate-400 absolute left-2.5 pointer-events-none" />
-              <Button
-                type="submit"
-                variant="primary"
-                size="sm"
-                className="absolute right-1 !px-2.5 !py-1 !rounded !font-medium"
-              >
-                Go
-              </Button>
-            </form>
-
-            <div className="grid grid-cols-2 gap-2 text-xs font-medium">
-              <Link
-                to="/products"
-                className="p-2.5 bg-slate-50 border border-slate-200 rounded-md flex items-center gap-2 hover:bg-slate-100"
-              >
-                <Layers className="w-4 h-4 text-slate-500" />
-                <span>Parts Catalog</span>
-              </Link>
-              <Link
-                to="/garage"
-                className="p-2.5 bg-slate-50 border border-slate-200 rounded-md flex items-center gap-2 hover:bg-slate-100"
-              >
-                <Car className="w-4 h-4 text-slate-500" />
-                <span>My Garage</span>
-              </Link>
-            </div>
-
-            {/* Authenticated Links in Mobile */}
-            {isAuthenticated ? (
-              <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
-                <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-1">
-                  Account ({user?.role})
-                </div>
-
-                {user?.role === 'ADMIN' && (
-                  <div className="space-y-1 text-xs font-semibold">
-                    <Link
-                      to="/admin/dashboard"
-                      className="block p-2 rounded-lg text-blue-700 bg-blue-50 font-bold"
-                    >
-                      Executive Dashboard Overview
-                    </Link>
-                    <Link
-                      to="/admin/sellers/verification"
-                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      Seller Verifications & Reviews
-                    </Link>
-                    <Link to="/admin/orders" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Master Orders
-                    </Link>
-                    <Link to="/admin/delivery-proposals" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Delivery Rates
-                    </Link>
-                    <Link to="/admin/reviews" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Reviews Moderation
-                    </Link>
-                    <Link to="/admin/finance" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Finance & Settlements
-                    </Link>
-                    <Link
-                      to="/admin/notifications"
-                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      Operational Alerts & Delivery Retries
-                    </Link>
-                    <Link
-                      to="/admin/audit-logs"
-                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      Security & Compliance Audit Logs
-                    </Link>
-                    <Link
-                      to="/admin/reports"
-                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      Consolidated Platform Reports
-                    </Link>
-                    <Link
-                      to="/notifications"
-                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      My Notification Centre
-                    </Link>
-                  </div>
-                )}
-
-                {user?.role === 'SELLER' && (
-                  <div className="space-y-1">
-                    <Link to="/seller/dashboard" className="block p-1.5 text-emerald-800 font-medium hover:bg-emerald-50 rounded">
-                      Seller Portal
-                    </Link>
-                    <Link to="/seller/products" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Inventory Management
-                    </Link>
-                    <Link to="/seller/orders" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Orders Fulfillment
-                    </Link>
-                    <Link to="/seller/delivery-rates" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Delivery Rates
-                    </Link>
-                    <Link to="/seller/finance" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Finance & Invoices
-                    </Link>
-                    <Link to="/seller/promotions" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Promotions
-                    </Link>
-                    <Link
-                      to="/notifications"
-                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      My Notification Centre
-                    </Link>
-                  </div>
-                )}
-
-                {user?.role === 'CUSTOMER' && (
-                  <div className="space-y-1">
-                    <Link to="/orders" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      My Orders & Receipts
-                    </Link>
-                    <Link
-                      to="/notifications"
-                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      My Notification Centre
-                    </Link>
-                    <Link
-                      to="/account/profile"
-                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                    >
-                      My Account & Addresses
-                    </Link>
-                    <Link to="/sellers/register" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Apply as Merchant
-                    </Link>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="w-full text-left p-1.5 text-rose-600 hover:bg-rose-50 font-medium flex items-center gap-1.5 rounded"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 text-xs font-medium"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Sign Out</span>
                 </button>
               </div>
             ) : (
-              <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
-                <Link
-                  to="/login"
-                  className="flex-1 py-2 text-center border border-slate-300 rounded-md text-xs font-semibold text-slate-700"
-                >
-                  Sign In
+              <div className="grid grid-cols-2 gap-2">
+                <Link to="/login">
+                  <Button variant="outline" size="sm" fullWidth>
+                    Sign In
+                  </Button>
                 </Link>
-                <Link
-                  to="/register"
-                  className="flex-1 py-2 text-center bg-blue-600 rounded-md text-xs font-semibold text-white"
-                >
-                  Register
+                <Link to="/register">
+                  <Button variant="primary" size="sm" fullWidth>
+                    Register
+                  </Button>
                 </Link>
               </div>
             )}
           </div>
-        )}
-      </header>
-    </>
+        </div>
+      )}
+    </header>
   );
 };

@@ -1,383 +1,293 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Package,
-  Calendar,
-  Truck,
-  FileSearch,
-  CheckCircle,
-  ChevronRight,
-  Loader2,
-  AlertCircle,
-  Filter,
-} from 'lucide-react';
+import { Package, Truck, FileCheck, Eye } from 'lucide-react';
 import {
   sellerOrderApi,
   SuborderDetail,
-  Pagination,
   SuborderFulfillmentStatus,
 } from '../../api/ordersDeliveryApi.js';
 import { SuborderStatusBadge } from '../../components/SuborderStatusBadge.js';
 import { ReceiptReviewModal } from '../../components/ReceiptReviewModal.js';
 import { CourierDispatchModal } from '../../components/CourierDispatchModal.js';
 import { formatLKR } from '../../../customer-experience/utils/formatters.js';
+import {
+  Alert,
+  Button,
+  EmptyState,
+  PageHeader,
+} from '../../../../shared/components/index.js';
 
 export const SellerOrdersPage: React.FC = () => {
   const [suborders, setSuborders] = useState<SuborderDetail[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 1,
-  });
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Modal States
-  const [activeReceiptSuborder, setActiveReceiptSuborder] = useState<SuborderDetail | null>(null);
-  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState<boolean>(false);
-
-  const [activeDispatchSuborder, setActiveDispatchSuborder] = useState<SuborderDetail | null>(null);
-  const [isDispatchModalOpen, setIsDispatchModalOpen] = useState<boolean>(false);
-
-  // Status Action Spinner State
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const fetchSuborders = async (page: number = 1, status: string = statusFilter) => {
+  const [receiptModalSub, setReceiptModalSub] = useState<SuborderDetail | null>(null);
+  const [dispatchModalSub, setDispatchModalSub] = useState<SuborderDetail | null>(null);
+
+  const loadSuborders = async (p = page, status = statusFilter) => {
     setIsLoading(true);
     setErrorMessage(null);
     try {
       const response = await sellerOrderApi.getSellerSuborders({
-        page,
+        page: p,
         limit: 10,
         fulfillmentStatus: status || undefined,
       });
-
       if (response.success && response.data) {
-        setSuborders(response.data.suborders);
-        setPagination(response.data.pagination);
+        setSuborders(response.data.suborders || []);
+        setTotalPages(response.data.pagination?.totalPages || 1);
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to fetch seller suborders.');
+      setErrorMessage(err?.message || 'Unable to load store orders.');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSuborders(1, statusFilter);
-  }, [statusFilter]);
+    loadSuborders(page, statusFilter);
+  }, [page, statusFilter]);
 
-  const handleQuickStatusTransition = async (
+  const handleAdvanceStatus = async (
     suborderId: string,
-    newStatus: SuborderFulfillmentStatus
+    nextStatus: SuborderFulfillmentStatus
   ) => {
     setUpdatingId(suborderId);
+    setErrorMessage(null);
     try {
-      const response = await sellerOrderApi.updateFulfillmentStatus(suborderId, {
-        fulfillmentStatus: newStatus,
+      await sellerOrderApi.updateFulfillmentStatus(suborderId, {
+        fulfillmentStatus: nextStatus,
       });
-      if (response.success) {
-        fetchSuborders(pagination.page, statusFilter);
-      }
+      await loadSuborders();
     } catch (err: any) {
-      alert(err?.message || 'Failed to update suborder fulfillment status.');
+      setErrorMessage(err?.message || 'Unable to update fulfillment status.');
     } finally {
       setUpdatingId(null);
     }
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-16">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Seller Order Fulfillment Workstation
-          </h1>
-          <p className="text-xs text-slate-500">
-            Manage your store's assigned suborders, review bank receipts, and dispatch consignments
-          </p>
-        </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <PageHeader
+        title="Merchant Orders & Fulfillment"
+        subtitle="Verify bank transfer receipts, prepare spare parts, and record courier tracking"
+        backTo="/seller/dashboard"
+        backLabel="Seller Portal"
+      />
 
-        {/* Filter Bar */}
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-slate-400" />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none bg-white"
+      {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+
+      <div className="bg-white border border-slate-200 rounded-lg p-3.5 flex flex-wrap gap-2">
+        {[
+          { value: '', label: 'All Orders' },
+          { value: 'PENDING_PAYMENT', label: 'Awaiting Payment' },
+          { value: 'AWAITING_FULFILLMENT', label: 'Awaiting Fulfillment' },
+          { value: 'PROCESSING', label: 'Processing' },
+          { value: 'READY_FOR_DISPATCH', label: 'Ready to Dispatch' },
+          { value: 'DISPATCHED', label: 'Dispatched' },
+          { value: 'DELIVERED', label: 'Delivered' },
+        ].map((tab) => (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() => {
+              setPage(1);
+              setStatusFilter(tab.value);
+            }}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              statusFilter === tab.value
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}
           >
-            <option value="">All Fulfillment Statuses</option>
-            <option value="AWAITING_FULFILLMENT">Awaiting Fulfillment</option>
-            <option value="PROCESSING">Processing</option>
-            <option value="READY_FOR_DISPATCH">Ready for Dispatch</option>
-            <option value="DISPATCHED">Dispatched</option>
-            <option value="DELIVERED">Delivered</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
-        </div>
+            {tab.label}
+          </button>
+        ))}
       </div>
-
-      {/* Seller Fulfillment KPI Overview */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
-            <Package className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Suborders</div>
-            <div className="text-lg font-black text-slate-900">{pagination.total}</div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600">
-            <Loader2 className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Awaiting Action</div>
-            <div className="text-lg font-black text-amber-600">
-              {suborders.filter((s) => s.fulfillmentStatus === 'AWAITING_FULFILLMENT').length}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
-            <CheckCircle className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Processing</div>
-            <div className="text-lg font-black text-indigo-600">
-              {suborders.filter((s) => s.fulfillmentStatus === 'PROCESSING').length}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
-            <Truck className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Dispatched</div>
-            <div className="text-lg font-black text-emerald-600">
-              {suborders.filter((s) => s.fulfillmentStatus === 'DISPATCHED').length}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {errorMessage && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-xs text-red-800">
-          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
 
       {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center space-y-3" data-testid="seller-orders-loading">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          <p className="text-xs text-slate-500">Loading assigned store suborders...</p>
-        </div>
+        <div className="h-64 bg-white border border-slate-200 rounded-lg" />
       ) : suborders.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center space-y-4 shadow-sm" data-testid="seller-orders-empty">
-          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto">
-            <Package className="w-8 h-8" />
-          </div>
-          <div className="max-w-md mx-auto">
-            <h2 className="text-base font-bold text-slate-900 mb-1">No Store Suborders Found</h2>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              When customers purchase parts from your store during checkout, your store-specific suborders will appear here.
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          icon={<Package className="w-6 h-6" />}
+          title="No merchant orders found"
+          description="Incoming customer orders assigned to your store will appear here."
+        />
       ) : (
-        <div className="space-y-4" data-testid="seller-orders-list">
+        <div className="space-y-4">
           {suborders.map((sub) => (
             <div
               key={sub._id}
-              className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4 hover:border-blue-300 transition"
+              className="bg-white border border-slate-200 rounded-lg p-5 space-y-4"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-slate-900">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-sm font-semibold text-slate-900">
                       {sub.suborderNumber}
                     </span>
-                    <SuborderStatusBadge fulfillmentStatus={sub.fulfillmentStatus} type="fulfillment" />
-                    <SuborderStatusBadge paymentStatus={sub.paymentStatus} type="payment" />
+                    <SuborderStatusBadge
+                      type="fulfillment"
+                      fulfillmentStatus={sub.fulfillmentStatus}
+                    />
+                    <SuborderStatusBadge
+                      type="payment"
+                      paymentStatus={sub.paymentStatus}
+                    />
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-slate-400">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {new Date(sub.createdAt).toLocaleDateString()}
-                    </span>
-                    <span>•</span>
-                    <span>Destination: {sub.deliveryDistrict} District</span>
-                    <span>•</span>
-                    <span>Payment Method: <strong>{sub.paymentMethod}</strong></span>
-                  </div>
+                  <p className="text-xs text-slate-500">
+                    District: {sub.deliveryDistrict} &middot; Method:{' '}
+                    {sub.paymentMethod.replace(/_/g, ' ')} &middot;{' '}
+                    {new Date(sub.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-4">
-                  <div className="text-right">
-                    <span className="text-[10px] text-slate-400 block">Subtotal + Delivery</span>
-                    <span className="text-base font-black text-slate-900">
-                      {formatLKR(sub.totalAmountInCents)}
-                    </span>
-                  </div>
-                  <Link
-                    to={`/seller/orders/${sub._id}`}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition"
-                  >
-                    <span>Detail</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
+                <div className="text-left sm:text-right">
+                  <span className="text-xs text-slate-500 block">Receivable</span>
+                  <span className="text-base font-bold text-slate-900 tabular-nums">
+                    {formatLKR(sub.totalAmountInCents)}
+                  </span>
                 </div>
               </div>
 
-              {/* Items List */}
-              <div className="space-y-1 text-xs">
+              <div className="space-y-1.5 text-sm">
                 {sub.items.map((item) => (
-                  <div key={item.productId} className="flex justify-between py-1 text-slate-600">
+                  <div
+                    key={item.productId}
+                    className="flex items-center justify-between text-slate-700"
+                  >
                     <span>
-                      <strong className="text-slate-800">{item.quantity}x</strong> {item.name}{' '}
-                      <span className="font-mono text-[10px] text-slate-400">({item.sku})</span>
+                      {item.name} <span className="text-slate-400">× {item.quantity}</span>
                     </span>
-                    <span className="font-medium text-slate-900">
+                    <span className="font-medium tabular-nums">
                       {formatLKR(item.lineTotalInCents)}
                     </span>
                   </div>
                 ))}
               </div>
 
-              {/* Seller Action Toolbar */}
-              <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70 -mx-5 -mb-5 p-4 rounded-b-2xl">
-                {/* Bank Slip Review Alert */}
-                {sub.paymentMethod === 'DIRECT_BANK_TRANSFER' && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveReceiptSuborder(sub);
-                        setIsReceiptModalOpen(true);
-                      }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm ${
-                        sub.paymentStatus === 'RECEIPT_UPLOADED'
-                          ? 'bg-amber-500 hover:bg-amber-600 text-white animate-pulse'
-                          : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
-                      }`}
-                    >
-                      <FileSearch className="w-3.5 h-3.5" />
-                      <span>
-                        {sub.paymentStatus === 'RECEIPT_UPLOADED'
-                          ? 'Review Pending Slip'
-                          : 'View Receipt Record'}
-                      </span>
-                    </button>
-                  </div>
-                )}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
+                <Link to={`/seller/orders/${sub._id}`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<Eye className="w-3.5 h-3.5" />}
+                  >
+                    Order Details
+                  </Button>
+                </Link>
 
-                {/* Fulfillment Status Progression Buttons */}
-                <div className="flex items-center gap-2 ml-auto">
+                <div className="flex flex-wrap items-center gap-2">
+                  {sub.paymentStatus === 'RECEIPT_UPLOADED' && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      leftIcon={<FileCheck className="w-3.5 h-3.5" />}
+                      onClick={() => setReceiptModalSub(sub)}
+                    >
+                      Verify Deposit Slip
+                    </Button>
+                  )}
+
                   {sub.fulfillmentStatus === 'AWAITING_FULFILLMENT' && (
-                    <button
-                      type="button"
-                      onClick={() => handleQuickStatusTransition(sub._id, 'PROCESSING')}
-                      disabled={updatingId === sub._id}
-                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition"
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      isLoading={updatingId === sub._id}
+                      onClick={() => handleAdvanceStatus(sub._id, 'PROCESSING')}
                     >
                       Start Processing
-                    </button>
+                    </Button>
                   )}
 
                   {sub.fulfillmentStatus === 'PROCESSING' && (
-                    <button
-                      type="button"
-                      onClick={() => handleQuickStatusTransition(sub._id, 'READY_FOR_DISPATCH')}
-                      disabled={updatingId === sub._id}
-                      className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition"
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      isLoading={updatingId === sub._id}
+                      onClick={() =>
+                        handleAdvanceStatus(sub._id, 'READY_FOR_DISPATCH')
+                      }
                     >
                       Mark Ready for Dispatch
-                    </button>
+                    </Button>
                   )}
 
-                  {sub.fulfillmentStatus === 'READY_FOR_DISPATCH' && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveDispatchSuborder(sub);
-                        setIsDispatchModalOpen(true);
-                      }}
-                      className="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                  {(sub.fulfillmentStatus === 'PROCESSING' ||
+                    sub.fulfillmentStatus === 'READY_FOR_DISPATCH') && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      leftIcon={<Truck className="w-3.5 h-3.5" />}
+                      onClick={() => setDispatchModalSub(sub)}
                     >
-                      <Truck className="w-3.5 h-3.5" />
-                      <span>Dispatch Package</span>
-                    </button>
+                      Dispatch Package
+                    </Button>
                   )}
 
                   {sub.fulfillmentStatus === 'DISPATCHED' && (
-                    <button
-                      type="button"
-                      onClick={() => handleQuickStatusTransition(sub._id, 'DELIVERED')}
-                      disabled={updatingId === sub._id}
-                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-1"
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      isLoading={updatingId === sub._id}
+                      onClick={() => handleAdvanceStatus(sub._id, 'DELIVERED')}
                     >
-                      <CheckCircle className="w-3.5 h-3.5" />
-                      <span>Confirm Delivered</span>
-                    </button>
+                      Confirm Delivery
+                    </Button>
                   )}
                 </div>
               </div>
             </div>
           ))}
 
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
-              <button
-                disabled={pagination.page <= 1}
-                onClick={() => fetchSuborders(pagination.page - 1, statusFilter)}
-                className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold disabled:opacity-40"
+          {totalPages > 1 && (
+            <div className="flex justify-center gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => p - 1)}
               >
                 Previous
-              </button>
-              <span className="text-xs text-slate-500 font-medium">
-                Page {pagination.page} of {pagination.totalPages}
+              </Button>
+              <span className="text-sm text-slate-600 px-3 py-1.5">
+                Page {page} of {totalPages}
               </span>
-              <button
-                disabled={pagination.page >= pagination.totalPages}
-                onClick={() => fetchSuborders(pagination.page + 1, statusFilter)}
-                className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold disabled:opacity-40"
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => p + 1)}
               >
                 Next
-              </button>
+              </Button>
             </div>
           )}
         </div>
       )}
 
-      {/* Seller Receipt Review Modal */}
-      {activeReceiptSuborder && (
+      {receiptModalSub && (
         <ReceiptReviewModal
-          isOpen={isReceiptModalOpen}
-          onClose={() => setIsReceiptModalOpen(false)}
-          suborderId={activeReceiptSuborder._id}
-          suborderNumber={activeReceiptSuborder.suborderNumber}
-          onDecisionComplete={() => fetchSuborders(pagination.page, statusFilter)}
+          isOpen={Boolean(receiptModalSub)}
+          onClose={() => setReceiptModalSub(null)}
+          suborderId={receiptModalSub._id}
+          suborderNumber={receiptModalSub.suborderNumber}
+          onDecisionComplete={() => loadSuborders()}
         />
       )}
 
-      {/* Courier Dispatch Modal */}
-      {activeDispatchSuborder && (
+      {dispatchModalSub && (
         <CourierDispatchModal
-          isOpen={isDispatchModalOpen}
-          onClose={() => setIsDispatchModalOpen(false)}
-          suborderId={activeDispatchSuborder._id}
-          suborderNumber={activeDispatchSuborder.suborderNumber}
-          onDispatchSuccess={() => fetchSuborders(pagination.page, statusFilter)}
+          isOpen={Boolean(dispatchModalSub)}
+          onClose={() => setDispatchModalSub(null)}
+          suborderId={dispatchModalSub._id}
+          suborderNumber={dispatchModalSub.suborderNumber}
+          onDispatchSuccess={() => loadSuborders()}
         />
       )}
     </div>

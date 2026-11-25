@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, XCircle, AlertCircle, Sparkles } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle, Info } from 'lucide-react';
 import { FitmentStatus } from '../api/customerExperienceApi.js';
 
 interface FitmentAlertBannerProps {
@@ -17,12 +17,12 @@ export const FitmentAlertBanner: React.FC<FitmentAlertBannerProps> = ({
 }) => {
   if (isUniversalFit) {
     return (
-      <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 flex items-start gap-3">
-        <Sparkles className="w-5 h-5 text-teal-600 shrink-0 mt-0.5" />
+      <div className="bg-blue-50/70 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+        <Info className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />
         <div>
-          <h4 className="text-sm font-bold text-teal-950">Universal Fitment Spare Part</h4>
-          <p className="text-xs text-teal-800 mt-0.5">
-            This component is engineered as a universal vehicle part compatible across most automotive makes and standard configurations.
+          <h4 className="text-sm font-semibold text-blue-950">Universal Fitment Part</h4>
+          <p className="text-sm text-blue-900 mt-0.5">
+            This part is marked for universal vehicle use across standard configurations.
           </p>
         </div>
       </div>
@@ -31,12 +31,14 @@ export const FitmentAlertBanner: React.FC<FitmentAlertBannerProps> = ({
 
   if (!status || !vehicleName) {
     return (
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-slate-500 shrink-0 mt-0.5" />
+      <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex items-start gap-3">
+        <AlertCircle className="w-5 h-5 text-slate-500 shrink-0 mt-0.5" aria-hidden="true" />
         <div>
-          <h4 className="text-sm font-bold text-slate-800">Check Vehicle Fitment</h4>
-          <p className="text-xs text-slate-600 mt-0.5">
-            Select your vehicle in the filter bar or from My Garage to verify compatibility before purchasing.
+          <h4 className="text-sm font-semibold text-slate-900">
+            Verify Vehicle Compatibility
+          </h4>
+          <p className="text-sm text-slate-600 mt-0.5">
+            Add or select a vehicle in your garage to confirm whether this part fits your model.
           </p>
         </div>
       </div>
@@ -45,16 +47,13 @@ export const FitmentAlertBanner: React.FC<FitmentAlertBannerProps> = ({
 
   if (status === 'EXACT_FIT') {
     return (
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
-        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-start gap-3">
+        <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" aria-hidden="true" />
         <div>
-          <h4 className="text-sm font-bold text-emerald-950">
-            ✓ Guaranteed Fit for {vehicleName}
+          <h4 className="text-sm font-semibold text-emerald-950">
+            Fits your {vehicleName}
           </h4>
-          <p className="text-xs text-emerald-800 mt-0.5">
-            This spare part is verified compatible with your saved vehicle profile based on OEM specifications.
-            {notes ? ` Note: ${notes}` : ''}
-          </p>
+          {notes && <p className="text-sm text-emerald-900 mt-0.5">{notes}</p>}
         </div>
       </div>
     );
@@ -62,14 +61,14 @@ export const FitmentAlertBanner: React.FC<FitmentAlertBannerProps> = ({
 
   if (status === 'DOES_NOT_FIT') {
     return (
-      <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-start gap-3">
-        <XCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+      <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 flex items-start gap-3">
+        <XCircle className="w-5 h-5 text-rose-700 shrink-0 mt-0.5" aria-hidden="true" />
         <div>
-          <h4 className="text-sm font-bold text-rose-950">
-            ✕ Does Not Fit {vehicleName}
+          <h4 className="text-sm font-semibold text-rose-950">
+            Does not fit your {vehicleName}
           </h4>
-          <p className="text-xs text-rose-800 mt-0.5">
-            Our compatibility database indicates this part does not match the specifications of your selected vehicle.
+          <p className="text-sm text-rose-900 mt-0.5">
+            {notes || 'Check the part number or choose a matching variant for your vehicle.'}
           </p>
         </div>
       </div>
@@ -77,12 +76,14 @@ export const FitmentAlertBanner: React.FC<FitmentAlertBannerProps> = ({
   }
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-      <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+      <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" aria-hidden="true" />
       <div>
-        <h4 className="text-sm font-bold text-amber-950">Fitment Uncertainty for {vehicleName}</h4>
-        <p className="text-xs text-amber-800 mt-0.5">
-          Compatibility details for this specific vehicle trim or engine are not fully confirmed. Please verify OEM part numbers.
+        <h4 className="text-sm font-semibold text-amber-950">
+          Fitment not confirmed for {vehicleName}
+        </h4>
+        <p className="text-sm text-amber-900 mt-0.5">
+          {notes || 'Compare OEM specifications carefully before ordering.'}
         </p>
       </div>
     </div>

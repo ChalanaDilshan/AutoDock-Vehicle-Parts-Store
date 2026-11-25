@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { ShoppingCart, Heart, ShieldCheck, Truck, RefreshCw, AlertTriangle } from 'lucide-react';
+import { ShoppingCart, Heart, Minus, Plus, ShieldCheck } from 'lucide-react';
 import { ProductItem } from '../api/customerExperienceApi.js';
 import { formatLKR } from '../utils/formatters.js';
+import { Button } from '../../../shared/components/index.js';
 
 interface AddToCartBoxProps {
   product: ProductItem;
@@ -23,158 +24,103 @@ export const AddToCartBox: React.FC<AddToCartBoxProps> = ({
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const isOutOfStock = product.stock <= 0 || product.status === 'OUT_OF_STOCK';
-  const isLowStock = product.stock > 0 && product.stock <= (product.lowStockThreshold || 5);
+  const maxQty = Math.max(1, product.stock);
 
-  const handleIncrement = () => {
-    if (quantity < product.stock) {
-      setQuantity((prev) => prev + 1);
-    }
-  };
-
-  const handleDecrement = () => {
-    if (quantity > 1) {
-      setQuantity((prev) => prev - 1);
-    }
-  };
-
-  const handleAddToCart = async () => {
-    if (isOutOfStock || isSubmitting) return;
+  const handleSubmit = async () => {
+    if (isOutOfStock) return;
     setIsSubmitting(true);
     setFeedback(null);
     try {
       await onAddToCart(quantity);
-      setFeedback('Added to cart successfully!');
+      setFeedback('Added to your shopping cart.');
       setTimeout(() => setFeedback(null), 3000);
-    } catch (err: any) {
-      setFeedback(err?.message || 'Failed to add item to cart');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
-      {/* Price & Stock Display */}
-      <div>
-        <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
-          Marketplace Price
+    <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
+      <div className="space-y-1">
+        <p className="text-xs font-medium text-slate-500">Price</p>
+        <div className="text-2xl font-bold text-slate-900 tabular-nums">
+          {formatLKR(product.priceInCents)}
         </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-2xl sm:text-3xl font-black text-slate-900">
-            {formatLKR(product.priceInCents)}
-          </span>
-          <span className="text-xs text-slate-500 font-medium">incl. taxes</span>
-        </div>
-
-        {/* Stock Status Badge */}
-        <div className="mt-3">
-          {isOutOfStock ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-              <AlertTriangle className="w-3.5 h-3.5" />
-              Out of Stock
-            </span>
-          ) : isLowStock ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
-              <AlertTriangle className="w-3.5 h-3.5" />
-              Only {product.stock} units remaining in stock
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              In Stock ({product.stock} available)
-            </span>
-          )}
-        </div>
+        <p
+          className={`text-sm font-medium ${
+            isOutOfStock ? 'text-rose-600' : 'text-emerald-700'
+          }`}
+        >
+          {isOutOfStock ? 'Out of stock' : `${product.stock} available`}
+        </p>
       </div>
 
-      {/* Quantity & Actions */}
       {!isOutOfStock && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Select Quantity:
+        <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+          <span className="text-sm font-medium text-slate-700">Quantity</span>
+          <div className="inline-flex items-center border border-slate-300 rounded-lg bg-white">
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              disabled={quantity <= 1}
+              aria-label="Decrease quantity"
+              className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-50 disabled:opacity-40 rounded-l-lg"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <span className="w-10 text-center text-sm font-semibold text-slate-900 tabular-nums">
+              {quantity}
             </span>
-            <div className="flex items-center border border-slate-300 rounded-lg overflow-hidden bg-white">
-              <button
-                type="button"
-                onClick={handleDecrement}
-                disabled={quantity <= 1 || isSubmitting}
-                className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-40 transition font-bold text-sm"
-              >
-                -
-              </button>
-              <span className="w-10 text-center font-bold text-sm text-slate-900">
-                {quantity}
-              </span>
-              <button
-                type="button"
-                onClick={handleIncrement}
-                disabled={quantity >= product.stock || isSubmitting}
-                className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 disabled:opacity-40 transition font-bold text-sm"
-              >
-                +
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
+              disabled={quantity >= maxQty}
+              aria-label="Increase quantity"
+              className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-50 disabled:opacity-40 rounded-r-lg"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       )}
 
-      {/* Main Buttons */}
-      <div className="space-y-2.5">
-        <button
-          type="button"
-          disabled={isOutOfStock || isSubmitting || isLoading}
-          onClick={handleAddToCart}
-          className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-sm ${
-            isOutOfStock
-              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white'
-          }`}
+      <div className="space-y-2.5 pt-1">
+        <Button
+          variant="primary"
+          size="lg"
+          fullWidth
+          disabled={isOutOfStock || isLoading}
+          isLoading={isSubmitting}
+          leftIcon={<ShoppingCart className="w-4 h-4" />}
+          onClick={handleSubmit}
         >
-          {isSubmitting ? (
-            <RefreshCw className="w-4 h-4 animate-spin" />
-          ) : (
-            <ShoppingCart className="w-4 h-4" />
-          )}
-          <span>{isOutOfStock ? 'Currently Unavailable' : 'Add to Shopping Cart'}</span>
-        </button>
+          {isOutOfStock ? 'Currently Unavailable' : 'Add to Shopping Cart'}
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="md"
+          fullWidth
+          leftIcon={
+            <Heart
+              className={`w-4 h-4 ${isWishlisted ? 'fill-rose-600 text-rose-600' : ''}`}
+            />
+          }
           onClick={onToggleWishlist}
-          className={`w-full py-2.5 px-4 rounded-xl font-semibold text-xs transition border flex items-center justify-center gap-2 ${
-            isWishlisted
-              ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
-              : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-          }`}
         >
-          <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current text-rose-600' : ''}`} />
-          <span>{isWishlisted ? 'Saved in Wishlist' : 'Add to Wishlist'}</span>
-        </button>
-
-        {feedback && (
-          <div
-            className={`p-2 rounded text-center text-xs font-semibold ${
-              feedback.includes('success')
-                ? 'bg-emerald-50 text-emerald-800'
-                : 'bg-rose-50 text-rose-800'
-            }`}
-          >
-            {feedback}
-          </div>
-        )}
+          {isWishlisted ? 'Saved in Wishlist' : 'Save to Wishlist'}
+        </Button>
       </div>
 
-      {/* Trust Badges */}
-      <div className="border-t border-slate-100 pt-4 space-y-2.5 text-xs text-slate-600">
-        <div className="flex items-center gap-2.5">
-          <Truck className="w-4 h-4 text-blue-600 shrink-0" />
-          <span>Island-wide courier delivery across all 25 districts</span>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>Direct merchant warranty & spare-part authenticity</span>
-        </div>
+      {feedback && (
+        <p role="status" className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
+          {feedback}
+        </p>
+      )}
+
+      <div className="pt-3 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-500">
+        <ShieldCheck className="w-4 h-4 text-slate-400 shrink-0" />
+        <span>Dispatched directly by the verified seller store</span>
       </div>
     </div>
   );

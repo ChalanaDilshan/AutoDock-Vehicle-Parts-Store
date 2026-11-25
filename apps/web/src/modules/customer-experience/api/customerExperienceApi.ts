@@ -174,9 +174,60 @@ export interface ApiResponse<T> {
 // Products API (Public)
 // ---------------------------------------------------------------------------
 
+function normalizePaginatedResponse<T>(raw: any, defaultLimit = 20): ApiResponse<PaginatedResult<T>> {
+  if (Array.isArray(raw?.data)) {
+    const total = Number(raw?.meta?.pagination?.total ?? raw.data.length);
+    const page = Number(raw?.meta?.pagination?.page ?? 1);
+    const limit = Number(raw?.meta?.pagination?.limit ?? defaultLimit) || defaultLimit;
+    const pages = Number(
+      raw?.meta?.pagination?.pages ?? Math.max(1, Math.ceil(total / Math.max(1, limit)))
+    );
+    return {
+      ...raw,
+      data: {
+        items: raw.data,
+        pagination: { total, page, limit, pages },
+      },
+    };
+  }
+  return raw;
+}
+
+const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/;
+
 export const productsApi = {
-  search: (query: ProductSearchQuery = {}): Promise<ApiResponse<PaginatedResult<ProductItem>>> => {
-    return apiClient.get('/products', { params: query });
+  search: async (query: ProductSearchQuery = {}): Promise<ApiResponse<PaginatedResult<ProductItem>>> => {
+    const params: Record<string, any> = {};
+    if (query.q) params.q = query.q;
+    if (query.category && OBJECT_ID_REGEX.test(query.category)) params.categoryId = query.category;
+    if (query.brand && OBJECT_ID_REGEX.test(query.brand)) params.brandId = query.brand;
+    if (query.condition) {
+      params.condition = query.condition === 'NEW' ? 'BRAND_NEW' : query.condition;
+    }
+    if (query.minPrice !== undefined) params.minPriceInCents = query.minPrice;
+    if (query.maxPrice !== undefined) params.maxPriceInCents = query.maxPrice;
+    if (query.make) params.make = query.make;
+    if (query.model) params.model = query.model;
+    if (query.year !== undefined) params.year = query.year;
+    if (query.page !== undefined) params.page = query.page;
+    if (query.limit !== undefined) params.limit = query.limit;
+
+    if (query.sortBy === 'PRICE_ASC') {
+      params.sortBy = 'priceInCents';
+      params.sortOrder = 'asc';
+    } else if (query.sortBy === 'PRICE_DESC') {
+      params.sortBy = 'priceInCents';
+      params.sortOrder = 'desc';
+    } else if (query.sortBy === 'RATING_DESC') {
+      params.sortBy = 'averageRating';
+      params.sortOrder = 'desc';
+    } else if (query.sortBy === 'NEWEST' || query.sortBy === 'RELEVANCE') {
+      params.sortBy = 'createdAt';
+      params.sortOrder = 'desc';
+    }
+
+    const raw = await apiClient.get('/products', { params });
+    return normalizePaginatedResponse<ProductItem>(raw, query.limit ?? 12);
   },
 
   getById: (id: string): Promise<ApiResponse<ProductItem>> => {
@@ -190,8 +241,9 @@ export const productsApi = {
     return apiClient.get(`/products/${id}/compatibility`, { params });
   },
 
-  getReviews: (id: string, params: { page?: number; limit?: number } = {}): Promise<ApiResponse<PaginatedResult<ProductReview>>> => {
-    return apiClient.get(`/products/${id}/reviews`, { params });
+  getReviews: async (id: string, params: { page?: number; limit?: number } = {}): Promise<ApiResponse<PaginatedResult<ProductReview>>> => {
+    const raw = await apiClient.get(`/products/${id}/reviews`, { params });
+    return normalizePaginatedResponse<ProductReview>(raw, params.limit ?? 20);
   },
 
   getRecommendations: (params: {
@@ -211,8 +263,9 @@ export const productsApi = {
 // ---------------------------------------------------------------------------
 
 export const sellerProductsApi = {
-  list: (params: { page?: number; limit?: number; status?: string } = {}): Promise<ApiResponse<PaginatedResult<ProductItem>>> => {
-    return apiClient.get('/seller/products', { params });
+  list: async (params: { page?: number; limit?: number; status?: string } = {}): Promise<ApiResponse<PaginatedResult<ProductItem>>> => {
+    const raw = await apiClient.get('/seller/products', { params });
+    return normalizePaginatedResponse<ProductItem>(raw, params.limit ?? 20);
   },
 
   getById: (id: string): Promise<ApiResponse<ProductItem>> => {
@@ -239,8 +292,9 @@ export const sellerProductsApi = {
     return apiClient.delete(`/seller/products/${id}`);
   },
 
-  getReviews: (params: { page?: number; limit?: number } = {}): Promise<ApiResponse<PaginatedResult<ProductReview>>> => {
-    return apiClient.get('/seller/products/reviews', { params });
+  getReviews: async (params: { page?: number; limit?: number } = {}): Promise<ApiResponse<PaginatedResult<ProductReview>>> => {
+    const raw = await apiClient.get('/seller/products/reviews', { params });
+    return normalizePaginatedResponse<ProductReview>(raw, params.limit ?? 20);
   },
 
   addCompatibility: (
@@ -353,8 +407,9 @@ export const reviewApi = {
     return apiClient.post('/reviews', data);
   },
 
-  adminList: (params: { page?: number; limit?: number; status?: string } = {}): Promise<ApiResponse<PaginatedResult<ProductReview>>> => {
-    return apiClient.get('/admin/reviews', { params });
+  adminList: async (params: { page?: number; limit?: number; status?: string } = {}): Promise<ApiResponse<PaginatedResult<ProductReview>>> => {
+    const raw = await apiClient.get('/admin/reviews', { params });
+    return normalizePaginatedResponse<ProductReview>(raw, params.limit ?? 20);
   },
 
   adminModerate: (

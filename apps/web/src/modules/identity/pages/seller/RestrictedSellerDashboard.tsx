@@ -1,208 +1,196 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Package,
+  ShoppingBag,
+  Landmark,
+  Percent,
+  Truck,
+  MessageSquare,
+  Lock,
+  CheckCircle2,
+  ArrowRight,
+} from 'lucide-react';
 import { sellerApi, SellerProfileData } from '../../api/identityApi.js';
 import {
-  Lock,
-  PackageX,
-  CreditCard,
-  FileText,
-  Clock,
-  Loader2,
-  Building2,
-} from 'lucide-react';
+  Alert,
+  Badge,
+  Button,
+  PageHeader,
+} from '../../../../shared/components/index.js';
 
 export const RestrictedSellerDashboard: React.FC = () => {
   const [seller, setSeller] = useState<SellerProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchSeller = async () => {
-      try {
-        const response = await sellerApi.getMe();
-        if (response.success && response.data) {
-          setSeller(response.data);
-        } else {
-          setError(response.message || 'Unable to load seller profile.');
-        }
-      } catch (err: any) {
-        setError(err?.message || 'Error connecting to seller service.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSeller();
+    sellerApi
+      .getMe()
+      .then((res) => {
+        if (res.success && res.data) setSeller(res.data);
+      })
+      .catch((err: any) => {
+        setErrorMessage(err?.message || 'Unable to load merchant profile.');
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] text-slate-500">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
-        <p className="text-sm">Loading seller portal...</p>
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="h-64 bg-white border border-slate-200 rounded-lg" />
       </div>
     );
   }
 
-  if (error || !seller) {
+  if (errorMessage || !seller) {
     return (
-      <div className="max-w-md mx-auto my-12 bg-white p-6 rounded-xl border border-slate-200 text-center">
-        <Building2 className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-        <h2 className="text-base font-bold text-slate-900 mb-1">No Active Seller Profile</h2>
-        <p className="text-xs text-slate-500 mb-4">{error || 'You have not registered as a seller yet.'}</p>
-        <Link
-          to="/sellers/register"
-          className="inline-block px-4 py-2 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 transition"
-        >
-          Register Spare-Parts Business
+      <div className="max-w-3xl mx-auto px-4 py-12 space-y-4">
+        <Alert variant="warning" title="Merchant store setup incomplete">
+          {errorMessage || 'Create a seller store profile to access the Seller Portal.'}
+        </Alert>
+        <Link to="/sellers/register">
+          <Button variant="primary">Register Seller Store</Button>
         </Link>
       </div>
     );
   }
 
   const isApproved = seller.verificationStatus === 'APPROVED' && seller.isEligibleToSell;
+  const bankVerified = seller.bankDetails?.verificationStatus === 'VERIFIED';
+
+  const tools = [
+    {
+      title: 'Spare Parts Inventory',
+      description: 'List spare parts, adjust stock, and configure vehicle fitment.',
+      to: '/seller/products',
+      icon: <Package className="w-5 h-5" />,
+      locked: !isApproved,
+      lockLabel: 'Locked pending verification',
+    },
+    {
+      title: 'Orders & Fulfillment',
+      description: 'Confirm payments, pack items, and dispatch tracking details.',
+      to: '/seller/orders',
+      icon: <ShoppingBag className="w-5 h-5" />,
+      locked: !isApproved,
+      lockLabel: 'Requires seller approval',
+    },
+    {
+      title: 'Finance & Invoices',
+      description: 'View monthly commission statements, subsidies, and payment slips.',
+      to: '/seller/finance',
+      icon: <Landmark className="w-5 h-5" />,
+      locked: false,
+      lockLabel: '',
+    },
+    {
+      title: 'Promotions & Coupons',
+      description: 'Launch seller-funded discounts across selected parts.',
+      to: '/seller/promotions',
+      icon: <Percent className="w-5 h-5" />,
+      locked: !isApproved,
+      lockLabel: 'Requires seller approval',
+    },
+    {
+      title: 'Delivery Rates',
+      description: 'Propose district delivery rates across Sri Lanka.',
+      to: '/seller/delivery-rates',
+      icon: <Truck className="w-5 h-5" />,
+      locked: !isApproved,
+      lockLabel: 'Requires seller approval',
+    },
+    {
+      title: 'Customer Reviews',
+      description: 'Read verified buyer feedback on your spare parts.',
+      to: '/seller/reviews',
+      icon: <MessageSquare className="w-5 h-5" />,
+      locked: false,
+      lockLabel: '',
+    },
+  ];
 
   return (
-    <div className="max-w-5xl mx-auto my-6 space-y-6">
-      {/* Top Welcome Card */}
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Seller Portal</span>
-            <span
-              className={`text-[11px] font-bold px-2 py-0.5 rounded border ${
-                isApproved
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                  : 'bg-amber-50 text-amber-800 border-amber-200'
-              }`}
-            >
-              Status: {seller.verificationStatus}
-            </span>
-          </div>
-          <h1 className="text-xl font-bold text-slate-900">{seller.businessName}</h1>
-          <p className="text-xs text-slate-500">
-            Store URL: autodock.lk/{seller.storeSlug} | BR: {seller.businessRegistrationNumber}
-          </p>
-        </div>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6">
+      <PageHeader
+        title={seller.businessName}
+        subtitle={`Registration: ${seller.businessRegistrationNumber} · ${seller.operatingAddress.city}, ${seller.operatingAddress.district}`}
+        badge={
+          <Badge variant={isApproved ? 'success' : 'warning'} size="md">
+            {seller.verificationStatus}
+          </Badge>
+        }
+        actions={
+          <Link to="/seller/onboarding">
+            <Button variant="outline" size="sm">
+              Onboarding &amp; Documents
+            </Button>
+          </Link>
+        }
+      />
 
-        <Link
-          to="/seller/onboarding/status"
-          className="text-xs border border-slate-300 px-3 py-1.5 rounded-md font-medium text-slate-700 hover:bg-slate-50 transition inline-flex items-center gap-1 self-start md:self-auto"
+      {!isApproved ? (
+        <Alert
+          variant="warning"
+          title="Restricted Merchant Access — Catalog Publishing Locked"
         >
-          <Clock className="w-3.5 h-3.5 text-blue-600" />
-          <span>View Verification Dossier</span>
-        </Link>
-      </div>
-
-      {/* RESTRICTION NOTICE BANNER (WHEN NOT APPROVED) */}
-      {!isApproved && (
-        <div
-          role="alert"
-          className="bg-amber-50 border border-amber-200 p-5 rounded-xl flex items-start gap-3.5"
-        >
-          <div className="p-2 bg-amber-100 text-amber-800 rounded-lg shrink-0">
-            <Lock className="w-5 h-5" />
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-sm font-bold text-amber-950">
-              Restricted Merchant Access — Catalog Publishing Locked
-            </h2>
-            <p className="text-xs text-amber-800 leading-relaxed">
-              Your merchant account is currently in <strong>{seller.verificationStatus}</strong> status. In accordance with AutoDock trust and anti-counterfeit spare-parts regulations, product catalogue publishing and customer order fulfillment are restricted until full administrative verification is completed.
-            </p>
-            {seller.rejectionReason && (
-              <div className="mt-2 p-2.5 bg-red-50 text-red-700 border border-red-200 rounded text-xs">
-                <strong>Rejection Notice:</strong> {seller.rejectionReason}
-              </div>
-            )}
-            {seller.additionalInfoRequested && (
-              <div className="mt-2 p-2.5 bg-amber-100/70 text-amber-900 border border-amber-300 rounded text-xs">
-                <strong>Action Required:</strong> {seller.additionalInfoRequested}
-              </div>
-            )}
-          </div>
-        </div>
+          Your store cannot publish live listings until administrative verification finishes.{' '}
+          <Link to="/seller/onboarding" className="font-semibold underline">
+            Complete or review onboarding
+          </Link>
+        </Alert>
+      ) : (
+        <Alert variant="success" title="Store Verified & Active">
+          Your merchant store is approved for public listings and checkout orders. Bank status:{' '}
+          {bankVerified ? 'Verified' : 'Pending review'}.
+        </Alert>
       )}
 
-      {/* Feature Capability Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Capability 1: Parts Catalog Publishing */}
-        <div className={`p-5 rounded-xl border bg-white shadow-sm flex flex-col justify-between ${!isApproved ? 'opacity-80' : ''}`}>
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className={`p-2 rounded-lg ${isApproved ? 'bg-blue-50 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
-                <PackageX className="w-5 h-5" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {tools.map((tool) => (
+          <div
+            key={tool.to}
+            className={`bg-white border border-slate-200 rounded-lg p-5 flex flex-col justify-between gap-4 ${
+              tool.locked ? 'bg-slate-50/70' : ''
+            }`}
+          >
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center">
+                  {tool.icon}
+                </div>
+                {tool.locked ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">
+                    <Lock className="w-3 h-3" />
+                    <span>{tool.lockLabel}</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Available</span>
+                  </span>
+                )}
               </div>
-              <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${isApproved ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                {isApproved ? 'Authorized' : 'Locked'}
-              </span>
+              <h2 className="text-base font-semibold text-slate-900">
+                {tool.title}
+              </h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {tool.description}
+              </p>
             </div>
-            <h3 className="font-bold text-sm text-slate-900 mb-1">Catalog & Inventory</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Publish OEM & aftermarket spare parts, manage vehicle compatibility, and update inventory stock counts.
-            </p>
-          </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 text-xs">
-            {isApproved ? (
-              <span className="text-blue-600 font-semibold cursor-pointer">Manage Inventory →</span>
-            ) : (
-              <span className="text-slate-400 font-medium">Locked pending verification</span>
+            {!tool.locked && (
+              <Link
+                to={tool.to}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-700 hover:text-blue-800 pt-2 border-t border-slate-100"
+              >
+                <span>Open workspace</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             )}
           </div>
-        </div>
-
-        {/* Capability 2: Bank Account & Payment Intake */}
-        <div className="p-5 rounded-xl border bg-white shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
-                <CreditCard className="w-5 h-5" />
-              </div>
-              <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${
-                seller.bankDetails?.verificationStatus === 'VERIFIED'
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : 'bg-amber-50 text-amber-800'
-              }`}>
-                {seller.bankDetails?.verificationStatus || 'Not Provided'}
-              </span>
-            </div>
-            <h3 className="font-bold text-sm text-slate-900 mb-1">Bank Settlement Details</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Direct bank-transfer payment routing details. Requires administrator audit before activation.
-            </p>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 text-xs">
-            <Link to="/seller/onboarding" className="text-blue-600 hover:text-blue-800 font-semibold">
-              Inspect Bank Status →
-            </Link>
-          </div>
-        </div>
-
-        {/* Capability 3: Verification Dossier */}
-        <div className="p-5 rounded-xl border bg-white shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
-                <FileText className="w-5 h-5" />
-              </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700">
-                Onboarding Hub
-              </span>
-            </div>
-            <h3 className="font-bold text-sm text-slate-900 mb-1">Onboarding Dossier</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Inspect uploaded BR certificates, NIC photos, storefront media, and legal privacy consent.
-            </p>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 text-xs">
-            <Link to="/seller/onboarding" className="text-blue-600 hover:text-blue-800 font-semibold">
-              Open Onboarding Hub →
-            </Link>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
