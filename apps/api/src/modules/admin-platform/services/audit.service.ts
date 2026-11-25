@@ -14,6 +14,8 @@ const SENSITIVE_AUDIT_KEYS = new Set([
   'cvv',
   'storageKey',
   's3StorageKey',
+  'apiKey',
+  'apiSecret',
 ]);
 
 function sanitizeAuditValue(key: string, value: unknown): unknown {
