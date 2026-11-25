@@ -358,7 +358,7 @@ export class ReportingService {
           // PII Masking: Mask phone numbers (+94 77 123 4567 -> +94 77 **** 4567)
           val = val.replace(/(\+94\s?\d{2})\s?\d{3,4}\s?(\d{3,4})/g, '$1 **** $2');
           // Mask email handles
-          val = val.replace(/(^.)[^@]*(@.*$)/, '$1***$2');
+          val = val.replace(/\b([a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]*(@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/g, '$1***$2');
           return `"${val.replace(/"/g, '""')}"`;
         }
         return val !== undefined && val !== null ? String(val) : '';
