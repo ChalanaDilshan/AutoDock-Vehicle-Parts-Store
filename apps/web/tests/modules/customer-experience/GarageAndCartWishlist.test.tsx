@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { MyGaragePage } from '../../../src/modules/customer-experience/pages/MyGaragePage.js';
 import { CartPage } from '../../../src/modules/customer-experience/pages/CartPage.js';
 import { WishlistPage } from '../../../src/modules/customer-experience/pages/WishlistPage.js';
@@ -167,9 +167,17 @@ describe('MOD-02 Garage, Cart & Wishlist Frontend Tests', () => {
       data: mockCartData as any,
     });
 
+    const CheckoutMarker = () => {
+      const loc = useLocation();
+      return <div data-testid="checkout-route">{loc.pathname}</div>;
+    };
+
     render(
-      <MemoryRouter>
-        <CartPage />
+      <MemoryRouter initialEntries={['/cart']}>
+        <Routes>
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutMarker />} />
+        </Routes>
       </MemoryRouter>
     );
 
@@ -181,13 +189,11 @@ describe('MOD-02 Garage, Cart & Wishlist Frontend Tests', () => {
     // Verify grand total formatted in LKR
     expect(screen.getAllByText('Rs. 23,500.00').length).toBeGreaterThan(0);
 
-    // Click checkout handoff button
+    // Click proceed to checkout button -> direct navigation to /checkout
     const checkoutBtn = screen.getByRole('button', { name: /Proceed to Checkout/i });
     fireEvent.click(checkoutBtn);
 
-    // Verify Module 03 handoff notice is displayed
-    expect(await screen.findByText(/Module 03 Checkout Boundary Handoff/i)).toBeDefined();
-    expect(screen.getByText(/ProductModulePublicService.getCartForCheckout/i)).toBeDefined();
+    expect(await screen.findByTestId('checkout-route')).toBeDefined();
   });
 
   it('Renders customer wishlist with 1-click move to cart', async () => {

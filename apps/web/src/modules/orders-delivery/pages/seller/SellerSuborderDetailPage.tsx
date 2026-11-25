@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import {
-  Package,
-  Calendar,
-  Truck,
-  FileSearch,
-  CheckCircle,
-  ChevronLeft,
-  Loader2,
-  AlertCircle,
-  Building2,
-} from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { FileCheck, Truck, CheckCircle2 } from 'lucide-react';
 import {
   sellerOrderApi,
   SuborderDetail,
@@ -20,20 +10,24 @@ import { SuborderStatusBadge } from '../../components/SuborderStatusBadge.js';
 import { ReceiptReviewModal } from '../../components/ReceiptReviewModal.js';
 import { CourierDispatchModal } from '../../components/CourierDispatchModal.js';
 import { formatLKR } from '../../../customer-experience/utils/formatters.js';
+import {
+  Alert,
+  Button,
+  PageHeader,
+} from '../../../../shared/components/index.js';
 
 export const SellerSuborderDetailPage: React.FC = () => {
   const { suborderId } = useParams<{ suborderId: string }>();
 
-  const [suborder, setSuborder] = useState<SuborderDetail[] | SuborderDetail | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [suborder, setSuborder] = useState<SuborderDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  // Modal States
-  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState<boolean>(false);
-  const [isDispatchModalOpen, setIsDispatchModalOpen] = useState<boolean>(false);
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [isDispatchModalOpen, setIsDispatchModalOpen] = useState(false);
 
-  const fetchSuborder = async () => {
+  const loadDetail = async () => {
     if (!suborderId) return;
     setIsLoading(true);
     setErrorMessage(null);
@@ -43,30 +37,27 @@ export const SellerSuborderDetailPage: React.FC = () => {
         setSuborder(response.data);
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to retrieve suborder record.');
+      setErrorMessage(err?.message || 'Unable to load order details.');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSuborder();
+    loadDetail();
   }, [suborderId]);
 
-  const currentSub = suborder as SuborderDetail | null;
-
-  const handleStatusTransition = async (newStatus: SuborderFulfillmentStatus) => {
+  const handleStatusUpdate = async (status: SuborderFulfillmentStatus) => {
     if (!suborderId) return;
     setIsUpdating(true);
+    setErrorMessage(null);
     try {
-      const response = await sellerOrderApi.updateFulfillmentStatus(suborderId, {
-        fulfillmentStatus: newStatus,
+      await sellerOrderApi.updateFulfillmentStatus(suborderId, {
+        fulfillmentStatus: status,
       });
-      if (response.success) {
-        fetchSuborder();
-      }
+      await loadDetail();
     } catch (err: any) {
-      alert(err?.message || 'Failed to update status.');
+      setErrorMessage(err?.message || 'Unable to update status.');
     } finally {
       setIsUpdating(false);
     }
@@ -74,273 +65,166 @@ export const SellerSuborderDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="py-24 text-center space-y-3" data-testid="seller-suborder-loading">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
-        <p className="text-xs text-slate-500">Loading suborder details...</p>
+      <div className="max-w-5xl mx-auto px-4 py-10">
+        <div className="h-72 bg-white border border-slate-200 rounded-lg" />
       </div>
     );
   }
 
-  if (errorMessage || !currentSub) {
+  if (errorMessage || !suborder) {
     return (
-      <div className="max-w-md mx-auto my-16 bg-white p-8 rounded-2xl border border-slate-200 text-center shadow-sm space-y-4">
-        <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto">
-          <AlertCircle className="w-8 h-8" />
-        </div>
-        <h2 className="text-lg font-bold text-slate-900">Suborder Unavailable</h2>
-        <p className="text-xs text-slate-600 leading-relaxed">{errorMessage}</p>
-        <Link
-          to="/seller/orders"
-          className="inline-block px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-sm"
-        >
-          Return to Seller Workstation
-        </Link>
+      <div className="max-w-4xl mx-auto px-4 py-10">
+        <Alert variant="danger">{errorMessage || 'Suborder not found.'}</Alert>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16">
-      {/* Header & Back Link */}
-      <div className="space-y-3 pb-4 border-b border-slate-200">
-        <Link
-          to="/seller/orders"
-          className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          <span>Back to Store Suborders</span>
-        </Link>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight font-mono">
-                {currentSub.suborderNumber}
-              </h1>
-              <SuborderStatusBadge fulfillmentStatus={currentSub.fulfillmentStatus} type="fulfillment" />
-              <SuborderStatusBadge paymentStatus={currentSub.paymentStatus} type="payment" />
-            </div>
-            <p className="text-xs text-slate-500 mt-1 flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Received on {new Date(currentSub.createdAt).toLocaleDateString()}</span>
-              <span>•</span>
-              <span>Destination: {currentSub.deliveryDistrict} District</span>
-              <span>•</span>
-              <span>Method: <strong>{currentSub.paymentMethod}</strong></span>
-            </p>
-          </div>
-
-          <div className="text-right">
-            <span className="text-xs text-slate-400 block font-normal">Suborder Total</span>
-            <span className="text-2xl font-black text-slate-900">
-              {formatLKR(currentSub.totalAmountInCents)}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Grid: Financial & Fulfillment Status */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Fulfillment Control Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4 text-xs">
-          <div className="flex items-center gap-2 font-bold text-slate-900 pb-2 border-b border-slate-100">
-            <Truck className="w-4 h-4 text-blue-600" />
-            <span>Fulfillment Lifecycle Actions</span>
-          </div>
-
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <PageHeader
+        title={<span className="font-mono">{suborder.suborderNumber}</span>}
+        subtitle={`Delivery District: ${suborder.deliveryDistrict} · Payment: ${suborder.paymentMethod.replace(/_/g, ' ')}`}
+        backTo="/seller/orders"
+        backLabel="Back to Merchant Orders"
+        badge={
           <div className="flex flex-wrap gap-2">
-            {currentSub.fulfillmentStatus === 'AWAITING_FULFILLMENT' && (
-              <button
-                type="button"
-                onClick={() => handleStatusTransition('PROCESSING')}
-                disabled={isUpdating}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-sm"
+            <SuborderStatusBadge
+              type="fulfillment"
+              fulfillmentStatus={suborder.fulfillmentStatus}
+            />
+            <SuborderStatusBadge
+              type="payment"
+              paymentStatus={suborder.paymentStatus}
+            />
+          </div>
+        }
+        actions={
+          <div className="flex flex-wrap gap-2">
+            {suborder.paymentStatus === 'RECEIPT_UPLOADED' && (
+              <Button
+                variant="primary"
+                size="sm"
+                leftIcon={<FileCheck className="w-4 h-4" />}
+                onClick={() => setIsReceiptModalOpen(true)}
               >
-                Mark as Processing
-              </button>
+                Verify Deposit Slip
+              </Button>
             )}
-
-            {currentSub.fulfillmentStatus === 'PROCESSING' && (
-              <button
-                type="button"
-                onClick={() => handleStatusTransition('READY_FOR_DISPATCH')}
-                disabled={isUpdating}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition shadow-sm"
+            {suborder.fulfillmentStatus === 'AWAITING_FULFILLMENT' && (
+              <Button
+                variant="primary"
+                size="sm"
+                isLoading={isUpdating}
+                onClick={() => handleStatusUpdate('PROCESSING')}
               >
-                Mark Ready for Dispatch
-              </button>
+                Start Processing
+              </Button>
             )}
-
-            {currentSub.fulfillmentStatus === 'READY_FOR_DISPATCH' && (
-              <button
-                type="button"
+            {(suborder.fulfillmentStatus === 'PROCESSING' ||
+              suborder.fulfillmentStatus === 'READY_FOR_DISPATCH') && (
+              <Button
+                variant="primary"
+                size="sm"
+                leftIcon={<Truck className="w-4 h-4" />}
                 onClick={() => setIsDispatchModalOpen(true)}
-                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl font-bold transition flex items-center gap-1.5 shadow-sm"
               >
-                <Truck className="w-4 h-4" />
-                <span>Dispatch Package with Courier Details</span>
-              </button>
+                Dispatch Package
+              </Button>
             )}
-
-            {currentSub.fulfillmentStatus === 'DISPATCHED' && (
-              <button
-                type="button"
-                onClick={() => handleStatusTransition('DELIVERED')}
-                disabled={isUpdating}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition flex items-center gap-1.5 shadow-sm"
+            {suborder.fulfillmentStatus === 'DISPATCHED' && (
+              <Button
+                variant="primary"
+                size="sm"
+                isLoading={isUpdating}
+                leftIcon={<CheckCircle2 className="w-4 h-4" />}
+                onClick={() => handleStatusUpdate('DELIVERED')}
               >
-                <CheckCircle className="w-4 h-4" />
-                <span>Confirm Delivery Receipt</span>
-              </button>
-            )}
-
-            {['DELIVERED', 'CANCELLED'].includes(currentSub.fulfillmentStatus) && (
-              <span className="text-slate-500 italic">
-                Suborder lifecycle is in terminal state ({currentSub.fulfillmentStatus}).
-              </span>
+                Mark Delivered
+              </Button>
             )}
           </div>
-        </div>
+        }
+      />
 
-        {/* Financial Snapshot */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-2 text-xs">
-          <div className="flex items-center gap-2 font-bold text-slate-900 pb-2 border-b border-slate-100">
-            <Package className="w-4 h-4 text-blue-600" />
-            <span>Suborder Financial Account</span>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <section className="lg:col-span-8 bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200">
+            <h2 className="text-sm font-semibold text-slate-900">Ordered Parts</h2>
           </div>
-
-          <div className="space-y-1.5 text-slate-600">
-            <div className="flex justify-between">
-              <span>Product Line Subtotal</span>
-              <span className="font-semibold text-slate-900">
-                {formatLKR(currentSub.productSubtotalInCents)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>District Delivery Charge</span>
-              <span className="font-semibold text-slate-900">
-                {formatLKR(currentSub.deliveryFeeInCents)}
-              </span>
-            </div>
-            <div className="flex justify-between text-blue-600">
-              <span>Commissionable Base (excl. delivery)</span>
-              <span className="font-semibold font-mono">
-                {formatLKR(currentSub.commissionableBaseInCents)}
-              </span>
-            </div>
-            <div className="pt-2 border-t border-slate-100 flex justify-between font-bold text-slate-900">
-              <span>Total Suborder Payable</span>
-              <span className="text-sm font-black text-blue-600">
-                {formatLKR(currentSub.totalAmountInCents)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Line Items Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
-        <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-          Ordered Inventory Line Items
-        </h2>
-
-        <div className="divide-y divide-slate-100">
-          {currentSub.items.map((item) => (
-            <div key={item.productId} className="py-3 flex items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-3">
-                {item.thumbnailUrl ? (
-                  <img
-                    src={item.thumbnailUrl}
-                    alt={item.name}
-                    className="w-10 h-10 object-cover rounded-lg border border-slate-200"
-                  />
-                ) : (
-                  <div className="w-10 h-10 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400">
-                    <Package className="w-5 h-5" />
-                  </div>
-                )}
+          <div className="divide-y divide-slate-200">
+            {suborder.items.map((item) => (
+              <div
+                key={item.productId}
+                className="p-4 flex items-center justify-between gap-4 text-sm"
+              >
                 <div>
-                  <span className="font-semibold text-slate-900 block">{item.name}</span>
-                  <span className="text-[11px] text-slate-400 font-mono">
-                    SKU: {item.sku} • Qty: {item.quantity} × {formatLKR(item.unitPriceInCents)}
-                  </span>
+                  <div className="font-medium text-slate-900">{item.name}</div>
+                  <div className="text-xs text-slate-500 font-mono">
+                    SKU: {item.sku} &middot; Unit: {formatLKR(item.unitPriceInCents)} ×{' '}
+                    {item.quantity}
+                  </div>
+                </div>
+                <div className="font-semibold text-slate-900 tabular-nums">
+                  {formatLKR(item.lineTotalInCents)}
                 </div>
               </div>
-              <span className="font-bold text-slate-900">{formatLKR(item.lineTotalInCents)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Courier Dispatch Details (if exists) */}
-      {currentSub.courierDetails?.trackingNumber && (
-        <div className="bg-cyan-50/50 border border-cyan-200/60 rounded-2xl p-5 shadow-sm space-y-2 text-xs">
-          <div className="font-bold text-cyan-900 flex items-center gap-1.5 pb-2 border-b border-cyan-200/50">
-            <Truck className="w-4 h-4 text-cyan-700" />
-            <span>Active Courier Consignment Details</span>
+            ))}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-cyan-800">
-            <div>
-              <span className="text-cyan-600 block text-[11px]">Courier Partner</span>
-              <span className="font-semibold">{currentSub.courierDetails.courierName}</span>
-            </div>
-            <div>
-              <span className="text-cyan-600 block text-[11px]">Waybill Tracking #</span>
-              <span className="font-mono font-bold text-slate-900">
-                {currentSub.courierDetails.trackingNumber}
+        </section>
+
+        <section className="lg:col-span-4 bg-white border border-slate-200 rounded-lg p-5 space-y-3 h-fit">
+          <h2 className="text-sm font-semibold text-slate-900 border-b border-slate-200 pb-2.5">
+            Financial Summary
+          </h2>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between text-slate-600">
+              <span>Parts Subtotal</span>
+              <span className="tabular-nums">
+                {formatLKR(suborder.productSubtotalInCents)}
               </span>
             </div>
-            {currentSub.courierDetails.estimatedDeliveryDate && (
-              <div>
-                <span className="text-cyan-600 block text-[11px]">Estimated Delivery</span>
-                <span>
-                  {new Date(currentSub.courierDetails.estimatedDeliveryDate).toLocaleDateString()}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Bank Receipt Review Drawer Trigger */}
-      {currentSub.paymentMethod === 'DIRECT_BANK_TRANSFER' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex items-center justify-between">
-          <div className="space-y-1 text-xs">
-            <div className="flex items-center gap-1.5 font-bold text-slate-900">
-              <Building2 className="w-4 h-4 text-blue-600" />
-              <span>Direct Bank Deposit Receipt Record</span>
+            <div className="flex justify-between text-slate-600">
+              <span>Delivery Fee</span>
+              <span className="tabular-nums">
+                {formatLKR(suborder.deliveryFeeInCents)}
+              </span>
             </div>
-            <p className="text-slate-500">
-              Review customer uploaded deposit slip and verify into merchant account.
-            </p>
+            <div className="pt-2 border-t border-slate-200 flex justify-between font-bold text-slate-900">
+              <span>Order Total</span>
+              <span className="tabular-nums">
+                {formatLKR(suborder.totalAmountInCents)}
+              </span>
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIsReceiptModalOpen(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
-          >
-            <FileSearch className="w-4 h-4" />
-            <span>Inspect & Verify Slip</span>
-          </button>
-        </div>
-      )}
+          {suborder.courierDetails && (
+            <div className="pt-3 border-t border-slate-200 text-xs space-y-1">
+              <div className="font-semibold text-slate-900">Courier Tracking</div>
+              <div className="text-slate-600">
+                {suborder.courierDetails.courierName}
+              </div>
+              <div className="font-mono font-semibold text-slate-900">
+                {suborder.courierDetails.trackingNumber}
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
 
-      {/* Modals */}
       <ReceiptReviewModal
         isOpen={isReceiptModalOpen}
         onClose={() => setIsReceiptModalOpen(false)}
-        suborderId={currentSub._id}
-        suborderNumber={currentSub.suborderNumber}
-        onDecisionComplete={() => fetchSuborder()}
+        suborderId={suborder._id}
+        suborderNumber={suborder.suborderNumber}
+        onDecisionComplete={loadDetail}
       />
 
       <CourierDispatchModal
         isOpen={isDispatchModalOpen}
         onClose={() => setIsDispatchModalOpen(false)}
-        suborderId={currentSub._id}
-        suborderNumber={currentSub.suborderNumber}
-        onDispatchSuccess={() => fetchSuborder()}
+        suborderId={suborder._id}
+        suborderNumber={suborder.suborderNumber}
+        onDispatchSuccess={loadDetail}
       />
     </div>
   );

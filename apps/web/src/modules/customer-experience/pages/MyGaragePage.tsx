@@ -1,238 +1,199 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Car,
-  Plus,
-  Trash2,
-  CheckCircle2,
-  Star,
-  Search,
-  AlertCircle,
-  Loader2,
-  ShieldCheck,
-} from 'lucide-react';
+import { Car, Plus, Star, Trash2, ArrowRight } from 'lucide-react';
 import { GarageVehicle, garageApi } from '../api/customerExperienceApi.js';
 import { AddVehicleModal } from '../components/AddVehicleModal.js';
+import { useAuth } from '../../identity/context/AuthContext.js';
+import {
+  Alert,
+  Badge,
+  Button,
+  EmptyState,
+  PageHeader,
+} from '../../../shared/components/index.js';
 
 export const MyGaragePage: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   const [vehicles, setVehicles] = useState<GarageVehicle[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const fetchGarage = async () => {
+  const loadVehicles = async () => {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      const response = await garageApi.getVehicles();
-      if (response.success && response.data?.vehicles) {
-        setVehicles(response.data.vehicles);
+      const res = await garageApi.getVehicles();
+      if (res.success && res.data?.vehicles) {
+        setVehicles(res.data.vehicles);
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Unable to load your virtual garage.');
+      setErrorMessage(err?.message || 'Unable to load your saved vehicles.');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchGarage();
-  }, []);
+    if (isAuthenticated) {
+      loadVehicles();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
 
   const handleSetDefault = async (vehicleId: string) => {
     try {
-      const response = await garageApi.setDefault(vehicleId);
-      if (response.success) {
-        setActionSuccess('Default vehicle updated.');
-        setTimeout(() => setActionSuccess(null), 3000);
-        fetchGarage();
-      }
+      await garageApi.setDefault(vehicleId);
+      await loadVehicles();
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to set default vehicle.');
+      setErrorMessage(err?.message || 'Unable to update default vehicle.');
     }
   };
 
   const handleRemove = async (vehicleId: string) => {
-    if (!window.confirm('Are you sure you want to remove this vehicle from your garage?')) {
-      return;
-    }
     try {
-      const response = await garageApi.removeVehicle(vehicleId);
-      if (response.success) {
-        setActionSuccess('Vehicle removed from garage.');
-        setTimeout(() => setActionSuccess(null), 3000);
-        fetchGarage();
-      }
+      await garageApi.removeVehicle(vehicleId);
+      await loadVehicles();
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to remove vehicle.');
+      setErrorMessage(err?.message || 'Unable to remove vehicle.');
     }
   };
 
-  return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-16">
-      {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Virtual Fleet</span>
-            <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-              {vehicles.length}/10 Vehicles Saved
-            </span>
-          </div>
-          <h1 className="text-2xl font-black text-slate-900">My Garage</h1>
-          <p className="text-xs text-slate-500 mt-1 max-w-xl">
-            Save up to 10 vehicles in your garage profile for instant, 1-click compatible spare-part discovery and fitment verification.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-          disabled={vehicles.length >= 10}
-          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Vehicle</span>
-        </button>
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-12">
+        <EmptyState
+          icon={<Car className="w-6 h-6" />}
+          title="Sign in to manage My Garage"
+          description="Save your vehicle models once to quickly check compatibility on any spare part."
+          action={
+            <Link to="/login">
+              <Button variant="primary">Sign In</Button>
+            </Link>
+          }
+        />
       </div>
+    );
+  }
 
-      {actionSuccess && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-semibold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          <span>{actionSuccess}</span>
-        </div>
-      )}
+  return (
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6">
+      <PageHeader
+        title="My Garage"
+        subtitle="Save up to 10 vehicles for quick spare-part fitment checks"
+        badge={
+          <Badge variant="default" size="md">
+            {vehicles.length}/10 Vehicles Saved
+          </Badge>
+        }
+        actions={
+          <Button
+            variant="primary"
+            disabled={vehicles.length >= 10}
+            leftIcon={<Plus className="w-4 h-4" />}
+            onClick={() => setIsAddModalOpen(true)}
+          >
+            Add Vehicle
+          </Button>
+        }
+      />
 
-      {errorMessage && (
-        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-semibold flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-rose-600" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
+      {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
 
-      {/* Vehicle Cards Grid */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
-          <p className="text-xs font-medium">Loading saved vehicles...</p>
-        </div>
-      ) : vehicles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {vehicles.map((v) => (
+          {[...Array(2)].map((_, idx) => (
+            <div key={idx} className="h-44 bg-white border border-slate-200 rounded-lg" />
+          ))}
+        </div>
+      ) : vehicles.length === 0 ? (
+        <EmptyState
+          icon={<Car className="w-6 h-6" />}
+          title="No vehicles in your garage yet"
+          description="Add your car make, model, and year to filter compatible spare parts with one click."
+          action={
+            <Button
+              variant="primary"
+              leftIcon={<Plus className="w-4 h-4" />}
+              onClick={() => setIsAddModalOpen(true)}
+            >
+              Add Your First Vehicle
+            </Button>
+          }
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+          {vehicles.map((vehicle) => (
             <div
-              key={v._id}
-              className={`bg-white rounded-2xl border p-5 shadow-sm transition flex flex-col justify-between ${
-                v.isDefault ? 'border-blue-500 ring-1 ring-blue-500/20' : 'border-slate-200'
+              key={vehicle._id}
+              className={`bg-white rounded-lg border p-5 flex flex-col justify-between gap-4 ${
+                vehicle.isDefault ? 'border-blue-300 ring-1 ring-blue-100' : 'border-slate-200'
               }`}
             >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className={`p-2.5 rounded-xl ${
-                        v.isDefault ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'
-                      }`}
-                    >
-                      <Car className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-base text-slate-900 leading-tight">
-                        {v.year} {v.make} {v.model}
-                      </h3>
-                      {v.nickname && (
-                        <span className="text-xs text-slate-500 font-medium italic">"{v.nickname}"</span>
-                      )}
-                    </div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-base font-semibold text-slate-900">
+                      {vehicle.year} {vehicle.make} {vehicle.model}
+                    </h2>
+                    {vehicle.isDefault && (
+                      <Badge variant="primary" size="sm">
+                        Default
+                      </Badge>
+                    )}
                   </div>
-
-                  {v.isDefault ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
-                      <Star className="w-3 h-3 fill-current" />
-                      Default
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleSetDefault(v._id)}
-                      className="text-[11px] font-semibold text-slate-500 hover:text-blue-600 transition"
-                    >
-                      Set as Default
-                    </button>
+                  {vehicle.nickname && (
+                    <p className="text-sm text-slate-600">
+                      {`"${vehicle.nickname}"`}
+                    </p>
                   )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs py-3 border-y border-slate-100 my-2">
-                  <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Engine / Trim</span>
-                    <span className="text-slate-700 font-semibold">{v.engine || v.submodel || 'Standard'}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold">Chassis / VIN</span>
-                    <span className="text-slate-700 font-semibold font-mono">{v.vin || 'Not Registered'}</span>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 pt-1">
+                    {vehicle.engine && <span>Engine: {vehicle.engine}</span>}
+                    {vehicle.submodel && <span>Trim: {vehicle.submodel}</span>}
+                    {vehicle.vin && <span className="font-mono">VIN: {vehicle.vin}</span>}
                   </div>
                 </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center justify-between pt-3">
-                <Link
-                  to={`/products?make=${encodeURIComponent(v.make)}&model=${encodeURIComponent(
-                    v.model
-                  )}&year=${v.year}`}
-                  className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition inline-flex items-center gap-1.5 shadow-sm"
-                >
-                  <Search className="w-3.5 h-3.5" />
-                  <span>Find Matching Parts</span>
-                </Link>
 
                 <button
                   type="button"
-                  onClick={() => handleRemove(v._id)}
-                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                  title="Remove vehicle from garage"
+                  onClick={() => handleRemove(vehicle._id)}
+                  aria-label={`Remove ${vehicle.make} ${vehicle.model}`}
+                  className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors shrink-0"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
+
+              <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <Link
+                  to={`/products?make=${encodeURIComponent(vehicle.make)}&model=${encodeURIComponent(vehicle.model)}&year=${vehicle.year}`}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-700 hover:text-blue-800"
+                >
+                  <span>Shop compatible parts</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+
+                {!vehicle.isDefault && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<Star className="w-3.5 h-3.5" />}
+                    onClick={() => handleSetDefault(vehicle._id)}
+                  >
+                    Set Default
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
         </div>
-      ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-4 shadow-sm">
-          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto">
-            <Car className="w-8 h-8" />
-          </div>
-          <div className="max-w-sm mx-auto">
-            <h3 className="font-bold text-slate-900 text-base mb-1">Your Virtual Garage is Empty</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Add your vehicle make, model, and year to eliminate wrong spare-part purchases and filter compatible items with 1 click.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition inline-flex items-center gap-2 shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add First Vehicle</span>
-          </button>
-        </div>
       )}
 
-      {/* Trust Notice */}
-      <div className="p-4 bg-slate-100 rounded-xl text-xs text-slate-600 flex items-start gap-2.5">
-        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-        <div>
-          <strong>Strict Privacy & Ownership:</strong> Your garage vehicles and VIN records are stored securely with your customer account and never shared with other shoppers.
-        </div>
-      </div>
-
-      {/* Add Vehicle Modal */}
       <AddVehicleModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={fetchGarage}
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={loadVehicles}
         currentVehicleCount={vehicles.length}
       />
     </div>

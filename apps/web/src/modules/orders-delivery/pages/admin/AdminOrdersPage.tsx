@@ -1,245 +1,205 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Package,
-  Search,
-  ChevronRight,
-  Loader2,
-  AlertCircle,
-} from 'lucide-react';
+import { Search, Eye, ShoppingCart } from 'lucide-react';
 import {
   adminOrderApi,
   MasterOrderSummary,
-  Pagination,
 } from '../../api/ordersDeliveryApi.js';
 import { MasterOrderStatusBadge } from '../../components/MasterOrderStatusBadge.js';
 import { formatLKR } from '../../../customer-experience/utils/formatters.js';
+import {
+  Alert,
+  Button,
+  EmptyState,
+  PageHeader,
+} from '../../../../shared/components/index.js';
 
 export const AdminOrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<MasterOrderSummary[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 1,
-  });
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const fetchOrders = async (
-    page: number = 1,
-    search: string = searchTerm,
-    status: string = statusFilter
-  ) => {
+  const loadOrders = async (p = page, status = statusFilter, search = searchQuery) => {
     setIsLoading(true);
     setErrorMessage(null);
     try {
       const response = await adminOrderApi.getAdminOrders({
-        page,
-        limit: 10,
-        search: search || undefined,
+        page: p,
+        limit: 15,
         status: status || undefined,
+        search: search || undefined,
       });
-
       if (response.success && response.data) {
-        setOrders(response.data.orders);
-        setPagination(response.data.pagination);
+        setOrders(response.data.orders || []);
+        setTotal(response.data.pagination?.total ?? response.data.orders?.length ?? 0);
+        setTotalPages(response.data.pagination?.totalPages ?? 1);
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to retrieve marketplace orders.');
+      setErrorMessage(err?.message || 'Unable to load marketplace orders.');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchOrders(1, searchTerm, statusFilter);
-  }, [statusFilter]);
+    loadOrders(page, statusFilter, searchQuery);
+  }, [page, statusFilter, searchQuery]);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchOrders(1, searchTerm, statusFilter);
+    setPage(1);
+    setSearchQuery(searchInput.trim());
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-16">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Marketplace Orders Oversight
-          </h1>
-          <p className="text-xs text-slate-500">
-            Platform-wide transaction surveillance across all multi-vendor customers and merchants
-          </p>
-        </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Marketplace Orders"
+        subtitle={`Inspect customer orders, suborder fulfillment splits, and payment statuses (${total} total)`}
+      />
 
-        {/* Search & Filter */}
-        <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+      {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+
+      <div className="bg-white border border-slate-200 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <form onSubmit={handleSearch} className="flex items-center gap-2 flex-1 max-w-md">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by order #..."
-              className="pl-9 pr-3 py-1.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search order # or customer..."
+              className="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-300 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
             />
           </div>
-
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none bg-white"
-          >
-            <option value="">All Statuses</option>
-            <option value="PENDING_PAYMENT">Pending Payment</option>
-            <option value="AWAITING_FULFILLMENT">Awaiting Fulfillment</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
-
-          <button
-            type="submit"
-            className="px-3 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition"
-          >
-            Filter
-          </button>
+          <Button type="submit" variant="secondary" size="sm">
+            Search
+          </Button>
         </form>
-      </div>
 
-      {/* KPI Metric Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
-            <Package className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Orders</div>
-            <div className="text-xl font-black text-slate-900">{pagination.total}</div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600">
-            <Loader2 className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Current View Status</div>
-            <div className="text-sm font-bold text-slate-800">{statusFilter || 'All Statuses'}</div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
-            <Package className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Records on Page</div>
-            <div className="text-xl font-black text-slate-900">{orders.length}</div>
-          </div>
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            { value: '', label: 'All' },
+            { value: 'PENDING_PAYMENT', label: 'Pending Payment' },
+            { value: 'AWAITING_FULFILLMENT', label: 'Awaiting Fulfillment' },
+            { value: 'IN_PROGRESS', label: 'In Progress' },
+            { value: 'COMPLETED', label: 'Completed' },
+            { value: 'CANCELLED', label: 'Cancelled' },
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => {
+                setPage(1);
+                setStatusFilter(tab.value);
+              }}
+              className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                statusFilter === tab.value
+                  ? 'bg-slate-900 text-white'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
-
-      {errorMessage && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-xs text-red-800">
-          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
 
       {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center space-y-3" data-testid="admin-orders-loading">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          <p className="text-xs text-slate-500">Loading marketplace orders...</p>
-        </div>
+        <div className="h-64 bg-white border border-slate-200 rounded-lg" />
       ) : orders.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center space-y-4 shadow-sm" data-testid="admin-orders-empty">
-          <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto">
-            <Package className="w-8 h-8" />
-          </div>
-          <h2 className="text-base font-bold text-slate-900 mb-1">No Orders Found</h2>
-          <p className="text-xs text-slate-500">
-            No marketplace purchases match the current search or status filter.
-          </p>
-        </div>
+        <EmptyState
+          icon={<ShoppingCart className="w-6 h-6" />}
+          title="No marketplace orders found"
+          description="Customer orders matching your filter criteria will appear here."
+        />
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden" data-testid="admin-orders-table">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                <th className="py-3 px-4">Order Reference</th>
-                <th className="py-3 px-4">Customer</th>
-                <th className="py-3 px-4">District</th>
-                <th className="py-3 px-4">Suborders</th>
-                <th className="py-3 px-4">Total Payable</th>
-                <th className="py-3 px-4">Rollup Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {orders.map((ord) => (
-                <tr key={ord._id} className="hover:bg-slate-50/70 transition">
-                  <td className="py-3 px-4 font-mono font-bold text-slate-900">
-                    {ord.orderNumber}
-                  </td>
-                  <td className="py-3 px-4 text-slate-700">
-                    <span className="font-semibold block">{ord.shippingAddress?.fullName}</span>
-                    <span className="text-[10px] text-slate-400">{ord.shippingAddress?.phone}</span>
-                  </td>
-                  <td className="py-3 px-4 text-slate-600">
-                    {ord.shippingAddress?.district}
-                  </td>
-                  <td className="py-3 px-4 text-slate-600 font-semibold">
-                    {ord.suborderIds?.length || 1} Vendors
-                  </td>
-                  <td className="py-3 px-4 font-bold text-slate-900">
-                    {formatLKR(ord.finalPayableAmountInCents)}
-                  </td>
-                  <td className="py-3 px-4">
-                    <MasterOrderStatusBadge status={ord.overallStatus} />
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <Link
-                      to={`/admin/orders/${ord._id}`}
-                      className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition"
-                    >
-                      <span>Inspect</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </td>
+        <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-4">Order Number</th>
+                  <th className="py-3 px-4">Customer / District</th>
+                  <th className="py-3 px-4">Suborders</th>
+                  <th className="py-3 px-4">Total (LKR)</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Details</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {orders.map((order) => (
+                  <tr key={order._id} className="hover:bg-slate-50/60">
+                    <td className="py-3.5 px-4">
+                      <div className="font-mono font-semibold text-slate-900">
+                        {order.orderNumber}
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="font-medium text-slate-900">
+                        {order.shippingAddress?.fullName}
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        {order.shippingAddress?.district}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-700">
+                      {order.subordersCount ?? order.suborderIds?.length ?? 1} seller packages
+                    </td>
+                    <td className="py-3.5 px-4 font-semibold text-slate-900 tabular-nums">
+                      {formatLKR(order.finalPayableAmountInCents)}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <MasterOrderStatusBadge status={order.overallStatus} />
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      <Link to={`/admin/orders/${order._id}`}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          leftIcon={<Eye className="w-3.5 h-3.5" />}
+                        >
+                          Inspect
+                        </Button>
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between p-4 border-t border-slate-100 bg-slate-50/50">
-              <span className="text-xs text-slate-500">
-                Showing {orders.length} of {pagination.total} orders
+          {totalPages > 1 && (
+            <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
+              <span>
+                Page {page} of {totalPages}
               </span>
-              <div className="flex items-center gap-2">
-                <button
-                  disabled={pagination.page <= 1}
-                  onClick={() => fetchOrders(pagination.page - 1)}
-                  className="px-3 py-1 border border-slate-300 rounded-lg text-xs font-semibold disabled:opacity-40"
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => p - 1)}
                 >
                   Previous
-                </button>
-                <span className="text-xs text-slate-600 font-medium">
-                  Page {pagination.page} / {pagination.totalPages}
-                </span>
-                <button
-                  disabled={pagination.page >= pagination.totalPages}
-                  onClick={() => fetchOrders(pagination.page + 1)}
-                  className="px-3 py-1 border border-slate-300 rounded-lg text-xs font-semibold disabled:opacity-40"
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => p + 1)}
                 >
                   Next
-                </button>
+                </Button>
               </div>
             </div>
           )}

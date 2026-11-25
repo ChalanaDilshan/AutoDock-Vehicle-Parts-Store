@@ -15,9 +15,6 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   fullWidth?: boolean;
 }
 
-/**
- * Reusable accessible Input component with label, icons, helper text, and error state.
- */
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
     {
@@ -27,76 +24,79 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       leftIcon,
       rightIcon,
       fullWidth = true,
-      id,
       className = '',
-      ...rest
+      id,
+      required,
+      ...props
     },
     ref
   ) => {
     const generatedId = useId();
     const inputId = id || generatedId;
-    const messageId = error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined;
+    const errorId = `${inputId}-error`;
+    const helperId = `${inputId}-helper`;
 
     return (
       <div className={fullWidth ? 'w-full' : 'inline-block'}>
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-medium text-slate-700 mb-1.5"
+            className="block text-sm font-medium text-slate-700 mb-1.5"
           >
             {label}
+            {required && (
+              <span className="text-rose-600 ml-0.5" aria-hidden="true">
+                *
+              </span>
+            )}
           </label>
         )}
 
-        <div className="relative flex items-center">
+        <div className="relative">
           {leftIcon && (
-            <span
-              className="absolute left-3 text-slate-400 pointer-events-none inline-flex items-center"
-              aria-hidden="true"
-            >
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
               {leftIcon}
-            </span>
+            </div>
           )}
 
           <input
             ref={ref}
             id={inputId}
-            aria-invalid={Boolean(error) || undefined}
-            aria-describedby={messageId}
+            required={required}
+            aria-invalid={error ? 'true' : undefined}
+            aria-describedby={error ? errorId : helperText ? helperId : undefined}
             className={[
-              'w-full rounded-md border bg-white text-xs sm:text-sm text-slate-900 placeholder:text-slate-400',
-              'py-2 transition-colors outline-none',
-              'disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed',
+              'block w-full rounded-lg border bg-white text-sm text-slate-900 placeholder:text-slate-400 transition-colors',
+              'py-2',
               leftIcon ? 'pl-9' : 'pl-3',
               rightIcon ? 'pr-9' : 'pr-3',
               error
-                ? 'border-rose-500 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                : 'border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-600',
+                ? 'border-rose-300 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20'
+                : 'border-slate-300 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15',
+              'disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed',
               className,
             ]
               .filter(Boolean)
               .join(' ')}
-            {...rest}
+            {...props}
           />
 
           {rightIcon && (
-            <span className="absolute right-3 text-slate-400 inline-flex items-center">
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
               {rightIcon}
-            </span>
+            </div>
           )}
         </div>
 
-        {error && (
-          <p id={messageId} role="alert" className="mt-1 text-xs text-rose-600 font-medium">
+        {error ? (
+          <p id={errorId} role="alert" className="mt-1.5 text-xs text-rose-600">
             {error}
           </p>
-        )}
-
-        {!error && helperText && (
-          <p id={messageId} className="mt-1 text-xs text-slate-500">
+        ) : helperText ? (
+          <p id={helperId} className="mt-1.5 text-xs text-slate-500">
             {helperText}
           </p>
-        )}
+        ) : null}
       </div>
     );
   }

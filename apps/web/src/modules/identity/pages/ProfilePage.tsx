@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Save } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 import { authApi } from '../api/identityApi.js';
-import { User, Mail, Phone, Shield, Save, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import {
+  Alert,
+  Badge,
+  Button,
+  Input,
+  PageHeader,
+} from '../../../shared/components/index.js';
 
 export const ProfilePage: React.FC = () => {
   const { user, refreshProfile } = useAuth();
@@ -9,167 +16,115 @@ export const ProfilePage: React.FC = () => {
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
   const [phone, setPhone] = useState(user?.phone || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'danger';
+    text: string;
+  } | null>(null);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName);
+      setLastName(user.lastName);
+      setPhone(user.phone || '');
+    }
+  }, [user]);
 
-  if (!user) return null;
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccessMessage(null);
-    setErrorMessage(null);
+    setStatusMessage(null);
+    if (!firstName.trim() || !lastName.trim() || !phone.trim()) {
+      setStatusMessage({
+        type: 'danger',
+        text: 'First name, last name, and contact phone are required.',
+      });
+      return;
+    }
 
-    setIsSubmitting(true);
+    setIsSaving(true);
     try {
-      const response = await authApi.updateMe({
+      await authApi.updateMe({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         phone: phone.trim(),
       });
-
-      if (response.success) {
-        await refreshProfile();
-        setSuccessMessage('Profile details updated successfully.');
-      } else {
-        setErrorMessage(response.message || 'Failed to update profile.');
-      }
+      await refreshProfile();
+      setStatusMessage({
+        type: 'success',
+        text: 'Profile details saved.',
+      });
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Error saving profile changes.');
+      setStatusMessage({
+        type: 'danger',
+        text: err?.message || 'Unable to update your profile.',
+      });
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto my-6 space-y-6">
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <div className="flex items-center justify-between pb-6 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg">
-              {user.firstName[0]}
-              {user.lastName[0]}
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-slate-900">
-                {user.firstName} {user.lastName}
-              </h1>
-              <p className="text-xs text-slate-500">{user.email}</p>
-            </div>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6">
+      <PageHeader
+        title="Account Profile"
+        subtitle="Manage your personal contact details and view account status"
+        badge={
+          user?.role ? (
+            <Badge variant="primary">{user.role}</Badge>
+          ) : undefined
+        }
+      />
+
+      {statusMessage && (
+        <Alert variant={statusMessage.type}>{statusMessage.text}</Alert>
+      )}
+
+      <div className="bg-white border border-slate-200 rounded-lg divide-y divide-slate-200">
+        <div className="p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-medium text-slate-500">Registered Email</p>
+            <p className="text-sm font-semibold text-slate-900 mt-0.5">
+              {user?.email}
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-              <Shield className="w-3.5 h-3.5" />
-              Role: {user.role}
-            </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-              {user.accountStatus}
-            </span>
-          </div>
+          <Badge variant={user?.accountStatus === 'ACTIVE' ? 'success' : 'warning'}>
+            {user?.accountStatus || 'ACTIVE'}
+          </Badge>
         </div>
 
-        {successMessage && (
-          <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-md text-xs text-emerald-700 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{successMessage}</span>
-          </div>
-        )}
-
-        {errorMessage && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 text-xs text-red-700 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <h2 className="text-sm font-bold text-slate-800">Personal Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="profile-first-name" className="block text-xs font-semibold text-slate-700 mb-1">
-                First Name
-              </label>
-              <div className="relative">
-                <input
-                  id="profile-first-name"
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <User className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="profile-last-name" className="block text-xs font-semibold text-slate-700 mb-1">
-                Last Name
-              </label>
-              <div className="relative">
-                <input
-                  id="profile-last-name"
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="w-full text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <User className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="profile-email" className="block text-xs font-semibold text-slate-700 mb-1">
-                Email Address (Immutable)
-              </label>
-              <div className="relative">
-                <input
-                  id="profile-email"
-                  type="email"
-                  disabled
-                  value={user.email}
-                  className="w-full text-xs pl-8 pr-3 py-2 bg-slate-100 border border-slate-200 rounded-md text-slate-500 cursor-not-allowed"
-                />
-                <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="profile-phone" className="block text-xs font-semibold text-slate-700 mb-1">
-                Contact Phone
-              </label>
-              <div className="relative">
-                <input
-                  id="profile-phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+94 77 123 4567"
-                  className="w-full text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-              </div>
-            </div>
+        <form onSubmit={handleSave} className="p-5 sm:p-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+            />
+            <Input
+              label="Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+            />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end">
-            <button
+          <Input
+            label="Phone Number"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+          />
+
+          <div className="pt-2 flex justify-end">
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-60"
+              variant="primary"
+              isLoading={isSaving}
+              leftIcon={<Save className="w-4 h-4" />}
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-3.5 h-3.5" />
-                  <span>Save Profile</span>
-                </>
-              )}
-            </button>
+              Save Changes
+            </Button>
           </div>
         </form>
       </div>

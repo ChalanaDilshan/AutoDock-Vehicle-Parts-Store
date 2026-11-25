@@ -470,6 +470,11 @@ export const adminFinanceApi = {
   ): Promise<ApiResponse<{ settings: PlatformBankSettings }>> => {
     return apiClient.put('/admin/finance/platform-bank-account', payload);
   },
+
+  getReceiptStreamUrl: (invoiceId: string, receiptId: string): string => {
+    const baseUrl = apiClient.defaults.baseURL || '/api/v1';
+    return `${baseUrl}/admin/finance/invoices/${invoiceId}/receipts/${receiptId}/view`;
+  },
 };
 
 // ============================================================================

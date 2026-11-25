@@ -1,41 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Truck,
-  Plus,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Loader2,
-  ShieldAlert,
-  Send,
-} from 'lucide-react';
+import { Truck, Plus, Trash2, Send } from 'lucide-react';
 import {
   deliveryRateApi,
-  DeliveryRateProposalRecord,
   DeliveryZoneRecord,
+  DeliveryRateProposalRecord,
   DistrictRateProposalItem,
   SRI_LANKAN_DISTRICTS,
 } from '../../api/ordersDeliveryApi.js';
 import { formatLKR } from '../../../customer-experience/utils/formatters.js';
+import {
+  Alert,
+  Badge,
+  Button,
+  Input,
+  PageHeader,
+  Select,
+} from '../../../../shared/components/index.js';
 
 export const SellerDeliveryRatesPage: React.FC = () => {
   const [activeRates, setActiveRates] = useState<DeliveryZoneRecord[]>([]);
   const [proposals, setProposals] = useState<DeliveryRateProposalRecord[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Proposal Form State
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Default rates list for proposal form
   const [districtRates, setDistrictRates] = useState<DistrictRateProposalItem[]>([
-    { district: 'Colombo', deliveryFeeInCents: 45000, estimatedDaysMin: 1, estimatedDaysMax: 2 },
-    { district: 'Gampaha', deliveryFeeInCents: 50000, estimatedDaysMin: 2, estimatedDaysMax: 3 },
-    { district: 'Kalutara', deliveryFeeInCents: 55000, estimatedDaysMin: 2, estimatedDaysMax: 3 },
-    { district: 'Kandy', deliveryFeeInCents: 65000, estimatedDaysMin: 3, estimatedDaysMax: 5 },
+    {
+      district: 'Colombo',
+      deliveryFeeInCents: 45000,
+      estimatedDaysMin: 1,
+      estimatedDaysMax: 2,
+    },
   ]);
 
   const [newDistrict, setNewDistrict] = useState<string>('Galle');
@@ -53,7 +51,7 @@ export const SellerDeliveryRatesPage: React.FC = () => {
         setProposals(response.data.proposals || []);
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Failed to fetch delivery rate configurations.');
+      setErrorMessage(err?.message || 'Unable to load your delivery rate schedule.');
     } finally {
       setIsLoading(false);
     }
@@ -63,56 +61,39 @@ export const SellerDeliveryRatesPage: React.FC = () => {
     fetchRates();
   }, []);
 
-  const handleAddDistrictRate = () => {
+  const handleAddDistrictRow = () => {
+    setFormError(null);
     if (districtRates.some((r) => r.district === newDistrict)) {
-      setFormError(`District ${newDistrict} is already included in your proposal list.`);
+      setFormError(`${newDistrict} is already included in this draft proposal.`);
       return;
     }
-    setFormError(null);
-    setDistrictRates([
-      ...districtRates,
+    setDistrictRates((prev) => [
+      ...prev,
       {
         district: newDistrict,
-        deliveryFeeInCents: Math.round(newFeeLkr * 100),
-        estimatedDaysMin: newMinDays,
-        estimatedDaysMax: newMaxDays,
+        deliveryFeeInCents: Math.max(0, Math.round(newFeeLkr * 100)),
+        estimatedDaysMin: Math.max(1, newMinDays),
+        estimatedDaysMax: Math.max(newMinDays, newMaxDays),
       },
     ]);
   };
 
-  const handleRemoveDistrictRate = (district: string) => {
-    setDistrictRates(districtRates.filter((r) => r.district !== district));
-  };
-
-  const handleRateFeeChange = (district: string, feeInLkr: number) => {
-    setDistrictRates(
-      districtRates.map((r) =>
-        r.district === district
-          ? { ...r, deliveryFeeInCents: Math.round(feeInLkr * 100) }
-          : r
-      )
-    );
-  };
-
   const handleSubmitProposal = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+    setFormSuccess(null);
+
     if (districtRates.length === 0) {
-      setFormError('Please configure at least one district delivery rate.');
+      setFormError('Add at least one district rate before submitting.');
       return;
     }
 
     setIsSubmitting(true);
-    setFormError(null);
-    setFormSuccess(null);
-
     try {
-      const response = await deliveryRateApi.submitProposal({
-        districtRates,
-      });
-
+      const response = await deliveryRateApi.submitProposal({ districtRates });
       if (response.success) {
         setFormSuccess('Delivery rate proposal submitted to platform administrators for review.');
-        fetchRates();
+        await fetchRates();
       }
     } catch (err: any) {
       setFormError(err?.message || 'Failed to submit proposal.');
@@ -122,303 +103,200 @@ export const SellerDeliveryRatesPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Delivery Rate Proposals & Coverage
-          </h1>
-          <p className="text-xs text-slate-500">
-            Propose district delivery fees for administrator approval. Rates become active only after platform verification.
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <PageHeader
+        title="Delivery Rates & District Shipping"
+        subtitle="Configure district delivery charges in LKR and submit rate changes for review"
+        backTo="/seller/dashboard"
+        backLabel="Seller Portal"
+      />
+
+      {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+
+      {/* Active Rates */}
+      <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+        <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <Truck className="w-4 h-4 text-slate-500" />
+            <h2>Active Approved Delivery Rates</h2>
+          </div>
+          <span className="text-xs text-slate-500">
+            {activeRates.length} active zones
+          </span>
+        </div>
+
+        {isLoading ? (
+          <div className="p-6 text-sm text-slate-500">Loading active rates...</div>
+        ) : activeRates.length === 0 ? (
+          <div className="p-6 text-sm text-slate-500">
+            No custom district rates approved yet. Platform default shipping rates apply.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-5">
+            {activeRates.map((rate) => (
+              <div
+                key={rate._id}
+                className="border border-slate-200 rounded-lg p-3.5 flex items-center justify-between"
+              >
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">
+                    {rate.district} District
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    Est. {rate.estimatedDaysMin}–{rate.estimatedDaysMax} days
+                  </div>
+                </div>
+                <div className="text-sm font-bold text-slate-900 tabular-nums">
+                  {formatLKR(rate.deliveryFeeInCents)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Propose New Rates */}
+      <section className="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 space-y-5">
+        <div className="border-b border-slate-200 pb-3">
+          <h2 className="text-base font-semibold text-slate-900">
+            Submit New Rate Proposal
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Add district rates below and submit them for approval
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-blue-700 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-200 font-semibold">
-          <Truck className="w-4 h-4 text-blue-600" />
-          <span>District-Level Pricing</span>
+
+        {formError && <Alert variant="danger">{formError}</Alert>}
+        {formSuccess && <Alert variant="success">{formSuccess}</Alert>}
+
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end bg-slate-50 p-4 rounded-lg border border-slate-200">
+          <Select
+            label="District"
+            value={newDistrict}
+            onChange={(e) => setNewDistrict(e.target.value)}
+            options={SRI_LANKAN_DISTRICTS.map((d) => ({ value: d, label: d }))}
+          />
+          <Input
+            label="Fee (LKR)"
+            type="number"
+            min={0}
+            value={newFeeLkr}
+            onChange={(e) => setNewFeeLkr(Number(e.target.value))}
+          />
+          <Input
+            label="Min Days"
+            type="number"
+            min={1}
+            value={newMinDays}
+            onChange={(e) => setNewMinDays(Number(e.target.value))}
+          />
+          <Input
+            label="Max Days"
+            type="number"
+            min={1}
+            value={newMaxDays}
+            onChange={(e) => setNewMaxDays(Number(e.target.value))}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            leftIcon={<Plus className="w-4 h-4" />}
+            onClick={handleAddDistrictRow}
+          >
+            Add District
+          </Button>
         </div>
-      </div>
 
-      {/* Governance Notice */}
-      <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200/80 text-xs text-amber-900 space-y-1">
-        <div className="font-bold flex items-center gap-1.5 text-amber-800">
-          <ShieldAlert className="w-4 h-4" />
-          <span>AutoDock Delivery Governance Policy</span>
-        </div>
-        <p className="leading-relaxed">
-          Sellers propose flat delivery fees per Sri Lankan district. Platform administrators review and approve all proposals before they activate in checkout. Delivery charges are strictly excluded from AutoDock marketplace commission fees.
-        </p>
-      </div>
+        <form onSubmit={handleSubmitProposal} className="space-y-4">
+          <div className="border border-slate-200 rounded-lg overflow-hidden">
+            <table className="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="py-2.5 px-4">District</th>
+                  <th className="py-2.5 px-4">Fee</th>
+                  <th className="py-2.5 px-4">Estimated Window</th>
+                  <th className="py-2.5 px-4 text-right">Remove</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {districtRates.map((item) => (
+                  <tr key={item.district}>
+                    <td className="py-2.5 px-4 font-medium text-slate-900">
+                      {item.district}
+                    </td>
+                    <td className="py-2.5 px-4 font-semibold text-slate-900 tabular-nums">
+                      {formatLKR(item.deliveryFeeInCents)}
+                    </td>
+                    <td className="py-2.5 px-4 text-slate-600">
+                      {item.estimatedDaysMin}–{item.estimatedDaysMax} days
+                    </td>
+                    <td className="py-2.5 px-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDistrictRates((p) =>
+                            p.filter((r) => r.district !== item.district)
+                          )
+                        }
+                        className="p-1 text-slate-400 hover:text-rose-600"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-      {errorMessage && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-xs text-red-800">
-          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={isSubmitting}
+              leftIcon={<Send className="w-4 h-4" />}
+            >
+              Submit Proposal to Admin
+            </Button>
+          </div>
+        </form>
+      </section>
 
-      {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center space-y-3" data-testid="rates-loading">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          <p className="text-xs text-slate-500">Loading delivery rates and proposals...</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column: Submit New Proposal Form */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
-            <div className="pb-3 border-b border-slate-100">
-              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Send className="w-4 h-4 text-blue-600" />
-                <span>Submit New Rate Proposal</span>
-              </h2>
-              <p className="text-[11px] text-slate-500">
-                Configure rates across Sri Lankan administrative districts
-              </p>
-            </div>
-
-            {formError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800">
-                {formError}
-              </div>
-            )}
-
-            {formSuccess && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>{formSuccess}</span>
-              </div>
-            )}
-
-            {/* Quick Add Row */}
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
-              <span className="font-bold text-slate-700 block">Add District to Proposal</span>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <div>
-                  <label className="text-[11px] text-slate-500 block mb-0.5">District</label>
-                  <select
-                    value={newDistrict}
-                    onChange={(e) => setNewDistrict(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs bg-white font-medium"
-                  >
-                    {SRI_LANKAN_DISTRICTS.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[11px] text-slate-500 block mb-0.5">Fee (LKR)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="50"
-                    value={newFeeLkr}
-                    onChange={(e) => setNewFeeLkr(parseFloat(e.target.value) || 0)}
-                    className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] text-slate-500 block mb-0.5">Min Days</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="14"
-                    value={newMinDays}
-                    onChange={(e) => setNewMinDays(parseInt(e.target.value, 10) || 1)}
-                    className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] text-slate-500 block mb-0.5">Max Days</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="30"
-                    value={newMaxDays}
-                    onChange={(e) => setNewMaxDays(parseInt(e.target.value, 10) || 1)}
-                    className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs bg-white"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end pt-1">
-                <button
-                  type="button"
-                  onClick={handleAddDistrictRate}
-                  className="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Add District</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Configured Districts Table */}
-            <form onSubmit={handleSubmitProposal} className="space-y-4">
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-slate-700 block">
-                  Proposed Rates ({districtRates.length} Districts)
-                </span>
-                <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl">
-                  {districtRates.map((r) => (
-                    <div
-                      key={r.district}
-                      className="p-2.5 flex items-center justify-between text-xs hover:bg-slate-50"
-                    >
-                      <div>
-                        <span className="font-bold text-slate-900 block">{r.district}</span>
-                        <span className="text-[10px] text-slate-400">
-                          {r.estimatedDaysMin}-{r.estimatedDaysMax} business days
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1">
-                          <span className="text-slate-400 text-xs">LKR</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="50"
-                            value={r.deliveryFeeInCents / 100}
-                            onChange={(e) =>
-                              handleRateFeeChange(r.district, parseFloat(e.target.value) || 0)
-                            }
-                            className="w-20 px-2 py-1 border border-slate-300 rounded-lg text-xs font-mono font-bold text-right"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveDistrictRate(r.district)}
-                          className="text-slate-400 hover:text-red-600 transition"
-                          title="Remove district"
-                        >
-                          <XCircle className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting || districtRates.length === 0}
-                className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm"
+      {/* Proposal History */}
+      {proposals.length > 0 && (
+        <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200">
+            <h2 className="text-sm font-semibold text-slate-900">Proposal History</h2>
+          </div>
+          <div className="divide-y divide-slate-200 text-sm">
+            {proposals.map((prop) => (
+              <div
+                key={prop._id}
+                className="p-4 flex flex-wrap items-center justify-between gap-2"
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Submitting for Admin Approval...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    <span>Submit Proposal to Admin</span>
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-
-          {/* Right Column: Active Rates & Proposals History */}
-          <div className="space-y-6">
-            {/* Active Approved Rates */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-              <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                  <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-600" />
-                    <span>Active Approved Delivery Rates</span>
-                  </h2>
-                  <p className="text-[11px] text-slate-500">
-                    Currently active in customer checkout for your store
-                  </p>
+                  <span className="font-medium text-slate-900">
+                    {prop.districtRates.length} district rates submitted
+                  </span>
+                  <span className="text-xs text-slate-500 ml-2">
+                    {new Date(prop.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  {activeRates.length} Districts
-                </span>
+                <Badge
+                  variant={
+                    prop.status === 'APPROVED'
+                      ? 'success'
+                      : prop.status === 'REJECTED'
+                        ? 'danger'
+                        : 'warning'
+                  }
+                >
+                  {prop.status}
+                </Badge>
               </div>
-
-              {activeRates.length === 0 ? (
-                <p className="text-xs text-slate-400 py-4 text-center">
-                  No approved delivery rates yet. Submit a proposal to activate store rates.
-                </p>
-              ) : (
-                <div className="divide-y divide-slate-100 max-h-52 overflow-y-auto">
-                  {activeRates.map((rate) => (
-                    <div key={rate._id} className="py-2 flex items-center justify-between text-xs">
-                      <div>
-                        <span className="font-semibold text-slate-900">{rate.district} District</span>
-                        <span className="text-[10px] text-slate-400 block">
-                          Version {rate.version} • {rate.estimatedDaysMin}-{rate.estimatedDaysMax} days
-                        </span>
-                      </div>
-                      <span className="font-bold text-slate-900">
-                        {formatLKR(rate.deliveryFeeInCents)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Historical Proposals */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-              <div className="pb-3 border-b border-slate-100">
-                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-blue-600" />
-                  <span>Proposal Submissions Log</span>
-                </h2>
-                <p className="text-[11px] text-slate-500">
-                  Track review status and administrator feedback
-                </p>
-              </div>
-
-              {proposals.length === 0 ? (
-                <p className="text-xs text-slate-400 py-4 text-center">
-                  No proposal records found.
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {proposals.map((prop) => (
-                    <div
-                      key={prop._id}
-                      className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-slate-600 text-[11px]">
-                          Submitted {new Date(prop.createdAt).toLocaleDateString()}
-                        </span>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            prop.status === 'APPROVED'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : prop.status === 'REJECTED'
-                              ? 'bg-rose-100 text-rose-800'
-                              : 'bg-amber-100 text-amber-800'
-                          }`}
-                        >
-                          {prop.status}
-                        </span>
-                      </div>
-
-                      <div className="text-slate-600 text-[11px]">
-                        Coverage: <strong>{prop.districtRates?.length || 0} districts</strong>
-                      </div>
-
-                      {prop.reviewerNotes && (
-                        <div className="pt-1 border-t border-slate-200 text-slate-500 text-[11px]">
-                          <strong>Reviewer Feedback:</strong> {prop.reviewerNotes}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            ))}
           </div>
-        </div>
+        </section>
       )}
     </div>
   );

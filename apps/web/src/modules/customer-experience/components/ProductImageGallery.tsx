@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
+import { Package } from 'lucide-react';
 
 interface ProductImageGalleryProps {
-  images: Array<{
-    url: string;
-    isPrimary: boolean;
-    altText?: string;
-  }>;
+  images: Array<{ url: string; isPrimary?: boolean; altText?: string }>;
   productName: string;
 }
 
@@ -13,50 +10,47 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
   images,
   productName,
 }) => {
-  const fallback =
-    'https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=800&q=80';
-
-  const initialIndex = images.findIndex((img) => img.isPrimary);
-  const [selectedIndex, setSelectedIndex] = useState(initialIndex >= 0 ? initialIndex : 0);
-
-  const displayImages = images.length > 0 ? images : [{ url: fallback, isPrimary: true, altText: productName }];
-  const activeImage = displayImages[selectedIndex] || displayImages[0];
+  const initialIndex = Math.max(
+    0,
+    images.findIndex((img) => img.isPrimary)
+  );
+  const [selectedIndex, setSelectedIndex] = useState(initialIndex);
+  const activeImage = images[selectedIndex] || images[0];
 
   return (
-    <div className="space-y-4">
-      {/* Primary Image View */}
-      <div className="relative aspect-4/3 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200">
-        <img
-          src={activeImage.url}
-          alt={activeImage.altText || productName}
-          className="w-full h-full object-contain p-4 transition duration-300"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = fallback;
-          }}
-        />
+    <div className="space-y-3">
+      <div className="aspect-[4/3] w-full bg-white border border-slate-200 rounded-lg overflow-hidden flex items-center justify-center">
+        {activeImage?.url ? (
+          <img
+            src={activeImage.url}
+            alt={activeImage.altText || productName}
+            className="w-full h-full object-contain p-2"
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-slate-400">
+            <Package className="w-12 h-12 stroke-[1.5]" aria-hidden="true" />
+            <span className="text-xs">No image available</span>
+          </div>
+        )}
       </div>
 
-      {/* Thumbnails Row */}
-      {displayImages.length > 1 && (
-        <div className="flex items-center gap-3 overflow-x-auto pb-2">
-          {displayImages.map((img, idx) => (
+      {images.length > 1 && (
+        <div className="grid grid-cols-5 gap-2">
+          {images.map((img, idx) => (
             <button
-              key={idx}
+              key={`${img.url}-${idx}`}
               type="button"
               onClick={() => setSelectedIndex(idx)}
-              className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 shrink-0 bg-slate-100 transition ${
+              className={`aspect-square rounded-md border overflow-hidden bg-white transition-colors ${
                 selectedIndex === idx
-                  ? 'border-blue-600 ring-2 ring-blue-500/30'
+                  ? 'border-blue-600 ring-2 ring-blue-600/20'
                   : 'border-slate-200 hover:border-slate-300'
               }`}
             >
               <img
                 src={img.url}
-                alt={img.altText || `${productName} thumbnail ${idx + 1}`}
+                alt={img.altText || `${productName} view ${idx + 1}`}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = fallback;
-                }}
               />
             </button>
           ))}

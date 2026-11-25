@@ -22,9 +22,6 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
   fullWidth?: boolean;
 }
 
-/**
- * Reusable accessible Select dropdown component matching AutoDock's form controls.
- */
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   (
     {
@@ -34,48 +31,56 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       error,
       helperText,
       fullWidth = true,
-      id,
       className = '',
+      id,
+      required,
       children,
-      ...rest
+      ...props
     },
     ref
   ) => {
     const generatedId = useId();
     const selectId = id || generatedId;
-    const messageId = error ? `${selectId}-error` : helperText ? `${selectId}-helper` : undefined;
+    const errorId = `${selectId}-error`;
+    const helperId = `${selectId}-helper`;
 
     return (
       <div className={fullWidth ? 'w-full' : 'inline-block'}>
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-xs font-medium text-slate-700 mb-1.5"
+            className="block text-sm font-medium text-slate-700 mb-1.5"
           >
             {label}
+            {required && (
+              <span className="text-rose-600 ml-0.5" aria-hidden="true">
+                *
+              </span>
+            )}
           </label>
         )}
 
-        <div className="relative flex items-center">
+        <div className="relative">
           <select
             ref={ref}
             id={selectId}
-            aria-invalid={Boolean(error) || undefined}
-            aria-describedby={messageId}
+            required={required}
+            aria-invalid={error ? 'true' : undefined}
+            aria-describedby={error ? errorId : helperText ? helperId : undefined}
             className={[
-              'w-full appearance-none rounded-md border bg-white text-xs sm:text-sm text-slate-900',
-              'pl-3 pr-9 py-2 transition-colors outline-none',
-              'disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed',
+              'block w-full appearance-none rounded-lg border bg-white text-sm text-slate-900 transition-colors',
+              'py-2 pl-3 pr-9',
               error
-                ? 'border-rose-500 focus:border-rose-600 focus:ring-1 focus:ring-rose-500'
-                : 'border-slate-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-600',
+                ? 'border-rose-300 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20'
+                : 'border-slate-300 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15',
+              'disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed',
               className,
             ]
               .filter(Boolean)
               .join(' ')}
-            {...rest}
+            {...props}
           >
-            {placeholder !== undefined && (
+            {placeholder && (
               <option value="">{placeholder}</option>
             )}
             {options?.map((opt) => (
@@ -86,23 +91,20 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             {children}
           </select>
 
-          <ChevronDown
-            className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none"
-            aria-hidden="true"
-          />
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-500">
+            <ChevronDown className="w-4 h-4" aria-hidden="true" />
+          </div>
         </div>
 
-        {error && (
-          <p id={messageId} role="alert" className="mt-1 text-xs text-rose-600 font-medium">
+        {error ? (
+          <p id={errorId} role="alert" className="mt-1.5 text-xs text-rose-600">
             {error}
           </p>
-        )}
-
-        {!error && helperText && (
-          <p id={messageId} className="mt-1 text-xs text-slate-500">
+        ) : helperText ? (
+          <p id={helperId} className="mt-1.5 text-xs text-slate-500">
             {helperText}
           </p>
-        )}
+        ) : null}
       </div>
     );
   }

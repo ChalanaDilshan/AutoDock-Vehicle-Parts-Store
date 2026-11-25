@@ -297,16 +297,33 @@ export const checkoutApi = {
   },
 };
 
+function normalizePaginationMeta(meta: any, itemCount: number): Pagination {
+  const page = Number(meta?.pagination?.page ?? meta?.page ?? 1);
+  const limit = Number(meta?.pagination?.limit ?? meta?.limit ?? 10) || 10;
+  const total = Number(meta?.pagination?.total ?? meta?.total ?? itemCount);
+  const totalPages = Number(
+    meta?.pagination?.totalPages ?? Math.max(1, Math.ceil(total / Math.max(1, limit)))
+  );
+  return { page, limit, total, totalPages };
+}
+
 export const orderApi = {
   getCustomerOrders: async (params?: {
     page?: number;
     limit?: number;
     status?: string;
   }): Promise<ApiResponse<{ orders: MasterOrderSummary[]; pagination: Pagination }>> => {
-    return (await apiClient.get('/orders', { params })) as unknown as ApiResponse<{
-      orders: MasterOrderSummary[];
-      pagination: Pagination;
-    }>;
+    const raw = (await apiClient.get('/orders', { params })) as any;
+    if (Array.isArray(raw?.data)) {
+      return {
+        ...raw,
+        data: {
+          orders: raw.data,
+          pagination: normalizePaginationMeta(raw.meta, raw.data.length),
+        },
+      };
+    }
+    return raw;
   },
 
   getOrderById: async (
@@ -363,10 +380,17 @@ export const sellerOrderApi = {
     fulfillmentStatus?: string;
     paymentStatus?: string;
   }): Promise<ApiResponse<{ suborders: SuborderDetail[]; pagination: Pagination }>> => {
-    return (await apiClient.get('/seller/suborders', { params })) as unknown as ApiResponse<{
-      suborders: SuborderDetail[];
-      pagination: Pagination;
-    }>;
+    const raw = (await apiClient.get('/seller/suborders', { params })) as any;
+    if (Array.isArray(raw?.data)) {
+      return {
+        ...raw,
+        data: {
+          suborders: raw.data,
+          pagination: normalizePaginationMeta(raw.meta, raw.data.length),
+        },
+      };
+    }
+    return raw;
   },
 
   getSellerSuborderById: async (suborderId: string): Promise<ApiResponse<SuborderDetail>> => {
@@ -454,10 +478,17 @@ export const adminOrderApi = {
     status?: string;
     search?: string;
   }): Promise<ApiResponse<{ orders: MasterOrderSummary[]; pagination: Pagination }>> => {
-    return (await apiClient.get('/admin/orders', { params })) as unknown as ApiResponse<{
-      orders: MasterOrderSummary[];
-      pagination: Pagination;
-    }>;
+    const raw = (await apiClient.get('/admin/orders', { params })) as any;
+    if (Array.isArray(raw?.data)) {
+      return {
+        ...raw,
+        data: {
+          orders: raw.data,
+          pagination: normalizePaginationMeta(raw.meta, raw.data.length),
+        },
+      };
+    }
+    return raw;
   },
 
   getAdminOrderById: async (

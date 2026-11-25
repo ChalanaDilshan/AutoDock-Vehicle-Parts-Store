@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
+import { Building2 } from 'lucide-react';
 import { SellerProfileData } from '../../api/identityApi.js';
-import { X, CheckCircle, AlertTriangle, Building2, Loader2 } from 'lucide-react';
+import { Alert, Button, Modal } from '../../../../shared/components/index.js';
 
 interface BankVerificationModalProps {
   isOpen: boolean;
   onClose: () => void;
   seller: SellerProfileData;
-  onConfirm: (payload: { decision: 'VERIFY' | 'REJECT'; rejectionReason?: string }) => Promise<void>;
+  onConfirm: (payload: {
+    decision: 'VERIFY' | 'REJECT';
+    rejectionReason?: string;
+  }) => Promise<void>;
 }
 
 export const BankVerificationModal: React.FC<BankVerificationModalProps> = ({
@@ -20,14 +24,15 @@ export const BankVerificationModal: React.FC<BankVerificationModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  if (!isOpen || !seller.bankDetails) return null;
+  const bank = seller.bankDetails;
+  if (!bank) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
 
-    if (decision === 'REJECT' && !rejectionReason.trim()) {
-      setValidationError('Please specify a rejection reason for the bank account.');
+    if (decision === 'REJECT' && rejectionReason.trim().length < 5) {
+      setValidationError('Provide a reason explaining why bank details were rejected.');
       return;
     }
 
@@ -39,139 +44,99 @@ export const BankVerificationModal: React.FC<BankVerificationModalProps> = ({
       });
       onClose();
     } catch (err: any) {
-      setValidationError(err?.message || 'Failed to update bank account verification status.');
+      setValidationError(err?.message || 'Unable to verify bank details.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="bank-verify-title"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Audit Bank Account Details"
+      subtitle={seller.businessName}
+      size="md"
     >
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-          <div className="flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-blue-600" />
-            <h3 id="bank-verify-title" className="font-bold text-slate-900 text-sm">
-              Review Seller Bank Account
-            </h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2 text-sm">
+          <div className="flex items-center gap-2 font-semibold text-slate-900 pb-1 border-b border-slate-200">
+            <Building2 className="w-4 h-4 text-slate-500" />
+            <span>{bank.bankName}</span>
           </div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span className="text-slate-500 block">Account Holder</span>
+              <span className="font-medium text-slate-900">{bank.accountHolderName}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block">Branch</span>
+              <span className="font-medium text-slate-900">{bank.branchName}</span>
+            </div>
+            <div className="col-span-2">
+              <span className="text-slate-500 block">Masked Account Number</span>
+              <span className="font-mono font-semibold text-slate-900">
+                {bank.maskedAccountNumber}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={onClose}
-            className="p-1 text-slate-400 hover:text-slate-600 rounded transition"
-            aria-label="Close"
+            type="button"
+            onClick={() => setDecision('VERIFY')}
+            className={`py-2 px-3 rounded-lg border text-sm font-medium ${
+              decision === 'VERIFY'
+                ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
+                : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+            }`}
           >
-            <X className="w-5 h-5" />
+            Verify Account
+          </button>
+          <button
+            type="button"
+            onClick={() => setDecision('REJECT')}
+            className={`py-2 px-3 rounded-lg border text-sm font-medium ${
+              decision === 'REJECT'
+                ? 'border-rose-600 bg-rose-50 text-rose-800'
+                : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            Reject Account
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          {/* Bank Summary Details */}
-          <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1.5">
-            <div className="flex justify-between">
-              <span className="text-slate-500">Bank Name:</span>
-              <span className="font-semibold text-slate-800">{seller.bankDetails.bankName}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Account Holder:</span>
-              <span className="font-semibold text-slate-800">{seller.bankDetails.accountHolderName}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Masked Account:</span>
-              <span className="font-mono font-semibold text-slate-900">{seller.bankDetails.maskedAccountNumber}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Branch:</span>
-              <span className="font-semibold text-slate-800">{seller.bankDetails.branchName}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Current Status:</span>
-              <span className="font-bold text-amber-700">{seller.bankDetails.verificationStatus}</span>
-            </div>
-          </div>
-
-          <div className="text-[11px] text-slate-500 leading-snug">
-            Verify that the bank account holder matches the registered Business Name ({seller.businessName}) or registered business proprietor.
-          </div>
-
-          {/* Action Decision */}
+        {decision === 'REJECT' && (
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">Verification Decision</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setDecision('VERIFY')}
-                className={`py-2 px-3 rounded text-xs font-semibold flex items-center justify-center gap-1.5 border transition ${
-                  decision === 'VERIFY'
-                    ? 'bg-emerald-600 text-white border-emerald-600'
-                    : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-                }`}
-              >
-                <CheckCircle className="w-4 h-4" /> Verify Account
-              </button>
-              <button
-                type="button"
-                onClick={() => setDecision('REJECT')}
-                className={`py-2 px-3 rounded text-xs font-semibold flex items-center justify-center gap-1.5 border transition ${
-                  decision === 'REJECT'
-                    ? 'bg-red-600 text-white border-red-600'
-                    : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-                }`}
-              >
-                <AlertTriangle className="w-4 h-4" /> Reject Details
-              </button>
-            </div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              Rejection Reason *
+            </label>
+            <textarea
+              rows={3}
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="Explain discrepancy in account holder name or branch..."
+              className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+            />
           </div>
+        )}
 
-          {/* Rejection Note */}
-          {decision === 'REJECT' && (
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Rejection Reason *
-              </label>
-              <textarea
-                rows={3}
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="E.g., Account holder name does not match the registered business owner."
-                className="w-full text-xs p-2.5 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-          )}
+        {validationError && <Alert variant="danger">{validationError}</Alert>}
 
-          {validationError && (
-            <div className="p-2.5 bg-red-50 text-red-700 text-xs rounded border border-red-200">
-              {validationError}
-            </div>
-          )}
-
-          {/* Modal Footer */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="px-3 py-1.5 border border-slate-300 rounded text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`px-4 py-1.5 rounded text-xs font-semibold text-white transition flex items-center gap-1.5 ${
-                decision === 'VERIFY' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'
-              }`}
-            >
-              {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              <span>{decision === 'VERIFY' ? 'Confirm Verification' : 'Confirm Rejection'}</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant={decision === 'VERIFY' ? 'primary' : 'danger'}
+            isLoading={isSubmitting}
+          >
+            {decision === 'VERIFY' ? 'Confirm Verification' : 'Reject Bank Details'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 };

@@ -1,47 +1,26 @@
 import React from 'react';
 import { MasterOrderRollupStatus } from '../api/ordersDeliveryApi.js';
+import { Badge } from '../../../shared/components/index.js';
 
 interface MasterOrderStatusBadgeProps {
   status: MasterOrderRollupStatus;
 }
 
-export const MasterOrderStatusBadge: React.FC<MasterOrderStatusBadgeProps> = ({ status }) => {
+export const MasterOrderStatusBadge: React.FC<MasterOrderStatusBadgeProps> = ({
+  status,
+}) => {
   switch (status) {
     case 'PENDING_PAYMENT':
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300">
-          Pending Payment
-        </span>
-      );
+      return <Badge variant="warning">Pending Payment</Badge>;
     case 'AWAITING_FULFILLMENT':
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-900 border border-blue-300">
-          Awaiting Fulfillment
-        </span>
-      );
+      return <Badge variant="primary">Awaiting Fulfillment</Badge>;
     case 'IN_PROGRESS':
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-900 border border-indigo-300">
-          In Progress
-        </span>
-      );
+      return <Badge variant="info">In Progress</Badge>;
     case 'COMPLETED':
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-900 border border-emerald-300">
-          Completed
-        </span>
-      );
+      return <Badge variant="success">Completed</Badge>;
     case 'CANCELLED':
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-900 border border-rose-300">
-          Cancelled
-        </span>
-      );
+      return <Badge variant="danger">Cancelled</Badge>;
     default:
-      return (
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-800">
-          {status}
-        </span>
-      );
+      return <Badge variant="default">{status}</Badge>;
   }
 };

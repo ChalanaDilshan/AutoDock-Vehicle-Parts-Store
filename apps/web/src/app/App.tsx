@@ -1,9 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Layout } from '../shared/components/Layout.js';
 import { ErrorBoundary } from '../shared/components/ErrorBoundary.js';
 import { AuthProvider } from '../modules/identity/context/AuthContext.js';
-import { SplashScreen } from '../shared/components/SplashScreen.js';
 
 // Module route imports
 import { identityRoutes } from '../modules/identity/routes.js';
@@ -36,12 +35,8 @@ const router = createBrowserRouter([
 ]);
 
 export const App: React.FC = () => {
-  const [splashDone, setSplashDone] = useState(false);
-  const handleSplashDone = useCallback(() => setSplashDone(true), []);
-
   return (
     <ErrorBoundary>
-      {!splashDone && <SplashScreen onDone={handleSplashDone} />}
       <AuthProvider>
         <RouterProvider router={router} />
       </AuthProvider>
