@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <rect width="400" height="300" fill="#F8FAFC"/>
+  <rect x="48" y="42" width="304" height="216" rx="16" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  <path d="M115 110c0-18 14-32 32-32h56c18 0 32 14 32 32v72c0 12-10 22-22 22h-76c-12 0-22-10-22-22v-72z" fill="#1E293B"/>
+  <path d="M128 118h94v54c0 8-7 14-15 14h-64c-8 0-15-6-15-14v-54z" fill="#2563EB"/>
+  <line x1="175" y1="118" x2="175" y2="186" stroke="#1E293B" stroke-width="4"/>
+  <path d="M165 110c0-18 14-32 32-32h56c18 0 32 14 32 32v72c0 12-10 22-22 22h-76c-12 0-22-10-22-22v-72z" fill="#334155" opacity="0.92" transform="translate(26,18)"/>
+  <path d="M204 144h94v54c0 8-7 14-15 14h-64c-8 0-15-6-15-14v-54z" fill="#3B82F6"/>
+  <line x1="251" y1="144" x2="251" y2="212" stroke="#0F172A" stroke-width="4"/>
+  <text x="200" y="244" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#64748B">CERAMIC BRAKE PAD SET</text>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <rect width="400" height="300" fill="#F8FAFC"/>
+  <rect x="48" y="42" width="304" height="216" rx="16" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  <rect x="184" y="64" width="32" height="18" rx="4" fill="#94A3B8"/>
+  <rect x="178" y="82" width="44" height="58" rx="6" fill="#E2E8F0" stroke="#CBD5E1" stroke-width="2"/>
+  <rect x="178" y="96" width="44" height="8" fill="#2563EB"/>
+  <rect x="170" y="140" width="60" height="22" rx="4" fill="#334155"/>
+  <rect x="180" y="162" width="40" height="38" rx="3" fill="#64748B"/>
+  <line x1="180" y1="170" x2="220" y2="170" stroke="#CBD5E1" stroke-width="2"/>
+  <line x1="180" y1="179" x2="220" y2="179" stroke="#CBD5E1" stroke-width="2"/>
+  <line x1="180" y1="188" x2="220" y2="188" stroke="#CBD5E1" stroke-width="2"/>
+  <path d="M196 200h8v12l-6 4" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+  <text x="200" y="244" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#64748B">IRIDIUM SPARK PLUG SET</text>
+</svg>

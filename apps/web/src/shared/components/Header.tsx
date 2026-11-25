@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../modules/identity/context/AuthContext.js';
 import { NotificationBell } from '../../modules/admin-platform/components/NotificationBell.js';
+import { StorefrontCategoryBar } from '../../modules/customer-experience/components/StorefrontCategoryBar.js';
 import { Button } from './Button.js';
 
 export const Header: React.FC = () => {
@@ -249,6 +250,9 @@ export const Header: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Storefront Category & Mega-Menu Bar (Home & Storefront Pages) */}
+      <StorefrontCategoryBar />
 
       {/* Seller Workspace Quick Bar (Desktop) */}
       {isSeller && (
