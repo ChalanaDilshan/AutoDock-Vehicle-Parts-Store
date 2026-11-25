@@ -6,7 +6,8 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { LoginPage } from '../../../src/modules/identity/pages/LoginPage.js';
 import { RegisterPage } from '../../../src/modules/identity/pages/RegisterPage.js';
 import { ProtectedRoute } from '../../../src/modules/identity/components/ProtectedRoute.js';
-import { AuthProvider, useAuth } from '../../../src/modules/identity/context/AuthContext.js';
+import { CartLoginPrompt } from '../../../src/modules/identity/components/CartLoginPrompt.js';
+import { AuthProvider } from '../../../src/modules/identity/context/AuthContext.js';
 import { authApi } from '../../../src/modules/identity/api/identityApi.js';
 
 // Mock authApi
@@ -127,5 +128,46 @@ describe('MOD-01 Authentication UI Tests', () => {
 
     expect(screen.getByText('Login Screen Destination')).toBeDefined();
     expect(screen.queryByText('Secret Profile Content')).toBeNull();
+  });
+
+  it('CartLoginPrompt validates fields, toggles password visibility, and calls login on submit', async () => {
+    vi.mocked(authApi.login).mockRejectedValueOnce({
+      message: 'Invalid email or password credentials.',
+      status: 401,
+    });
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <CartLoginPrompt />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    const submitBtn = screen.getByRole('button', { name: /^LOGIN$/i });
+    fireEvent.click(submitBtn);
+
+    expect(await screen.findByText(/Please enter both your email address and password\./i)).toBeDefined();
+    expect(authApi.login).not.toHaveBeenCalled();
+
+    const emailInput = screen.getByLabelText(/Email Address/i) as HTMLInputElement;
+    const passwordInput = screen.getByLabelText(/^Password/i) as HTMLInputElement;
+    expect(passwordInput.type).toBe('password');
+
+    const toggleBtn = screen.getByRole('button', { name: /Show password/i });
+    fireEvent.click(toggleBtn);
+    expect(passwordInput.type).toBe('text');
+    expect(screen.getByRole('button', { name: /Hide password/i })).toBeDefined();
+
+    fireEvent.change(emailInput, { target: { value: 'customer@autodock.lk' } });
+    fireEvent.change(passwordInput, { target: { value: 'WrongPass123!' } });
+    fireEvent.click(submitBtn);
+
+    expect(await screen.findByText(/Invalid email or password credentials\./i)).toBeDefined();
+    expect(emailInput.value).toBe('customer@autodock.lk');
+    expect(authApi.login).toHaveBeenCalledWith({
+      email: 'customer@autodock.lk',
+      password: 'WrongPass123!',
+    });
   });
 });
