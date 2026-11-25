@@ -17,6 +17,8 @@ import {
   Phone,
   CheckCircle2,
   LayoutDashboard,
+  Car,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '../../modules/identity/context/AuthContext.js';
 import { NotificationBell } from '../../modules/admin-platform/components/NotificationBell.js';
