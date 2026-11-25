@@ -16,14 +16,21 @@ import {
   Building2,
   Phone,
   CheckCircle2,
-  Car,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useAuth } from '../../modules/identity/context/AuthContext.js';
+import { NotificationBell } from '../../modules/admin-platform/components/NotificationBell.js';
+import { AdminLayout } from '../../modules/admin-platform/components/AdminLayout.js';
 
 export const Layout: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // If navigating any administrative workstation, render the unified AdminLayout shell
+  if (location.pathname.startsWith('/admin')) {
+    return <AdminLayout />;
+  }
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -149,11 +156,25 @@ export const Layout: React.FC = () => {
             {/* Role-Specific Workstations */}
             {user?.role === 'ADMIN' ? (
               <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-800 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                  Admin Platform
-                </span>
-                <Link to="/admin/sellers/verification" className="text-slate-700 hover:text-blue-600 transition">
-                  Sellers
+                <Link
+                  to="/admin/dashboard"
+                  className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 hover:bg-blue-100 transition"
+                >
+                  Admin Console
+                </Link>
+                <Link
+                  to="/admin/dashboard"
+                  className="flex items-center gap-1 hover:text-blue-600 text-slate-700 transition"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link
+                  to="/admin/sellers/verification"
+                  className="flex items-center gap-1 hover:text-blue-600 text-slate-700 transition"
+                >
+                  <Shield className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Sellers</span>
                 </Link>
                 <Link to="/admin/catalogue" className="text-slate-700 hover:text-blue-600 transition">
                   Catalogue
@@ -217,6 +238,8 @@ export const Layout: React.FC = () => {
 
           {/* User Actions */}
           <div className="flex items-center gap-2">
+            <NotificationBell />
+
             <Link
               to="/wishlist"
               className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition"
@@ -331,12 +354,18 @@ export const Layout: React.FC = () => {
                 </div>
 
                 {user?.role === 'ADMIN' && (
-                  <div className="space-y-1">
-                    <Link to="/admin/sellers/verification" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Seller Verifications
+                  <div className="space-y-1 text-xs font-semibold">
+                    <Link
+                      to="/admin/dashboard"
+                      className="block p-2 rounded-lg text-blue-700 bg-blue-50 font-bold"
+                    >
+                      Executive Dashboard Overview
                     </Link>
-                    <Link to="/admin/catalogue" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Catalogue Taxonomy
+                    <Link
+                      to="/admin/sellers/verification"
+                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      Seller Verifications & Reviews
                     </Link>
                     <Link to="/admin/orders" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
                       Master Orders
@@ -349,6 +378,30 @@ export const Layout: React.FC = () => {
                     </Link>
                     <Link to="/admin/finance" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
                       Finance & Settlements
+                    </Link>
+                    <Link
+                      to="/admin/notifications"
+                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      Operational Alerts & Delivery Retries
+                    </Link>
+                    <Link
+                      to="/admin/audit-logs"
+                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      Security & Compliance Audit Logs
+                    </Link>
+                    <Link
+                      to="/admin/reports"
+                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      Consolidated Platform Reports
+                    </Link>
+                    <Link
+                      to="/notifications"
+                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      My Notification Centre
                     </Link>
                   </div>
                 )}
@@ -373,6 +426,12 @@ export const Layout: React.FC = () => {
                     <Link to="/seller/promotions" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
                       Promotions
                     </Link>
+                    <Link
+                      to="/notifications"
+                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      My Notification Centre
+                    </Link>
                   </div>
                 )}
 
@@ -381,8 +440,17 @@ export const Layout: React.FC = () => {
                     <Link to="/orders" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
                       My Orders & Receipts
                     </Link>
-                    <Link to="/account/profile" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
-                      Account Settings
+                    <Link
+                      to="/notifications"
+                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      My Notification Centre
+                    </Link>
+                    <Link
+                      to="/account/profile"
+                      className="block p-2 rounded-lg text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                      My Account & Addresses
                     </Link>
                     <Link to="/sellers/register" className="block p-1.5 text-slate-700 hover:bg-slate-50 rounded">
                       Apply as Merchant

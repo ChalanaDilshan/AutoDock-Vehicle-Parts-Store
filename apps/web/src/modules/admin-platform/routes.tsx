@@ -1,19 +1,65 @@
-import React from 'react';
-import { RouteObject } from 'react-router-dom';
-
-/**
- * MOD-05 Administration, Notifications & Reporting (Frontend Routes Placeholder)
- */
-const AdminDashboardPage: React.FC = () => (
-  <div className="bg-white p-6 rounded-lg border border-slate-200">
-    <h1 className="text-xl font-bold text-slate-900 mb-2">Administrative Workstation</h1>
-    <p className="text-sm text-slate-600 mb-4">MOD-05 Platform Foundation</p>
-    <div className="p-3 bg-purple-50 text-purple-800 rounded text-xs">
-      Central administrator overview dashboard placeholder. Will be implemented in Module 05.
-    </div>
-  </div>
-);
+import { RouteObject, Navigate } from 'react-router-dom';
+import { ProtectedRoute } from '../identity/components/ProtectedRoute.js';
+import { AdminDashboardPage } from './pages/AdminDashboardPage.js';
+import { NotificationsPage } from './pages/NotificationsPage.js';
+import { AdminNotificationsOperationsPage } from './pages/AdminNotificationsOperationsPage.js';
+import { AdminAuditExplorerPage } from './pages/AdminAuditExplorerPage.js';
+import { AdminReportsPage } from './pages/AdminReportsPage.js';
 
 export const adminPlatformRoutes: RouteObject[] = [
-  { path: 'admin/dashboard', element: <AdminDashboardPage /> },
+  // User-Facing In-App Notification Centre (Available for all authenticated users: Customers, Sellers, Admins)
+  {
+    path: 'notifications',
+    element: (
+      <ProtectedRoute>
+        <NotificationsPage />
+      </ProtectedRoute>
+    ),
+  },
+
+  // Central Administrator Workstation Routes (Restricted strictly to role: 'ADMIN')
+  {
+    path: 'admin',
+    element: <Navigate to="/admin/dashboard" replace />,
+  },
+  {
+    path: 'admin/dashboard',
+    element: (
+      <ProtectedRoute allowedRoles={['ADMIN']}>
+        <AdminDashboardPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'admin/notifications',
+    element: (
+      <ProtectedRoute allowedRoles={['ADMIN']}>
+        <AdminNotificationsOperationsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'admin/audit-logs',
+    element: (
+      <ProtectedRoute allowedRoles={['ADMIN']}>
+        <AdminAuditExplorerPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'admin/reports',
+    element: (
+      <ProtectedRoute allowedRoles={['ADMIN']}>
+        <AdminReportsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'admin/reports/:reportType',
+    element: (
+      <ProtectedRoute allowedRoles={['ADMIN']}>
+        <AdminReportsPage />
+      </ProtectedRoute>
+    ),
+  },
 ];
