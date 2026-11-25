@@ -63,6 +63,7 @@ export const HomePage: React.FC = () => {
   const years = Array.from({ length: 35 }, (_, i) => String(currentYear - i));
 
   useEffect(() => {
+    let isMounted = true;
     setIsLoadingProducts(true);
     setIsLoadingLatest(true);
     setIsLoadingTaxonomy(true);
@@ -72,14 +73,18 @@ export const HomePage: React.FC = () => {
     productsApi
       .getRecommendations({ limit: 8 })
       .then((res) => {
+        if (!isMounted) return;
         if (res.success && Array.isArray(res.data)) {
           setFeaturedProducts(res.data);
         }
       })
       .catch(() => {
+        if (!isMounted) return;
         setProductsError('Unable to load featured products right now.');
       })
-      .finally(() => setIsLoadingProducts(false));
+      .finally(() => {
+        if (isMounted) setIsLoadingProducts(false);
+      });
 
     if (typeof productsApi.search === 'function') {
       Promise.allSettled([
@@ -87,6 +92,7 @@ export const HomePage: React.FC = () => {
         productsApi.search({ sortBy: 'RATING_DESC', limit: 6 }),
       ])
         .then(([newestRes, popularRes]) => {
+          if (!isMounted) return;
           if (
             newestRes.status === 'fulfilled' &&
             newestRes.value?.success &&
@@ -102,7 +108,9 @@ export const HomePage: React.FC = () => {
             setPopularProducts(popularRes.value.data.items);
           }
         })
-        .finally(() => setIsLoadingLatest(false));
+        .finally(() => {
+          if (isMounted) setIsLoadingLatest(false);
+        });
     } else {
       setIsLoadingLatest(false);
     }
@@ -113,6 +121,7 @@ export const HomePage: React.FC = () => {
       taxonomyApi.getMakes(),
     ])
       .then(([catRes, brandRes, makeRes]) => {
+        if (!isMounted) return;
         let taxonomyFailed = false;
         if (catRes.status === 'fulfilled' && catRes.value.success && Array.isArray(catRes.value.data)) {
           setCategories(catRes.value.data.slice(0, 8));
@@ -129,7 +138,13 @@ export const HomePage: React.FC = () => {
           setTaxonomyError('Categories are currently unavailable.');
         }
       })
-      .finally(() => setIsLoadingTaxonomy(false));
+      .finally(() => {
+        if (isMounted) setIsLoadingTaxonomy(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
