@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Modal } from '../../../shared/components/index.js';
+import { CURRENT_PRIVACY_NOTICE_VERSION } from '../constants/privacy.constants.js';
 
 interface PrivacyNoticeModalProps {
   isOpen: boolean;
@@ -26,7 +27,7 @@ Identity verification documents and bank details are classified as Strictly Conf
 export const PrivacyNoticeModal: React.FC<PrivacyNoticeModalProps> = ({
   isOpen,
   onClose,
-  version = 'v1.2',
+  version = CURRENT_PRIVACY_NOTICE_VERSION,
 }) => {
   return (
     <Modal

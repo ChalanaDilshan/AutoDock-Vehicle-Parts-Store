@@ -16,6 +16,7 @@ import {
 } from '../../api/identityApi.js';
 import { DocumentDropzone } from '../../components/DocumentDropzone.js';
 import { PrivacyNoticeModal } from '../../components/PrivacyNoticeModal.js';
+import { CURRENT_PRIVACY_NOTICE_VERSION } from '../../constants/privacy.constants.js';
 import {
   Alert,
   Badge,
@@ -37,6 +38,7 @@ export const SellerOnboardingHub: React.FC = () => {
   const [accountHolderName, setAccountHolderName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [branchName, setBranchName] = useState('');
+  const [branchCode, setBranchCode] = useState('');
   const [isSavingBank, setIsSavingBank] = useState(false);
 
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
@@ -58,6 +60,7 @@ export const SellerOnboardingHub: React.FC = () => {
           setBankName(profileRes.data.bankDetails.bankName || '');
           setAccountHolderName(profileRes.data.bankDetails.accountHolderName || '');
           setBranchName(profileRes.data.bankDetails.branchName || '');
+          setBranchCode(profileRes.data.bankDetails.branchCode || '');
         }
         if (
           profileRes.data.hasPrivacyAcknowledgement ||
@@ -127,6 +130,7 @@ export const SellerOnboardingHub: React.FC = () => {
         accountHolderName: accountHolderName.trim(),
         accountNumber: accountNumber.trim(),
         branchName: branchName.trim(),
+        branchCode: branchCode.trim() || undefined,
       });
       if (response.success) {
         const pRes = await sellerApi.getMe();
@@ -152,7 +156,7 @@ export const SellerOnboardingHub: React.FC = () => {
       setIsAcknowledgingPrivacy(true);
       try {
         await sellerApi.acknowledgePrivacy({
-          noticeVersion: 'v1.2',
+          noticeVersion: CURRENT_PRIVACY_NOTICE_VERSION,
           acknowledged: true,
         });
         setSeller((prev) =>
@@ -502,6 +506,12 @@ export const SellerOnboardingHub: React.FC = () => {
                   ? 'Enter new number to replace'
                   : 'Enter bank account number'
               }
+            />
+            <Input
+              label="Branch Code (Optional)"
+              value={branchCode}
+              onChange={(e) => setBranchCode(e.target.value)}
+              placeholder="e.g. 045"
             />
           </div>
           <div className="flex justify-end">
