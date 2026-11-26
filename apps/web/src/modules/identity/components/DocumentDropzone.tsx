@@ -3,6 +3,27 @@ import { Upload, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { DocumentType, SellerDocumentItem } from '../api/identityApi.js';
 import { Alert, Badge } from '../../../shared/components/index.js';
 
+const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024; // 10 MB (aligned with UploadDocumentSchema)
+const MIN_DOCUMENT_BYTES = 100;
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+]);
+
+function resolveAllowedMimeType(file: File): string | null {
+  const normalizedType = (file.type || '').toLowerCase();
+  if (normalizedType) {
+    return ALLOWED_MIME_TYPES.has(normalizedType) ? normalizedType : null;
+  }
+
+  const lowerName = file.name.toLowerCase();
+  if (lowerName.endsWith('.pdf')) return 'application/pdf';
+  if (lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg')) return 'image/jpeg';
+  if (lowerName.endsWith('.png')) return 'image/png';
+  return null;
+}
+
 interface DocumentDropzoneProps {
   label: string;
   description: string;
@@ -34,25 +55,45 @@ export const DocumentDropzone: React.FC<DocumentDropzoneProps> = ({
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
     setErrorMessage(null);
 
-    if (file.size > 5 * 1024 * 1024) {
-      setErrorMessage('File exceeds 5MB size limit.');
+    const resolvedMime = resolveAllowedMimeType(file);
+    if (!resolvedMime) {
+      setErrorMessage('Unsupported file type. Upload a PDF, JPG, or PNG file.');
+      return;
+    }
+
+    if (file.size < MIN_DOCUMENT_BYTES) {
+      setErrorMessage('File is too small (minimum 100 bytes required).');
+      return;
+    }
+
+    if (file.size > MAX_DOCUMENT_BYTES) {
+      setErrorMessage('File exceeds 10MB size limit.');
       return;
     }
 
     setIsUploading(true);
     try {
       const reader = new FileReader();
+      reader.onerror = () => {
+        setErrorMessage('Unable to read selected file.');
+        setIsUploading(false);
+      };
       reader.onload = async () => {
         try {
-          const result = reader.result as string;
+          const result = typeof reader.result === 'string' ? reader.result : '';
           const base64 = result.includes(',') ? result.split(',')[1] : result;
+          if (!base64 || base64.trim().length === 0) {
+            setErrorMessage('Selected file could not be encoded or is empty.');
+            return;
+          }
           await onUpload({
             documentType,
             fileName: file.name,
-            mimeType: file.type || 'application/octet-stream',
+            mimeType: resolvedMime,
             fileSizeBytes: file.size,
             fileContentBase64: base64,
           });
@@ -122,7 +163,7 @@ export const DocumentDropzone: React.FC<DocumentDropzoneProps> = ({
         <input
           id={inputId}
           type="file"
-          accept=".pdf,.jpg,.jpeg,.png"
+          accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
           disabled={disabled || isUploading}
           onChange={handleFileChange}
           aria-label={label}
@@ -130,7 +171,7 @@ export const DocumentDropzone: React.FC<DocumentDropzoneProps> = ({
         />
         <label
           htmlFor={inputId}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 cursor-pointer ${
+          className={`inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] sm:min-h-0 sm:py-1.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 cursor-pointer ${
             disabled || isUploading ? 'opacity-50 pointer-events-none' : ''
           }`}
         >
@@ -143,7 +184,7 @@ export const DocumentDropzone: React.FC<DocumentDropzoneProps> = ({
                 : 'Choose File'}
           </span>
         </label>
-        <span className="text-xs text-slate-400">PDF, JPG or PNG (max 5MB)</span>
+        <span className="text-xs text-slate-500">PDF, JPG or PNG (max 10MB)</span>
       </div>
     </div>
   );

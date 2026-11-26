@@ -57,8 +57,14 @@ export const RestrictedSellerDashboard: React.FC = () => {
     );
   }
 
-  const isApproved = seller.verificationStatus === 'APPROVED' && seller.isEligibleToSell;
-  const bankVerified = seller.bankDetails?.verificationStatus === 'VERIFIED';
+  const isStoreApproved = seller.verificationStatus === 'APPROVED';
+  const bankStatus =
+    seller.bankDetails?.verificationStatus ?? seller.bankVerificationStatus;
+  const bankVerified = bankStatus === 'VERIFIED';
+  const isFullyEligible = Boolean(seller.isEligibleToSell);
+  const isStoreApprovedBankPending =
+    isStoreApproved &&
+    (!isFullyEligible || (bankStatus !== undefined && !bankVerified));
 
   const tools = [
     {
@@ -66,16 +72,20 @@ export const RestrictedSellerDashboard: React.FC = () => {
       description: 'List spare parts, adjust stock, and configure vehicle fitment.',
       to: '/seller/products',
       icon: <Package className="w-5 h-5" />,
-      locked: !isApproved,
-      lockLabel: 'Locked pending verification',
+      locked: !isFullyEligible,
+      lockLabel: isStoreApprovedBankPending
+        ? 'Locked pending bank verification'
+        : 'Locked pending verification',
     },
     {
       title: 'Orders & Fulfillment',
       description: 'Confirm payments, pack items, and dispatch tracking details.',
       to: '/seller/orders',
       icon: <ShoppingBag className="w-5 h-5" />,
-      locked: !isApproved,
-      lockLabel: 'Requires seller approval',
+      locked: !isFullyEligible,
+      lockLabel: isStoreApprovedBankPending
+        ? 'Requires bank verification'
+        : 'Requires seller approval',
     },
     {
       title: 'Finance & Invoices',
@@ -90,16 +100,20 @@ export const RestrictedSellerDashboard: React.FC = () => {
       description: 'Launch seller-funded discounts across selected parts.',
       to: '/seller/promotions',
       icon: <Percent className="w-5 h-5" />,
-      locked: !isApproved,
-      lockLabel: 'Requires seller approval',
+      locked: !isFullyEligible,
+      lockLabel: isStoreApprovedBankPending
+        ? 'Requires bank verification'
+        : 'Requires seller approval',
     },
     {
       title: 'Delivery Rates',
       description: 'Propose district delivery rates across Sri Lanka.',
       to: '/seller/delivery-rates',
       icon: <Truck className="w-5 h-5" />,
-      locked: !isApproved,
-      lockLabel: 'Requires seller approval',
+      locked: !isFullyEligible,
+      lockLabel: isStoreApprovedBankPending
+        ? 'Requires bank verification'
+        : 'Requires seller approval',
     },
     {
       title: 'Customer Reviews',
@@ -117,7 +131,16 @@ export const RestrictedSellerDashboard: React.FC = () => {
         title={seller.businessName}
         subtitle={`Registration: ${seller.businessRegistrationNumber} · ${seller.operatingAddress.city}, ${seller.operatingAddress.district}`}
         badge={
-          <Badge variant={isApproved ? 'success' : 'warning'} size="md">
+          <Badge
+            variant={
+              isFullyEligible
+                ? 'success'
+                : isStoreApproved
+                  ? 'primary'
+                  : 'warning'
+            }
+            size="md"
+          >
             {seller.verificationStatus}
           </Badge>
         }
@@ -130,7 +153,7 @@ export const RestrictedSellerDashboard: React.FC = () => {
         }
       />
 
-      {!isApproved ? (
+      {!isStoreApproved ? (
         <Alert
           variant="warning"
           title="Restricted Merchant Access — Catalog Publishing Locked"
@@ -140,10 +163,19 @@ export const RestrictedSellerDashboard: React.FC = () => {
             Complete or review onboarding
           </Link>
         </Alert>
+      ) : isStoreApprovedBankPending ? (
+        <Alert
+          variant="warning"
+          title="Store Approved, Bank Verification Pending"
+        >
+          Your store profile is approved, but bank account verification ({bankStatus || 'PENDING'}) must be verified before catalog publishing and checkout eligibility unlock.{' '}
+          <Link to="/seller/onboarding" className="font-semibold underline">
+            Review bank details
+          </Link>
+        </Alert>
       ) : (
         <Alert variant="success" title="Store Verified & Active">
-          Your merchant store is approved for public listings and checkout orders. Bank status:{' '}
-          {bankVerified ? 'Verified' : 'Pending review'}.
+          Your merchant store is approved and eligible for public listings and checkout orders. Bank status: Verified.
         </Alert>
       )}
 

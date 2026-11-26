@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Save } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Save, Store } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 import { authApi } from '../api/identityApi.js';
 import {
@@ -128,6 +129,46 @@ export const ProfilePage: React.FC = () => {
           </div>
         </form>
       </div>
+
+      {user?.role === 'CUSTOMER' && !user?.sellerId && (
+        <section
+          aria-labelledby="merchant-cta-heading"
+          className="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        >
+          <div className="flex items-start gap-3">
+            <span className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center shrink-0">
+              <Store className="w-5 h-5" aria-hidden="true" />
+            </span>
+            <div className="space-y-1">
+              <h2
+                id="merchant-cta-heading"
+                className="text-base font-semibold text-slate-900"
+              >
+                Register as a Merchant
+              </h2>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Sell vehicle spare parts across Sri Lanka with your own verified AutoDock store.{' '}
+                <Link
+                  to="/seller/register"
+                  className="font-medium text-blue-700 hover:underline"
+                >
+                  Learn how merchant onboarding works
+                </Link>
+              </p>
+            </div>
+          </div>
+          <Link to="/sellers/register" className="shrink-0">
+            <Button
+              variant="outline"
+              size="md"
+              className="min-h-[44px]"
+              rightIcon={<ArrowRight className="w-4 h-4" />}
+            >
+              Register Store
+            </Button>
+          </Link>
+        </section>
+      )}
     </div>
   );
 };

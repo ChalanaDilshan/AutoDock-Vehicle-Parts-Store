@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, Button, Input } from '../../../shared/components/index.js';
 import { authApi } from '../api/identityApi.js';
+import { buildAuthPathWithNext, getSafeRedirectPath } from '../utils/navigation.js';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const safeNextParam = getSafeRedirectPath(searchParams.get('next'), '');
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -51,7 +54,7 @@ export const RegisterPage: React.FC = () => {
         phone: phone.trim(),
         password,
       });
-      navigate('/login', { replace: true });
+      navigate(buildAuthPathWithNext('/login', safeNextParam), { replace: true });
     } catch (err: any) {
       setErrorMessage(err?.message || 'Registration failed. Please try again.');
     } finally {
@@ -151,7 +154,10 @@ export const RegisterPage: React.FC = () => {
 
         <p className="text-center text-sm text-slate-600">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-blue-700 hover:underline">
+          <Link
+            to={buildAuthPathWithNext('/login', safeNextParam)}
+            className="font-medium text-blue-700 hover:underline"
+          >
             Sign in
           </Link>
         </p>

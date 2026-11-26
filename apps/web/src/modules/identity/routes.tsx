@@ -10,6 +10,7 @@ import { ProfilePage } from './pages/ProfilePage.js';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage.js';
 
 // Seller Onboarding & Dashboard Pages
+import { SellOnAutoDockPage } from './pages/seller/SellOnAutoDockPage.js';
 import { SellerRegisterStep1Page } from './pages/seller/SellerRegisterStep1Page.js';
 import { SellerOnboardingHub } from './pages/seller/SellerOnboardingHub.js';
 import { SellerStatusNoticePage } from './pages/seller/SellerStatusNoticePage.js';
@@ -38,6 +39,7 @@ export const identityRoutes: RouteObject[] = [
   },
 
   // Seller Onboarding & Portal Routes
+  { path: 'seller/register', element: <SellOnAutoDockPage /> },
   { path: 'sellers/register', element: <SellerRegisterStep1Page /> },
   {
     path: 'seller/onboarding',
