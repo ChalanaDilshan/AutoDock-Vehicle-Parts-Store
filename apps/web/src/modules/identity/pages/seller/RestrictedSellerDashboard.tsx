@@ -168,14 +168,22 @@ export const RestrictedSellerDashboard: React.FC = () => {
           variant="warning"
           title="Store Approved, Bank Verification Pending"
         >
-          Your store profile is approved, but bank account verification ({bankStatus || 'PENDING'}) must be verified before catalog publishing and checkout eligibility unlock.{' '}
+          Your dealership documents are approved. Once an administrator verifies your
+          bank account, you can publish products and accept bank payments.{' '}
           <Link to="/seller/onboarding" className="font-semibold underline">
-            Review bank details
+            Check bank status
           </Link>
         </Alert>
       ) : (
-        <Alert variant="success" title="Store Verified & Active">
-          Your merchant store is approved and eligible for public listings and checkout orders. Bank status: Verified.
+        <Alert
+          variant="success"
+          title="Store Verified & Active — Eligible to Sell"
+        >
+          Your account is fully verified. You can list products, manage orders, and
+          receive customer payouts.{' '}
+          <Link to="/seller/products" className="font-semibold underline">
+            Go to Product Management
+          </Link>
         </Alert>
       )}
 
