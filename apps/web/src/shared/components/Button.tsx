@@ -17,9 +17,9 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const VARIANT_CLASSES: Record<NonNullable<ButtonProps['variant']>, string> = {
-  primary: 'bg-blue-700 hover:bg-blue-800 text-white border border-transparent shadow-xs',
+  primary: 'bg-[#E11D30] hover:bg-[#BE123C] text-white border border-transparent shadow-xs',
   secondary: 'bg-slate-900 hover:bg-slate-800 text-white border border-slate-900 shadow-xs',
-  'secondary-dark': 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700',
+  'secondary-dark': 'bg-[#0B121F] hover:bg-slate-800 text-white border border-slate-700',
   outline: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 shadow-xs',
   danger: 'bg-rose-600 hover:bg-rose-700 text-white border border-transparent shadow-xs',
   ghost: 'bg-transparent hover:bg-slate-100 text-slate-700 border border-transparent',
@@ -53,7 +53,7 @@ export const Button: React.FC<ButtonProps> = ({
       aria-busy={isLoading ? 'true' : undefined}
       className={[
         'inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-150 select-none',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E11D30] focus-visible:ring-offset-2',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         VARIANT_CLASSES[variant],
         SIZE_CLASSES[size],

@@ -27,6 +27,14 @@ export default {
           muted: '#F1F5F9',
           border: '#E2E8F0',
         },
+        autodock: {
+          red: '#E11D30',
+          'red-hover': '#BE123C',
+          'red-accent': '#FB2C36',
+          dark: '#0B121F',
+          card: '#1C2433',
+          light: '#E5E7EB',
+        },
       },
       fontFamily: {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],

@@ -48,7 +48,7 @@ export const StoreTypeSelector: React.FC<StoreTypeSelectorProps> = ({
             onClick={() => onChange(opt.type)}
             className={`text-left rounded-lg border p-4 transition-colors flex flex-col gap-2 ${
               selected
-                ? 'border-blue-600 bg-blue-50/50 ring-1 ring-blue-600'
+                ? 'border-[#E11D30] bg-red-50/50 ring-1 ring-[#E11D30]'
                 : 'border-slate-200 bg-white hover:border-slate-300'
             } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
@@ -57,7 +57,7 @@ export const StoreTypeSelector: React.FC<StoreTypeSelectorProps> = ({
                 <span
                   className={`w-9 h-9 rounded-md flex items-center justify-center ${
                     selected
-                      ? 'bg-blue-700 text-white'
+                      ? 'bg-[#E11D30] text-white'
                       : 'bg-slate-100 text-slate-600'
                   }`}
                 >
@@ -71,7 +71,7 @@ export const StoreTypeSelector: React.FC<StoreTypeSelectorProps> = ({
                 </div>
               </div>
               {selected && (
-                <span className="w-5 h-5 rounded-full bg-blue-700 text-white flex items-center justify-center shrink-0">
+                <span className="w-5 h-5 rounded-full bg-[#E11D30] text-white flex items-center justify-center shrink-0">
                   <Check className="w-3 h-3" />
                 </span>
               )}

@@ -190,11 +190,11 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* Hero Band */}
-      <section className="bg-slate-900 text-white border-b border-slate-800">
+      <section className="bg-[#0B121F] text-white border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <div className="lg:col-span-7 space-y-5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-400">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#FB2C36]">
                 Sri Lanka Vehicle Spare-Parts Marketplace
               </p>
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
@@ -243,7 +243,7 @@ export const HomePage: React.FC = () => {
               </div>
               <Link
                 to="/garage"
-                className="text-xs font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1"
+                className="text-xs font-medium text-[#E11D30] hover:text-[#BE123C] inline-flex items-center gap-1"
               >
                 <span>Open My Garage</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -293,23 +293,24 @@ export const HomePage: React.FC = () => {
       <section
         id="categories"
         aria-labelledby="shop-by-category-heading"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-b border-slate-200"
+        className="bg-[#E5E7EB] border-b border-slate-300"
       >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
             <h2
               id="shop-by-category-heading"
-              className="text-xl font-semibold text-slate-900 tracking-tight"
+              className="text-xl font-semibold text-[#111827] tracking-tight"
             >
               Shop by Category
             </h2>
-            <p className="text-sm text-slate-600 mt-0.5">
+            <p className="text-sm text-slate-700 mt-0.5">
               Browse parts organized by vehicle system
             </p>
           </div>
           <Link
             to="/products"
-            className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 shrink-0"
+            className="text-sm font-medium text-[#E11D30] hover:text-[#BE123C] inline-flex items-center gap-1 shrink-0"
           >
             <span>View All Categories</span>
             <ChevronRight className="w-4 h-4" />
@@ -323,7 +324,7 @@ export const HomePage: React.FC = () => {
             {[...Array(4)].map((_, idx) => (
               <div
                 key={idx}
-                className="h-24 bg-slate-100 rounded-lg border border-slate-200"
+                className="h-24 bg-[#1C2433]/20 rounded-lg border border-slate-300"
               />
             ))}
           </div>
@@ -333,17 +334,17 @@ export const HomePage: React.FC = () => {
               <Link
                 key={cat._id}
                 to={`/products?category=${encodeURIComponent(cat.slug)}`}
-                className="flex items-center gap-3 p-4 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/30 transition-colors"
+                className="flex items-center gap-3 p-4 rounded-lg border border-[#1C2433] bg-[#1C2433] hover:border-[#E11D30] transition-colors"
               >
-                <div className="w-10 h-10 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-md bg-[#0B121F] text-[#E11D30] flex items-center justify-center shrink-0">
                   {getCategoryIcon(cat.slug || cat.name)}
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold text-slate-900 truncate">
+                  <div className="text-sm font-semibold text-white truncate">
                     {cat.name}
                   </div>
                   {cat.description && (
-                    <div className="text-xs text-slate-500 truncate mt-0.5">
+                    <div className="text-xs text-slate-300 truncate mt-0.5">
                       {cat.description}
                     </div>
                   )}
@@ -352,10 +353,11 @@ export const HomePage: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center border border-slate-200 rounded-lg text-sm text-slate-500">
+          <div className="p-8 text-center border border-slate-300 bg-white rounded-lg text-sm text-slate-600">
             Categories will appear here once added by administrators.
           </div>
         )}
+        </div>
       </section>
 
       {/* Featured Products */}
@@ -371,7 +373,7 @@ export const HomePage: React.FC = () => {
           </div>
           <Link
             to="/products"
-            className="text-sm font-medium text-blue-700 hover:text-blue-800 inline-flex items-center gap-1 shrink-0"
+            className="text-sm font-medium text-[#E11D30] hover:text-[#BE123C] inline-flex items-center gap-1 shrink-0"
           >
             <span>View All</span>
             <ChevronRight className="w-4 h-4" />
@@ -428,7 +430,7 @@ export const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col justify-between gap-4">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700">
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#E11D30]">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Verified Quality</span>
               </div>
@@ -489,7 +491,7 @@ export const HomePage: React.FC = () => {
                 <Link
                   key={b._id}
                   to={`/products?brand=${encodeURIComponent(b.slug)}`}
-                  className="px-3 py-1.5 rounded-md border border-slate-200 bg-white hover:border-blue-300 hover:text-blue-700 text-xs font-medium text-slate-700 transition-colors"
+                  className="px-3 py-1.5 rounded-md border border-slate-200 bg-white hover:border-red-300 hover:text-[#E11D30] text-xs font-medium text-slate-700 transition-colors"
                 >
                   {b.name}
                 </Link>

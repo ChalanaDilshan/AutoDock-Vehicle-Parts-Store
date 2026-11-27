@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Percent } from 'lucide-react';
 import {
   adminFinanceApi,
@@ -97,7 +97,7 @@ export const AdminCommissionRatePage: React.FC = () => {
         <section className="lg:col-span-5 bg-white border border-slate-200 rounded-lg p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-200 pb-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <Percent className="w-4 h-4 text-blue-700" />
+              <Percent className="w-4 h-4 text-[#E11D30]" />
               <span>Current Standard Rate</span>
             </div>
             <Badge variant="success">Active</Badge>

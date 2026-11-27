@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Gift } from 'lucide-react';
 import {
   adminPromotionApi,
@@ -97,7 +97,7 @@ export const AdminSubsidiesPage: React.FC = () => {
                       <td className="py-3 px-4 text-slate-800 font-medium">
                         {sellerName}
                       </td>
-                      <td className="py-3 px-4 font-mono text-xs text-blue-700">
+                      <td className="py-3 px-4 font-mono text-xs text-[#E11D30]">
                         {s.promotionCode}
                       </td>
                       <td className="py-3 px-4 font-semibold tabular-nums">

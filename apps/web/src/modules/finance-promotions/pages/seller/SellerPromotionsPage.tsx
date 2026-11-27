@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Plus, BarChart3, Pause, Play, Tag } from 'lucide-react';
 import {
   sellerPromotionApi,
@@ -132,7 +132,7 @@ export const SellerPromotionsPage: React.FC = () => {
                     <td className="py-3.5 px-4 text-slate-900 font-medium">
                       {promo.title}
                     </td>
-                    <td className="py-3.5 px-4 font-medium text-blue-700">
+                    <td className="py-3.5 px-4 font-medium text-[#E11D30]">
                       {formatDiscount(promo)}
                     </td>
                     <td className="py-3.5 px-4 text-slate-600">

@@ -10,7 +10,7 @@ export const Footer: React.FC = () => {
           {/* Brand Summary */}
           <div className="space-y-3">
             <Link to="/" className="inline-flex items-center gap-2 text-slate-900">
-              <span className="w-7 h-7 rounded-md bg-blue-700 text-white flex items-center justify-center">
+              <span className="w-7 h-7 rounded-md bg-[#E11D30] text-white flex items-center justify-center">
                 <Wrench className="w-4 h-4" aria-hidden="true" />
               </span>
               <span className="text-base font-bold tracking-tight">AutoDock</span>
@@ -28,22 +28,22 @@ export const Footer: React.FC = () => {
             <h3 className="text-sm font-semibold text-slate-900">Popular Categories</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/products?category=engine-drivetrain" className="hover:text-blue-700 transition-colors">
+                <Link to="/products?category=engine-drivetrain" className="hover:text-[#E11D30] transition-colors">
                   Engine &amp; Drivetrain
                 </Link>
               </li>
               <li>
-                <Link to="/products?category=brakes-suspension" className="hover:text-blue-700 transition-colors">
+                <Link to="/products?category=brakes-suspension" className="hover:text-[#E11D30] transition-colors">
                   Brakes &amp; Suspension
                 </Link>
               </li>
               <li>
-                <Link to="/products?category=filters-fluids" className="hover:text-blue-700 transition-colors">
+                <Link to="/products?category=filters-fluids" className="hover:text-[#E11D30] transition-colors">
                   Filters &amp; Fluids
                 </Link>
               </li>
               <li>
-                <Link to="/products?category=electrical-lighting" className="hover:text-blue-700 transition-colors">
+                <Link to="/products?category=electrical-lighting" className="hover:text-[#E11D30] transition-colors">
                   Electrical &amp; Lighting
                 </Link>
               </li>
@@ -55,22 +55,22 @@ export const Footer: React.FC = () => {
             <h3 className="text-sm font-semibold text-slate-900">Customer Service</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/orders" className="hover:text-blue-700 transition-colors">
+                <Link to="/orders" className="hover:text-[#E11D30] transition-colors">
                   Track Orders
                 </Link>
               </li>
               <li>
-                <Link to="/garage" className="hover:text-blue-700 transition-colors">
+                <Link to="/garage" className="hover:text-[#E11D30] transition-colors">
                   My Garage
                 </Link>
               </li>
               <li>
-                <Link to="/wishlist" className="hover:text-blue-700 transition-colors">
+                <Link to="/wishlist" className="hover:text-[#E11D30] transition-colors">
                   Saved Wishlist
                 </Link>
               </li>
               <li>
-                <Link to="/privacy-policy" className="hover:text-blue-700 transition-colors">
+                <Link to="/privacy-policy" className="hover:text-[#E11D30] transition-colors">
                   Privacy Policy
                 </Link>
               </li>
@@ -82,12 +82,12 @@ export const Footer: React.FC = () => {
             <h3 className="text-sm font-semibold text-slate-900">Sellers &amp; Payments</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/seller/register" className="hover:text-blue-700 transition-colors">
+                <Link to="/seller/register" className="hover:text-[#E11D30] transition-colors">
                   Sell on AutoDock
                 </Link>
               </li>
               <li>
-                <Link to="/seller/dashboard" className="hover:text-blue-700 transition-colors">
+                <Link to="/seller/dashboard" className="hover:text-[#E11D30] transition-colors">
                   Merchant Center
                 </Link>
               </li>

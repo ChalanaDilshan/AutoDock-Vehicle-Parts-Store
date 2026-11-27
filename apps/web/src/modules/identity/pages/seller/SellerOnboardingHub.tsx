@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, CheckCircle2, FileText } from 'lucide-react';
 import {
@@ -203,7 +203,7 @@ export const SellerOnboardingHub: React.FC = () => {
       {/* Step 1: Required Documents */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
-          <FileText className="w-4 h-4 text-blue-700" />
+          <FileText className="w-4 h-4 text-[#E11D30]" />
           <h2>1. Verification Documents</h2>
         </div>
 
@@ -245,7 +245,7 @@ export const SellerOnboardingHub: React.FC = () => {
       <section className="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div className="flex items-center gap-2 text-base font-semibold text-slate-900">
-            <Building2 className="w-4 h-4 text-blue-700" />
+            <Building2 className="w-4 h-4 text-[#E11D30]" />
             <h2>2. Payout &amp; Direct Transfer Bank Account</h2>
           </div>
           {seller.bankDetails && (
@@ -304,7 +304,7 @@ export const SellerOnboardingHub: React.FC = () => {
             checked={privacyAgreed}
             disabled={isAcknowledgingPrivacy}
             onChange={(e) => handlePrivacyToggle(e.target.checked)}
-            className="mt-1 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+            className="mt-1 rounded border-slate-300 text-[#E11D30] focus:ring-[#E11D30]"
           />
           <div className="text-sm text-slate-700 leading-relaxed">
             <label htmlFor="privacy-ack-checkbox" className="cursor-pointer">
@@ -313,7 +313,7 @@ export const SellerOnboardingHub: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsPrivacyModalOpen(true)}
-              className="font-medium text-blue-700 hover:underline"
+              className="font-medium text-[#E11D30] hover:underline"
             >
               Read full notice
             </button>

@@ -72,7 +72,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               rightIcon ? 'pr-9' : 'pr-3',
               error
                 ? 'border-rose-300 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20'
-                : 'border-slate-300 hover:border-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15',
+                : 'border-slate-300 hover:border-slate-400 focus:border-[#E11D30] focus:outline-none focus:ring-2 focus:ring-[#E11D30]/15',
               'disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed',
               className,
             ]

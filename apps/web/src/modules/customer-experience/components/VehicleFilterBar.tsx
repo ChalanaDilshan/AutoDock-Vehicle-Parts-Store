@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Car, CheckCircle2, ChevronDown, X, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { GarageVehicle, taxonomyApi } from '../api/customerExperienceApi.js';
@@ -81,7 +81,7 @@ export const VehicleFilterBar: React.FC<VehicleFilterBarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-md bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-md bg-red-50 border border-red-200 text-[#E11D30] flex items-center justify-center shrink-0">
               <Car className="w-4 h-4" aria-hidden="true" />
             </div>
             {hasActiveVehicle ? (
@@ -125,7 +125,7 @@ export const VehicleFilterBar: React.FC<VehicleFilterBarProps> = ({
                       }
                       className={`px-2.5 py-1 rounded-md border text-xs font-medium transition-colors ${
                         selected
-                          ? 'bg-blue-50 border-blue-200 text-blue-700'
+                          ? 'bg-red-50 border-red-200 text-[#E11D30]'
                           : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                       }`}
                     >
@@ -140,7 +140,7 @@ export const VehicleFilterBar: React.FC<VehicleFilterBarProps> = ({
           <div className="flex items-center gap-2 shrink-0">
             <Link
               to="/garage"
-              className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:underline"
+              className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-[#E11D30] hover:underline"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>My Garage</span>

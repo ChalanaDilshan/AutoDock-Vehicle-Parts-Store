@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
@@ -76,7 +76,7 @@ export const LoginPage: React.FC = () => {
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-medium text-blue-700 hover:underline"
+                  className="text-xs font-medium text-[#E11D30] hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -108,7 +108,7 @@ export const LoginPage: React.FC = () => {
 
         <p className="text-center text-sm text-slate-600">
           Don&apos;t have an account?{' '}
-          <Link to="/register" className="font-medium text-blue-700 hover:underline">
+          <Link to="/register" className="font-medium text-[#E11D30] hover:underline">
             Create an account
           </Link>
         </p>

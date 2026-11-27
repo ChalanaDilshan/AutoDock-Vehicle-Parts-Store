@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { garageApi, taxonomyApi } from '../api/customerExperienceApi.js';
 import { Alert, Button, Input, Modal, Select } from '../../../shared/components/index.js';
 
@@ -160,7 +160,7 @@ export const AddVehicleModal: React.FC<AddVehicleModalProps> = ({
             type="checkbox"
             checked={isDefault}
             onChange={(e) => setIsDefault(e.target.checked)}
-            className="rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+            className="rounded border-slate-300 text-[#E11D30] focus:ring-[#E11D30]"
           />
           <span>Set as my default garage vehicle</span>
         </label>

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Star, CheckCircle2, AlertCircle, Package } from 'lucide-react';
 import { ProductItem } from '../api/customerExperienceApi.js';
@@ -64,7 +64,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {conditionLabel}
           </span>
           {product.isUniversalFit && !fitmentBadge && (
-            <span className="px-2 py-0.5 text-xs font-medium rounded bg-blue-50 text-blue-700 border border-blue-200">
+            <span className="px-2 py-0.5 text-xs font-medium rounded bg-red-50 text-[#E11D30] border border-red-200">
               Universal Fit
             </span>
           )}
@@ -103,7 +103,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         <Link
           to={`/products/${product._id}`}
-          className="text-sm font-semibold text-slate-900 hover:text-blue-700 transition-colors line-clamp-2 leading-snug"
+          className="text-sm font-semibold text-slate-900 hover:text-[#E11D30] transition-colors line-clamp-2 leading-snug"
         >
           {product.name}
         </Link>
@@ -153,7 +153,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               onClick={() => onAddToCart(product)}
               aria-label="Add to Shopping Cart"
               title="Add to Shopping Cart"
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-medium transition-colors shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E11D30] hover:bg-[#BE123C] disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-medium transition-colors shrink-0"
             >
               <ShoppingCart className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Add</span>

@@ -128,7 +128,7 @@ export const MyGaragePage: React.FC = () => {
             <div
               key={vehicle._id}
               className={`bg-white rounded-lg border p-5 flex flex-col justify-between gap-4 ${
-                vehicle.isDefault ? 'border-blue-300 ring-1 ring-blue-100' : 'border-slate-200'
+                vehicle.isDefault ? 'border-[#E11D30] ring-1 ring-red-100' : 'border-slate-200'
               }`}
             >
               <div className="flex items-start justify-between gap-3">
@@ -168,7 +168,7 @@ export const MyGaragePage: React.FC = () => {
               <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                 <Link
                   to={`/products?make=${encodeURIComponent(vehicle.make)}&model=${encodeURIComponent(vehicle.model)}&year=${vehicle.year}`}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-700 hover:text-blue-800"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[#E11D30] hover:text-[#BE123C]"
                 >
                   <span>Shop compatible parts</span>
                   <ArrowRight className="w-3.5 h-3.5" />

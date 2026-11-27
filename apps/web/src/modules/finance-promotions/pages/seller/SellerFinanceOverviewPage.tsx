@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FileText,
@@ -139,7 +139,7 @@ export const SellerFinanceOverviewPage: React.FC = () => {
           </h2>
           <Link
             to="/seller/invoices"
-            className="text-xs font-medium text-blue-700 hover:underline inline-flex items-center gap-1"
+            className="text-xs font-medium text-[#E11D30] hover:underline inline-flex items-center gap-1"
           >
             <span>View all</span>
             <ChevronRight className="w-3.5 h-3.5" />

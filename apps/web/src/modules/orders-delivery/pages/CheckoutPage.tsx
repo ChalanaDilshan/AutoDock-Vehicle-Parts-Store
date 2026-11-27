@@ -220,7 +220,7 @@ export const CheckoutPage: React.FC = () => {
                 value={customerNotes}
                 onChange={(e) => setCustomerNotes(e.target.value)}
                 placeholder="Gate code, preferred delivery hours, or landmark notes"
-                className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+                className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-[#E11D30] focus:outline-none"
               />
             </div>
           </section>
@@ -295,7 +295,7 @@ export const CheckoutPage: React.FC = () => {
                             }
                             className={`px-3 py-2 rounded-lg border text-xs font-medium text-left transition-colors ${
                               selectedMethod === opt.value
-                                ? 'border-blue-600 bg-blue-50 text-blue-800'
+                                ? 'border-[#E11D30] bg-red-50 text-[#BE123C]'
                                 : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                             }`}
                           >

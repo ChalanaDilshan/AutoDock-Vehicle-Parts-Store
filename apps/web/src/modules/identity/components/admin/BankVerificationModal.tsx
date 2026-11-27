@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Building2 } from 'lucide-react';
 import { SellerProfileData } from '../../api/identityApi.js';
 import { Alert, Button, Modal } from '../../../../shared/components/index.js';
@@ -117,7 +117,7 @@ export const BankVerificationModal: React.FC<BankVerificationModalProps> = ({
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="Explain discrepancy in account holder name or branch..."
-              className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+              className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-[#E11D30] focus:outline-none"
             />
           </div>
         )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Percent,
@@ -165,11 +165,11 @@ export const AdminFinanceOverviewPage: React.FC = () => {
           <Link
             key={sec.to}
             to={sec.to}
-            className="bg-white border border-slate-200 rounded-lg p-5 hover:border-blue-300 hover:shadow-xs transition-all flex items-start justify-between gap-3 group"
+            className="bg-white border border-slate-200 rounded-lg p-5 hover:border-red-300 hover:shadow-xs transition-all flex items-start justify-between gap-3 group"
           >
             <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-900 group-hover:text-blue-700">
-                <span className="text-slate-500 group-hover:text-blue-700">
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-900 group-hover:text-[#E11D30]">
+                <span className="text-slate-500 group-hover:text-[#E11D30]">
                   {sec.icon}
                 </span>
                 <span>{sec.title}</span>
@@ -178,7 +178,7 @@ export const AdminFinanceOverviewPage: React.FC = () => {
                 {sec.description}
               </p>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-700 shrink-0 mt-0.5" />
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#E11D30] shrink-0 mt-0.5" />
           </Link>
         ))}
       </div>

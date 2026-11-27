@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { ExternalLink, FileCheck, CheckCircle2, XCircle } from 'lucide-react';
 import {
   orderApi,
@@ -119,7 +119,7 @@ export const ReceiptReviewModal: React.FC<ReceiptReviewModalProps> = ({
                     href={orderApi.getReceiptStreamUrl(downloadToken)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:underline"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-[#E11D30] hover:underline"
                   >
                     <span>View Document</span>
                     <ExternalLink className="w-3.5 h-3.5" />

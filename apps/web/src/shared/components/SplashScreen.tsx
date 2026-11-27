@@ -34,7 +34,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onDone }) => {
         }`}
       >
         {/* Icon badge */}
-        <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-900/50">
+        <div className="w-16 h-16 rounded-2xl bg-[#E11D30] flex items-center justify-center shadow-lg shadow-red-900/50">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -52,7 +52,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onDone }) => {
         {/* Wordmark — single text node so tests matching 'AUTO' and 'DOCK' in the header still find exactly one each */}
         <div className="text-center">
           <div className="text-4xl font-bold tracking-tight leading-none select-none">
-            <span className="text-white">Auto</span><span className="text-blue-500">Dock</span>
+            <span className="text-white">Auto</span><span className="text-[#E11D30]">Dock</span>
           </div>
           <p className="text-xs text-slate-500 mt-1.5 tracking-widest uppercase font-medium">
             Genuine Parts LK
@@ -62,7 +62,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onDone }) => {
         {/* Animated progress bar */}
         <div className="mt-6 w-32 h-0.5 bg-slate-800 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-600 rounded-full"
+            className="h-full bg-[#E11D30] rounded-full"
             style={{
               width: phase === 'in' ? '0%' : '100%',
               transition: phase === 'in' ? 'none' : 'width 1.4s ease-out',

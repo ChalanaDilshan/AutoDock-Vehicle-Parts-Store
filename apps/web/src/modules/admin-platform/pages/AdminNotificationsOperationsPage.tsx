@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Bell, Mail, RotateCw } from 'lucide-react';
 import {
   adminPlatformApi,
@@ -88,7 +88,7 @@ export const AdminNotificationsOperationsPage: React.FC = () => {
           onClick={() => setActiveTab('ALERTS')}
           className={`pb-3 text-sm font-medium border-b-2 transition-colors inline-flex items-center gap-2 ${
             activeTab === 'ALERTS'
-              ? 'border-blue-700 text-blue-700'
+              ? 'border-[#E11D30] text-[#E11D30]'
               : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -101,7 +101,7 @@ export const AdminNotificationsOperationsPage: React.FC = () => {
           onClick={() => setActiveTab('DELIVERY')}
           className={`pb-3 text-sm font-medium border-b-2 transition-colors inline-flex items-center gap-2 ${
             activeTab === 'DELIVERY'
-              ? 'border-blue-700 text-blue-700'
+              ? 'border-[#E11D30] text-[#E11D30]'
               : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Alert, Button, Input } from '../../../shared/components/index.js';
 import { authApi } from '../api/identityApi.js';
@@ -151,7 +151,7 @@ export const RegisterPage: React.FC = () => {
 
         <p className="text-center text-sm text-slate-600">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-blue-700 hover:underline">
+          <Link to="/login" className="font-medium text-[#E11D30] hover:underline">
             Sign in
           </Link>
         </p>

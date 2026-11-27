@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { CategoryItem, taxonomyApi } from '../api/customerExperienceApi.js';
 import { Alert, Button, Input, Modal, Select } from '../../../shared/components/index.js';
 
@@ -127,7 +127,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Brief description of parts in this category"
-            className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+            className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-[#E11D30] focus:outline-none"
           />
         </div>
 
@@ -143,7 +143,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
               type="checkbox"
               checked={isActive}
               onChange={(e) => setIsActive(e.target.checked)}
-              className="rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+              className="rounded border-slate-300 text-[#E11D30] focus:ring-[#E11D30]"
             />
             <span>Active in storefront</span>
           </label>

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { PRIVACY_NOTICE_V1_2_TEXT } from '../components/PrivacyNoticeModal.js';
 import { PageHeader } from '../../../shared/components/index.js';
@@ -14,7 +14,7 @@ export const PrivacyPolicyPage: React.FC = () => {
       />
 
       <div className="bg-white border border-slate-200 rounded-lg p-6 sm:p-8 space-y-4">
-        <div className="flex items-center gap-2 text-sm font-semibold text-blue-700">
+        <div className="flex items-center gap-2 text-sm font-semibold text-[#E11D30]">
           <ShieldCheck className="w-4 h-4" />
           <span>Data Protection &amp; Verification Policy</span>
         </div>

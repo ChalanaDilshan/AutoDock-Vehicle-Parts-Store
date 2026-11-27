@@ -87,7 +87,7 @@ export const NotificationBell: React.FC = () => {
         {unreadCount > 0 && (
           <span
             data-testid="unread-notification-count"
-            className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-blue-700 text-white text-[10px] font-semibold flex items-center justify-center leading-none"
+            className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-[#E11D30] text-white text-[10px] font-semibold flex items-center justify-center leading-none"
           >
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
@@ -103,7 +103,7 @@ export const NotificationBell: React.FC = () => {
                 type="button"
                 disabled={isMarkingAll}
                 onClick={handleMarkAll}
-                className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:underline disabled:opacity-50"
+                className="inline-flex items-center gap-1 text-xs font-medium text-[#E11D30] hover:underline disabled:opacity-50"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
                 <span>Mark all read</span>
@@ -125,7 +125,7 @@ export const NotificationBell: React.FC = () => {
                 <div
                   key={n.id}
                   className={`p-3.5 text-xs space-y-1 ${
-                    !n.isRead ? 'bg-blue-50/40' : 'bg-white'
+                    !n.isRead ? 'bg-red-50/40' : 'bg-white'
                   }`}
                 >
                   <div className="font-semibold text-slate-900">{n.title}</div>
@@ -139,7 +139,7 @@ export const NotificationBell: React.FC = () => {
             <Link
               to="/notifications"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-medium text-blue-700 hover:underline"
+              className="text-xs font-medium text-[#E11D30] hover:underline"
             >
               Open Notification Centre
             </Link>

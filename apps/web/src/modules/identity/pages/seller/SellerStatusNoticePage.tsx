@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 import { sellerApi, SellerProfileData } from '../../api/identityApi.js';
@@ -115,7 +115,7 @@ export const SellerStatusNoticePage: React.FC = () => {
           </div>
         ) : (
           <div className="flex items-start gap-3">
-            <Clock className="w-6 h-6 text-blue-700 shrink-0 mt-0.5" />
+            <Clock className="w-6 h-6 text-[#E11D30] shrink-0 mt-0.5" />
             <div className="space-y-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Application under verification

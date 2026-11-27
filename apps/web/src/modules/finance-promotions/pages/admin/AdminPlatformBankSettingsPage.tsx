@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Save } from 'lucide-react';
 import {
   adminFinanceApi,
@@ -121,7 +121,7 @@ export const AdminPlatformBankSettingsPage: React.FC = () => {
               onChange={(e) =>
                 setForm((p) => ({ ...p, paymentInstructions: e.target.value }))
               }
-              className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+              className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-[#E11D30] focus:outline-none"
             />
           </div>
 
