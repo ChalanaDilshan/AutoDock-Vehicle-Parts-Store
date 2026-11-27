@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Lock } from 'lucide-react';
 import { sellerApi, SellerStoreType } from '../../api/identityApi.js';
@@ -251,7 +251,7 @@ export const SellerRegisterStep1Page: React.FC = () => {
           className="bg-white border border-slate-200 rounded-lg p-6 sm:p-8 space-y-5 shadow-xs"
         >
           <div className="flex items-start gap-3">
-            <span className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center shrink-0">
+            <span className="w-10 h-10 rounded-lg bg-red-50 border border-red-200 text-[#E11D30] flex items-center justify-center shrink-0">
               <Lock className="w-5 h-5" aria-hidden="true" />
             </span>
             <div className="space-y-1">

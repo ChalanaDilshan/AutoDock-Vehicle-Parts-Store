@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -108,7 +108,7 @@ export const SellOnAutoDockPage: React.FC = () => {
                 variant="primary"
                 size="lg"
                 fullWidth
-                className="min-h-[44px] bg-blue-600 hover:bg-blue-700"
+                className="min-h-[44px] bg-[#E11D30] hover:bg-[#BE123C]"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
               >
                 Sign In to Register Store
@@ -141,7 +141,7 @@ export const SellOnAutoDockPage: React.FC = () => {
                 variant="primary"
                 size="lg"
                 fullWidth
-                className="min-h-[44px] bg-blue-600 hover:bg-blue-700"
+                className="min-h-[44px] bg-[#E11D30] hover:bg-[#BE123C]"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
               >
                 Open Seller Verification Queue
@@ -161,7 +161,7 @@ export const SellOnAutoDockPage: React.FC = () => {
                 variant="primary"
                 size="lg"
                 fullWidth
-                className="min-h-[44px] bg-blue-600 hover:bg-blue-700"
+                className="min-h-[44px] bg-[#E11D30] hover:bg-[#BE123C]"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
               >
                 Start Store Registration
@@ -190,7 +190,7 @@ export const SellOnAutoDockPage: React.FC = () => {
                     variant="primary"
                     size="lg"
                     fullWidth
-                    className="min-h-[44px] bg-blue-600 hover:bg-blue-700"
+                    className="min-h-[44px] bg-[#E11D30] hover:bg-[#BE123C]"
                     rightIcon={<ArrowRight className="w-4 h-4" />}
                   >
                     Open Seller Portal
@@ -214,7 +214,7 @@ export const SellOnAutoDockPage: React.FC = () => {
                     variant="primary"
                     size="lg"
                     fullWidth
-                    className="min-h-[44px] bg-blue-600 hover:bg-blue-700"
+                    className="min-h-[44px] bg-[#E11D30] hover:bg-[#BE123C]"
                     rightIcon={<ArrowRight className="w-4 h-4" />}
                   >
                     Continue Store Onboarding
@@ -252,7 +252,7 @@ export const SellOnAutoDockPage: React.FC = () => {
                 variant="primary"
                 size="lg"
                 fullWidth
-                className="min-h-[44px] bg-blue-600 hover:bg-blue-700"
+                className="min-h-[44px] bg-[#E11D30] hover:bg-[#BE123C]"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
               >
                 {label}
@@ -311,7 +311,7 @@ export const SellOnAutoDockPage: React.FC = () => {
             <article className="bg-white border border-slate-200 rounded-lg p-6 space-y-4 shadow-xs">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <span className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center shrink-0">
+                  <span className="w-10 h-10 rounded-lg bg-red-50 border border-red-200 text-[#E11D30] flex items-center justify-center shrink-0">
                     <Store className="w-5 h-5" aria-hidden="true" />
                   </span>
                   <div>
@@ -328,15 +328,15 @@ export const SellOnAutoDockPage: React.FC = () => {
 
               <ul className="space-y-2.5 text-sm text-slate-700">
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />
+                  <CheckCircle2 className="w-4 h-4 text-[#E11D30] shrink-0 mt-0.5" aria-hidden="true" />
                   <span>Business Registration (BR) certificate matching store details</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />
+                  <CheckCircle2 className="w-4 h-4 text-[#E11D30] shrink-0 mt-0.5" aria-hidden="true" />
                   <span>National Identity Card (NIC) or Passport of the owner or director</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />
+                  <CheckCircle2 className="w-4 h-4 text-[#E11D30] shrink-0 mt-0.5" aria-hidden="true" />
                   <span>Owner live verification photo</span>
                 </li>
                 <li className="flex items-start gap-2.5">
@@ -374,15 +374,15 @@ export const SellOnAutoDockPage: React.FC = () => {
 
               <ul className="space-y-2.5 text-sm text-slate-700">
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />
+                  <CheckCircle2 className="w-4 h-4 text-[#E11D30] shrink-0 mt-0.5" aria-hidden="true" />
                   <span>Business Registration (BR) certificate matching registered business</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />
+                  <CheckCircle2 className="w-4 h-4 text-[#E11D30] shrink-0 mt-0.5" aria-hidden="true" />
                   <span>National Identity Card (NIC) or Passport of the owner or director</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />
+                  <CheckCircle2 className="w-4 h-4 text-[#E11D30] shrink-0 mt-0.5" aria-hidden="true" />
                   <span>Owner live verification photo</span>
                 </li>
                 <li className="flex items-start gap-2.5">
@@ -421,7 +421,7 @@ export const SellOnAutoDockPage: React.FC = () => {
               >
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-xs font-semibold px-2.5 py-1 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                    <span className="font-mono text-xs font-semibold px-2.5 py-1 rounded bg-red-50 text-[#E11D30] border border-red-200">
                       STEP {item.step}
                     </span>
                   </div>
@@ -456,7 +456,7 @@ export const SellOnAutoDockPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-2.5">
-              <div className="w-9 h-9 rounded-md bg-blue-50 text-blue-700 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-md bg-red-50 text-[#E11D30] flex items-center justify-center">
                 <Landmark className="w-5 h-5" aria-hidden="true" />
               </div>
               <h3 className="text-base font-semibold text-slate-900">
@@ -490,7 +490,7 @@ export const SellOnAutoDockPage: React.FC = () => {
                 Verification documents and bank details are stored privately with restricted administrator access and are never exposed publicly.{' '}
                 <Link
                   to="/privacy-policy"
-                  className="font-medium text-blue-700 hover:underline inline-flex items-center gap-1"
+                  className="font-medium text-[#E11D30] hover:underline inline-flex items-center gap-1"
                 >
                   <span>Read Privacy Policy</span>
                 </Link>
@@ -503,7 +503,7 @@ export const SellOnAutoDockPage: React.FC = () => {
         <section className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <ShieldCheck className="w-4 h-4 text-blue-700" aria-hidden="true" />
+              <ShieldCheck className="w-4 h-4 text-[#E11D30]" aria-hidden="true" />
               <span>Ready to prepare your store application?</span>
             </div>
             <p className="text-sm text-slate-600">

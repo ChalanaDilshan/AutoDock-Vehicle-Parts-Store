@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Plus, Pause, Play, Tag } from 'lucide-react';
 import {
   adminPromotionApi,
@@ -99,7 +99,7 @@ export const AdminPromotionsPage: React.FC = () => {
                       {p.code}
                     </td>
                     <td className="py-3.5 px-4 font-medium text-slate-900">{p.title}</td>
-                    <td className="py-3.5 px-4 text-blue-700 font-medium">
+                    <td className="py-3.5 px-4 text-[#E11D30] font-medium">
                       {p.discountType === 'PERCENTAGE'
                         ? `${p.discountValue / 100}% Off`
                         : `${formatLKR(p.discountValue)} Off`}

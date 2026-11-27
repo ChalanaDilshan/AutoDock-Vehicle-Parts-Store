@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { CreditCard, CheckCircle2 } from 'lucide-react';
 import { cardPaymentApi } from '../api/ordersDeliveryApi.js';
 import { apiClient } from '../../../shared/api/apiClient.js';
@@ -81,7 +81,7 @@ export const CardSandboxModal: React.FC<CardSandboxModalProps> = ({
         {!session ? (
           <div className="space-y-4">
             <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex items-start gap-3">
-              <CreditCard className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" />
+              <CreditCard className="w-5 h-5 text-[#E11D30] shrink-0 mt-0.5" />
               <p className="text-sm text-slate-600 leading-relaxed">
                 Continue to authorize payment for this seller package via the test payment gateway.
               </p>

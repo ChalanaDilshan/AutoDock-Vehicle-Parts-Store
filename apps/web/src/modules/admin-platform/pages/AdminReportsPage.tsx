@@ -133,7 +133,7 @@ export const AdminReportsPage: React.FC = () => {
               onClick={() => setSelectedReportType(r.reportType)}
               className={`text-left rounded-lg border p-3.5 transition-colors ${
                 active
-                  ? 'border-blue-600 bg-blue-50/50 text-blue-900'
+                  ? 'border-[#E11D30] bg-red-50/50 text-slate-900'
                   : 'border-slate-200 bg-white hover:border-slate-300 text-slate-800'
               }`}
             >

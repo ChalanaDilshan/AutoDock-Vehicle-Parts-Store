@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, CheckCheck, ExternalLink } from 'lucide-react';
 import {
@@ -124,7 +124,7 @@ export const NotificationsPage: React.FC = () => {
             <div
               key={n.id}
               className={`p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                !n.isRead ? 'bg-blue-50/30' : ''
+                !n.isRead ? 'bg-red-50/30' : ''
               }`}
             >
               <div className="space-y-1.5 min-w-0">

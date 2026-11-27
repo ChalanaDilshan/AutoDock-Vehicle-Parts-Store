@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { KeyRound } from 'lucide-react';
 import { authApi } from '../api/identityApi.js';
@@ -101,7 +101,7 @@ export const ResetPasswordPage: React.FC = () => {
 
         <p className="text-center text-sm text-slate-600">
           Remembered it?{' '}
-          <Link to="/login" className="font-medium text-blue-700 hover:underline">
+          <Link to="/login" className="font-medium text-[#E11D30] hover:underline">
             Sign in
           </Link>
         </p>

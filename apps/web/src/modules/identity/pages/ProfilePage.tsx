@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Save, Store } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
@@ -136,7 +136,7 @@ export const ProfilePage: React.FC = () => {
           className="bg-white border border-slate-200 rounded-lg p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
         >
           <div className="flex items-start gap-3">
-            <span className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center shrink-0">
+            <span className="w-10 h-10 rounded-lg bg-red-50 border border-red-200 text-[#E11D30] flex items-center justify-center shrink-0">
               <Store className="w-5 h-5" aria-hidden="true" />
             </span>
             <div className="space-y-1">
@@ -150,7 +150,7 @@ export const ProfilePage: React.FC = () => {
                 Sell vehicle spare parts across Sri Lanka with your own verified AutoDock store.{' '}
                 <Link
                   to="/seller/register"
-                  className="font-medium text-blue-700 hover:underline"
+                  className="font-medium text-[#E11D30] hover:underline"
                 >
                   Learn how merchant onboarding works
                 </Link>

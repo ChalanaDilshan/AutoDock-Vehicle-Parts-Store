@@ -169,9 +169,9 @@ export const OrderDetailPage: React.FC = () => {
                 </div>
 
                 {sub.courierDetails && (
-                  <div className="px-5 py-3 bg-blue-50/60 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs text-blue-900">
+                  <div className="px-5 py-3 bg-red-50/60 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-700">
                     <span className="inline-flex items-center gap-1.5 font-medium">
-                      <Truck className="w-4 h-4 text-blue-700" />
+                      <Truck className="w-4 h-4 text-[#E11D30]" />
                       <span>Dispatched via {sub.courierDetails.courierName}</span>
                     </span>
                     <span className="font-mono font-semibold">

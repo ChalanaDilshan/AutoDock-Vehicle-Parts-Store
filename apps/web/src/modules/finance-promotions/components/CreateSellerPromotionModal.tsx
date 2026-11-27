@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   PromotionDiscountType,
   sellerPromotionApi,
@@ -210,7 +210,7 @@ export const CreateSellerPromotionModal: React.FC<
                         );
                       }
                     }}
-                    className="rounded border-slate-300 text-blue-700"
+                    className="rounded border-slate-300 text-[#E11D30]"
                   />
                   <span className="truncate">{p.name}</span>
                   <span className="font-mono text-slate-400">({p.sku})</span>

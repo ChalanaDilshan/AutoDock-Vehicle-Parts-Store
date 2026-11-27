@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Trash2, PackageOpen } from 'lucide-react';
 import { WishlistData, wishlistApi } from '../api/customerExperienceApi.js';
@@ -141,7 +141,7 @@ export const WishlistPage: React.FC = () => {
                 <div className="p-4 flex-1 flex flex-col gap-2">
                   <Link
                     to={`/products/${p._id}`}
-                    className="text-sm font-semibold text-slate-900 hover:text-blue-700 line-clamp-2"
+                    className="text-sm font-semibold text-slate-900 hover:text-[#E11D30] line-clamp-2"
                   >
                     {p.name}
                   </Link>

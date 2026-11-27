@@ -17,11 +17,11 @@ export const FitmentAlertBanner: React.FC<FitmentAlertBannerProps> = ({
 }) => {
   if (isUniversalFit) {
     return (
-      <div className="bg-blue-50/70 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-        <Info className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />
+      <div className="bg-red-50/70 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+        <Info className="w-5 h-5 text-[#E11D30] shrink-0 mt-0.5" aria-hidden="true" />
         <div>
-          <h4 className="text-sm font-semibold text-blue-950">Universal Fitment Part</h4>
-          <p className="text-sm text-blue-900 mt-0.5">
+          <h4 className="text-sm font-semibold text-slate-900">Universal Fitment Part</h4>
+          <p className="text-sm text-slate-700 mt-0.5">
             This part is marked for universal vehicle use across standard configurations.
           </p>
         </div>

@@ -156,7 +156,7 @@ export const RegisterPage: React.FC = () => {
           Already have an account?{' '}
           <Link
             to={buildAuthPathWithNext('/login', safeNextParam)}
-            className="font-medium text-blue-700 hover:underline"
+            className="font-medium text-[#E11D30] hover:underline"
           >
             Sign in
           </Link>

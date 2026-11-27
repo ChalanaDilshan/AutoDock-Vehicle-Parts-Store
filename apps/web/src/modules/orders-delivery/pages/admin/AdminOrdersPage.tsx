@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Eye, ShoppingCart } from 'lucide-react';
 import {
@@ -75,7 +75,7 @@ export const AdminOrdersPage: React.FC = () => {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search order # or customer..."
-              className="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-300 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+              className="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-300 text-sm text-slate-900 focus:border-[#E11D30] focus:outline-none"
             />
           </div>
           <Button type="submit" variant="secondary" size="sm">

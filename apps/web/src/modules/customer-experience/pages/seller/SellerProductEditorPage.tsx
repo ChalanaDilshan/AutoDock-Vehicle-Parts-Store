@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Plus, Trash2, Save } from 'lucide-react';
 import {
@@ -300,7 +300,7 @@ export const SellerProductEditorPage: React.FC = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe part materials, packaging, and installation notes (min 20 characters)"
-              className="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+              className="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 focus:border-[#E11D30] focus:outline-none"
             />
           </div>
         </section>
@@ -427,7 +427,7 @@ export const SellerProductEditorPage: React.FC = () => {
                   checked={primaryImageIndex === idx}
                   onChange={() => setPrimaryImageIndex(idx)}
                   aria-label={`Set image ${idx + 1} as primary`}
-                  className="text-blue-700"
+                  className="text-[#E11D30]"
                 />
                 <div className="flex-1">
                   <Input
@@ -467,7 +467,7 @@ export const SellerProductEditorPage: React.FC = () => {
               type="checkbox"
               checked={isUniversalFit}
               onChange={(e) => setIsUniversalFit(e.target.checked)}
-              className="rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+              className="rounded border-slate-300 text-[#E11D30] focus:ring-[#E11D30]"
             />
             <span>Universal fit (fits most passenger vehicles)</span>
           </label>

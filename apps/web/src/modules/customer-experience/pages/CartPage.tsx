@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Trash2,
@@ -185,7 +185,7 @@ export const CartPage: React.FC = () => {
                           <div className="min-w-0 space-y-1">
                             <Link
                               to={`/products/${product._id}`}
-                              className="text-sm font-semibold text-slate-900 hover:text-blue-700 block truncate"
+                              className="text-sm font-semibold text-slate-900 hover:text-[#E11D30] block truncate"
                             >
                               {product.name}
                             </Link>
@@ -284,7 +284,7 @@ export const CartPage: React.FC = () => {
               </div>
 
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-md text-xs text-slate-600 flex items-start gap-2">
-                <ShieldCheck className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" />
+                <ShieldCheck className="w-4 h-4 text-[#E11D30] shrink-0 mt-0.5" />
                 <span>
                   Prices, discounts, and stock availability are confirmed at checkout.
                 </span>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, ChevronDown, ArrowRight, Package } from 'lucide-react';
 import {
@@ -125,7 +125,7 @@ export const StorefrontCategoryBar: React.FC = () => {
             onClick={() => handleMenuClick('shop-cat')}
             onMouseEnter={() => handleMenuEnter('shop-cat')}
             aria-expanded={activeMenu === 'shop-cat'}
-            className="min-h-[44px] flex items-center gap-2.5 pr-6 border-r border-slate-200 text-xs font-bold text-slate-900 hover:text-blue-700 active:text-blue-800 transition-colors shrink-0"
+            className="min-h-[44px] flex items-center gap-2.5 pr-6 border-r border-slate-200 text-xs font-bold text-slate-900 hover:text-[#E11D30] active:text-[#BE123C] transition-colors shrink-0"
           >
             <Menu className="w-4 h-4 text-slate-700" aria-hidden="true" />
             <span>Shop By Category</span>
@@ -140,7 +140,7 @@ export const StorefrontCategoryBar: React.FC = () => {
               onMouseEnter={() => handleMenuEnter('auto-parts')}
               aria-expanded={activeMenu === 'auto-parts'}
               className={`min-h-[44px] px-1 inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
-                activeMenu === 'auto-parts' ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'
+                activeMenu === 'auto-parts' ? 'text-[#E11D30]' : 'text-slate-800 hover:text-[#E11D30]'
               }`}
             >
               <span>Auto Parts</span>
@@ -153,7 +153,7 @@ export const StorefrontCategoryBar: React.FC = () => {
               onMouseEnter={() => handleMenuEnter('categories')}
               aria-expanded={activeMenu === 'categories'}
               className={`min-h-[44px] px-1 inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
-                activeMenu === 'categories' ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'
+                activeMenu === 'categories' ? 'text-[#E11D30]' : 'text-slate-800 hover:text-[#E11D30]'
               }`}
             >
               <span>Categories</span>
@@ -166,7 +166,7 @@ export const StorefrontCategoryBar: React.FC = () => {
               onMouseEnter={() => handleMenuEnter('brands')}
               aria-expanded={activeMenu === 'brands'}
               className={`min-h-[44px] px-1 inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
-                activeMenu === 'brands' ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'
+                activeMenu === 'brands' ? 'text-[#E11D30]' : 'text-slate-800 hover:text-[#E11D30]'
               }`}
             >
               <span>Brands</span>
@@ -179,7 +179,7 @@ export const StorefrontCategoryBar: React.FC = () => {
               onMouseEnter={() => handleMenuEnter('products')}
               aria-expanded={activeMenu === 'products'}
               className={`min-h-[44px] px-1 inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
-                activeMenu === 'products' ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'
+                activeMenu === 'products' ? 'text-[#E11D30]' : 'text-slate-800 hover:text-[#E11D30]'
               }`}
             >
               <span>Products</span>
@@ -192,7 +192,7 @@ export const StorefrontCategoryBar: React.FC = () => {
               onMouseEnter={() => handleMenuEnter('makes')}
               aria-expanded={activeMenu === 'makes'}
               className={`min-h-[44px] px-1 inline-flex items-center gap-1 text-xs font-semibold transition-colors ${
-                activeMenu === 'makes' ? 'text-blue-700' : 'text-slate-800 hover:text-blue-700'
+                activeMenu === 'makes' ? 'text-[#E11D30]' : 'text-slate-800 hover:text-[#E11D30]'
               }`}
             >
               <span>Vehicles</span>
@@ -201,14 +201,14 @@ export const StorefrontCategoryBar: React.FC = () => {
 
             <Link
               to="/products?sortBy=NEWEST"
-              className="min-h-[44px] px-1 inline-flex items-center text-xs font-semibold text-slate-800 hover:text-blue-700 transition-colors"
+              className="min-h-[44px] px-1 inline-flex items-center text-xs font-semibold text-slate-800 hover:text-[#E11D30] transition-colors"
             >
               New Arrivals
             </Link>
 
             <Link
               to="/products?sortBy=RATING_DESC"
-              className="min-h-[44px] px-1 inline-flex items-center text-xs font-semibold text-slate-800 hover:text-blue-700 transition-colors"
+              className="min-h-[44px] px-1 inline-flex items-center text-xs font-semibold text-slate-800 hover:text-[#E11D30] transition-colors"
             >
               Top Rated
             </Link>
@@ -227,7 +227,7 @@ export const StorefrontCategoryBar: React.FC = () => {
                     key={cat._id || cat.slug}
                     to={`/products?category=${encodeURIComponent(cat.slug)}`}
                     onClick={closeAllMenus}
-                    className="min-h-[44px] flex items-center justify-between px-4 py-2 text-sm text-slate-800 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                    className="min-h-[44px] flex items-center justify-between px-4 py-2 text-sm text-slate-800 hover:bg-red-50 hover:text-[#E11D30] transition-colors"
                   >
                     <span>{cat.name}</span>
                     <ArrowRight className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
@@ -264,7 +264,7 @@ export const StorefrontCategoryBar: React.FC = () => {
                         <Link
                           to={`/products?category=${encodeURIComponent(cat.slug)}`}
                           onClick={closeAllMenus}
-                          className="min-h-[36px] flex items-center text-xs text-slate-700 hover:text-blue-700 transition-colors"
+                          className="min-h-[36px] flex items-center text-xs text-slate-700 hover:text-[#E11D30] transition-colors"
                         >
                           {cat.name}
                         </Link>
@@ -283,7 +283,7 @@ export const StorefrontCategoryBar: React.FC = () => {
                         <Link
                           to={`/products?category=${encodeURIComponent(cat.slug)}`}
                           onClick={closeAllMenus}
-                          className="min-h-[36px] flex items-center text-xs text-slate-700 hover:text-blue-700 transition-colors"
+                          className="min-h-[36px] flex items-center text-xs text-slate-700 hover:text-[#E11D30] transition-colors"
                         >
                           {cat.name}
                         </Link>
@@ -309,7 +309,7 @@ export const StorefrontCategoryBar: React.FC = () => {
                           key={product._id}
                           to={`/products/${product._id}`}
                           onClick={closeAllMenus}
-                          className="bg-white border border-slate-200 hover:border-blue-300 rounded-md p-2 flex items-center gap-2.5 transition-colors"
+                          className="bg-white border border-slate-200 hover:border-red-300 rounded-md p-2 flex items-center gap-2.5 transition-colors"
                         >
                           <div className="w-12 h-12 rounded bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden">
                             {thumb ? (
@@ -359,7 +359,7 @@ export const StorefrontCategoryBar: React.FC = () => {
                   />
                   <div className="relative z-10 h-full p-5 flex flex-col justify-between bg-slate-950/75">
                     <div className="space-y-1.5">
-                      <p className="text-xs font-semibold text-blue-300">
+                      <p className="text-xs font-semibold text-[#FB2C36]">
                         Latest Inventory
                       </p>
                       <h4 className="text-lg font-bold text-white leading-snug">
@@ -392,7 +392,7 @@ export const StorefrontCategoryBar: React.FC = () => {
                 <Link
                   to="/products"
                   onClick={closeAllMenus}
-                  className="text-xs font-medium text-blue-700 hover:text-blue-800"
+                  className="text-xs font-medium text-[#E11D30] hover:text-[#BE123C]"
                 >
                   View All Parts
                 </Link>
@@ -403,7 +403,7 @@ export const StorefrontCategoryBar: React.FC = () => {
                     key={brand._id || brand.slug}
                     to={`/products?brand=${encodeURIComponent(brand.slug)}`}
                     onClick={closeAllMenus}
-                    className="min-h-[44px] px-3 py-2 rounded-md border border-slate-200 hover:border-blue-300 hover:bg-blue-50/40 text-xs font-semibold text-slate-800 flex items-center justify-between"
+                    className="min-h-[44px] px-3 py-2 rounded-md border border-slate-200 hover:border-red-300 hover:bg-red-50/40 text-xs font-semibold text-slate-800 flex items-center justify-between"
                   >
                     <span>{brand.name}</span>
                     {brand.countryOfOrigin && (
@@ -427,35 +427,35 @@ export const StorefrontCategoryBar: React.FC = () => {
               <Link
                 to="/products?sortBy=NEWEST"
                 onClick={closeAllMenus}
-                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
+                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-red-50 hover:text-[#E11D30]"
               >
                 Latest Arrivals
               </Link>
               <Link
                 to="/products?sortBy=RATING_DESC"
                 onClick={closeAllMenus}
-                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
+                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-red-50 hover:text-[#E11D30]"
               >
                 Top Rated Spare Parts
               </Link>
               <Link
                 to="/products?condition=NEW"
                 onClick={closeAllMenus}
-                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
+                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-red-50 hover:text-[#E11D30]"
               >
                 Brand New Parts
               </Link>
               <Link
                 to="/products?condition=RECONDITIONED"
                 onClick={closeAllMenus}
-                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
+                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-red-50 hover:text-[#E11D30]"
               >
                 Reconditioned Parts
               </Link>
               <Link
                 to="/products?sortBy=PRICE_ASC"
                 onClick={closeAllMenus}
-                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
+                className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-red-50 hover:text-[#E11D30]"
               >
                 Price: Low to High
               </Link>
@@ -475,7 +475,7 @@ export const StorefrontCategoryBar: React.FC = () => {
                     key={make}
                     to={`/products?make=${encodeURIComponent(make)}`}
                     onClick={closeAllMenus}
-                    className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-blue-50 hover:text-blue-700"
+                    className="min-h-[44px] flex items-center px-4 py-2 text-xs font-medium text-slate-800 hover:bg-red-50 hover:text-[#E11D30]"
                   >
                     {make} Parts
                   </Link>
@@ -489,7 +489,7 @@ export const StorefrontCategoryBar: React.FC = () => {
                 <Link
                   to="/garage"
                   onClick={closeAllMenus}
-                  className="min-h-[44px] flex items-center px-4 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                  className="min-h-[44px] flex items-center px-4 py-2 text-xs font-semibold text-[#E11D30] hover:bg-red-50"
                 >
                   Open Saved Vehicles
                 </Link>

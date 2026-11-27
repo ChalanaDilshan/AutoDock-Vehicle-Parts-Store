@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { ExternalLink, CheckCircle2, XCircle } from 'lucide-react';
 import {
   InvoicePaymentReceipt,
@@ -112,7 +112,7 @@ export const AdminReceiptVerificationModal: React.FC<
               href={adminFinanceApi.getReceiptStreamUrl(invoiceIdStr, receipt._id)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-medium text-blue-700 hover:underline"
+              className="inline-flex items-center gap-1 font-medium text-[#E11D30] hover:underline"
             >
               <span>Inspect Slip</span>
               <ExternalLink className="w-3 h-3" />

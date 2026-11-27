@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Tags, Plus, Edit3, FolderTree, Award } from 'lucide-react';
 import {
   CategoryItem,
@@ -91,7 +91,7 @@ export const AdminCataloguePage: React.FC = () => {
           onClick={() => setActiveTab('CATEGORIES')}
           className={`pb-3 text-sm font-medium border-b-2 transition-colors inline-flex items-center gap-2 ${
             activeTab === 'CATEGORIES'
-              ? 'border-blue-700 text-blue-700'
+              ? 'border-[#E11D30] text-[#E11D30]'
               : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -104,7 +104,7 @@ export const AdminCataloguePage: React.FC = () => {
           onClick={() => setActiveTab('BRANDS')}
           className={`pb-3 text-sm font-medium border-b-2 transition-colors inline-flex items-center gap-2 ${
             activeTab === 'BRANDS'
-              ? 'border-blue-700 text-blue-700'
+              ? 'border-[#E11D30] text-[#E11D30]'
               : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >

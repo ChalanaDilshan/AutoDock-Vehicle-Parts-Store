@@ -163,11 +163,11 @@ export const AdminLayout: React.FC = () => {
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     active
-                      ? 'bg-blue-50 text-blue-700'
+                      ? 'bg-red-50 text-[#E11D30]'
                       : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
-                  <span className={active ? 'text-blue-700' : 'text-slate-500'}>
+                  <span className={active ? 'text-[#E11D30]' : 'text-slate-500'}>
                     {item.icon}
                   </span>
                   <span className="truncate">{item.label}</span>
@@ -201,14 +201,14 @@ export const AdminLayout: React.FC = () => {
       >
         <div className="h-16 px-4 border-b border-slate-200 flex items-center justify-between gap-2.5 shrink-0">
           <Link to="/admin/dashboard" className="flex items-center gap-2.5">
-            <span className="w-8 h-8 rounded-md bg-blue-700 text-white flex items-center justify-center shrink-0">
+            <span className="w-8 h-8 rounded-md bg-[#E11D30] text-white flex items-center justify-center shrink-0">
               <Wrench className="w-4 h-4" aria-hidden="true" />
             </span>
             <div className="leading-none">
               <span className="text-base font-bold tracking-tight text-slate-900">
                 AUTODOCK
               </span>
-              <span className="ml-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded">
+              <span className="ml-1.5 text-xs font-medium text-[#E11D30] bg-red-50 border border-red-200 px-1.5 py-0.5 rounded">
                 Console
               </span>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Package,
@@ -199,7 +199,7 @@ export const SellerProductsPage: React.FC = () => {
                             title="Quick Stock Adjustment"
                             aria-label="Quick Stock Adjustment"
                             onClick={() => setStockEditProduct(p)}
-                            className="p-1 rounded border border-slate-200 text-slate-500 hover:text-blue-700 hover:border-blue-300"
+                            className="p-1 rounded border border-slate-200 text-slate-500 hover:text-[#E11D30] hover:border-red-300"
                           >
                             <SlidersHorizontal className="w-3.5 h-3.5" />
                           </button>
@@ -231,7 +231,7 @@ export const SellerProductsPage: React.FC = () => {
                             type="button"
                             onClick={() => handleToggleStatus(p)}
                             title={p.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
-                            className="p-1.5 rounded-md border border-slate-200 text-slate-600 hover:text-blue-700 hover:bg-blue-50"
+                            className="p-1.5 rounded-md border border-slate-200 text-slate-600 hover:text-[#E11D30] hover:bg-red-50"
                           >
                             <Power className="w-4 h-4" />
                           </button>

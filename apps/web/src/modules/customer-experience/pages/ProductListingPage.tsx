@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -318,7 +318,7 @@ export const ProductListingPage: React.FC = () => {
                     onChange={(e) => setSearchInput(e.target.value)}
                     placeholder="Search parts, OEM or SKU..."
                     aria-label="Filter results by keyword"
-                    className="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none"
+                    className="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#E11D30] focus:outline-none"
                   />
                 </div>
                 <Button type="submit" variant="secondary" size="sm">
@@ -346,7 +346,7 @@ export const ProductListingPage: React.FC = () => {
                   aria-label="Sort products"
                   value={sortBy}
                   onChange={(e) => updateParam('sortBy', e.target.value)}
-                  className="h-9 rounded-lg border border-slate-300 bg-white px-2.5 text-sm text-slate-800 focus:border-blue-600 focus:outline-none"
+                  className="h-9 rounded-lg border border-slate-300 bg-white px-2.5 text-sm text-slate-800 focus:border-[#E11D30] focus:outline-none"
                 >
                   <option value="RELEVANCE">Sort: Relevance</option>
                   <option value="PRICE_ASC">Price: Low to High</option>

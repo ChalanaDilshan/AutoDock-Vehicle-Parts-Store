@@ -54,23 +54,24 @@ export const Header: React.FC = () => {
 
   const navLinkClass = (active: boolean) =>
     `text-sm font-medium whitespace-nowrap transition-colors ${
-      active ? 'text-blue-700' : 'text-slate-600 hover:text-slate-900'
+      active ? 'text-[#E11D30]' : 'text-slate-600 hover:text-slate-900'
     }`;
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
       {/* Subtle announcement bar on larger viewports */}
-      <div className="hidden sm:block bg-slate-900 text-slate-300 text-xs">
+      <div className="hidden sm:block bg-[#0B121F] border-b border-slate-800 text-slate-200 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-8 flex items-center justify-between gap-4">
           <p className="truncate">
-            Island-wide spare parts delivery across Sri Lanka &middot; LKR checkout
+            <span className="text-[#FB2C36] font-semibold">Island-wide spare parts delivery</span>{' '}
+            across Sri Lanka &middot; LKR checkout
           </p>
           <div className="flex items-center gap-4 shrink-0">
             <span className="text-slate-400">Support: +94 11 234 5678</span>
             {isAdmin && (
               <Link
                 to="/admin/dashboard"
-                className="text-white font-medium hover:text-blue-300 transition-colors"
+                className="text-white font-medium hover:text-[#FB2C36] transition-colors"
               >
                 Admin Console &rarr;
               </Link>
@@ -86,12 +87,12 @@ export const Header: React.FC = () => {
           to="/"
           className="inline-flex items-center gap-2 shrink-0 focus-visible:outline-none"
         >
-          <span className="w-8 h-8 rounded-md bg-blue-700 text-white flex items-center justify-center shrink-0">
+          <span className="w-8 h-8 rounded-md bg-[#E11D30] text-white flex items-center justify-center shrink-0">
             <Wrench className="w-4 h-4" aria-hidden="true" />
           </span>
           <span className="text-lg font-bold tracking-tight leading-none">
             <span className="text-slate-900">AUTO</span>
-            <span className="text-blue-700">DOCK</span>
+            <span className="text-[#E11D30]">DOCK</span>
           </span>
         </Link>
 
@@ -111,7 +112,7 @@ export const Header: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search parts, OEM numbers, or brands..."
               aria-label="Search parts"
-              className="w-full h-9 pl-9 pr-20 rounded-lg border border-slate-300 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15 transition-colors"
+              className="w-full h-9 pl-9 pr-20 rounded-lg border border-slate-300 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#E11D30] focus:outline-none focus:ring-2 focus:ring-[#E11D30]/15 transition-colors"
             />
             <button
               type="submit"
@@ -202,7 +203,7 @@ export const Header: React.FC = () => {
                 to="/account/profile"
                 className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-medium text-slate-700 transition-colors max-w-[200px]"
               >
-                <span className="w-5 h-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center font-semibold shrink-0">
+                <span className="w-5 h-5 rounded-full bg-red-50 text-[#E11D30] flex items-center justify-center font-semibold shrink-0">
                   {(user?.firstName?.[0] || 'U').toUpperCase()}
                 </span>
                 <span className="truncate">{user?.firstName || 'Account'}</span>
@@ -261,22 +262,22 @@ export const Header: React.FC = () => {
             <span className="text-slate-400 uppercase tracking-wider font-semibold shrink-0">
               Merchant Tools
             </span>
-            <Link to="/seller/products" className="hover:text-blue-700 whitespace-nowrap">
+            <Link to="/seller/products" className="hover:text-[#E11D30] whitespace-nowrap">
               Inventory
             </Link>
-            <Link to="/seller/orders" className="hover:text-blue-700 whitespace-nowrap">
+            <Link to="/seller/orders" className="hover:text-[#E11D30] whitespace-nowrap">
               Orders
             </Link>
-            <Link to="/seller/promotions" className="hover:text-blue-700 whitespace-nowrap">
+            <Link to="/seller/promotions" className="hover:text-[#E11D30] whitespace-nowrap">
               Promos
             </Link>
-            <Link to="/seller/delivery-rates" className="hover:text-blue-700 whitespace-nowrap">
+            <Link to="/seller/delivery-rates" className="hover:text-[#E11D30] whitespace-nowrap">
               Delivery Rates
             </Link>
-            <Link to="/seller/finance" className="hover:text-blue-700 whitespace-nowrap">
+            <Link to="/seller/finance" className="hover:text-[#E11D30] whitespace-nowrap">
               Finance &amp; Invoices
             </Link>
-            <Link to="/seller/reviews" className="hover:text-blue-700 whitespace-nowrap">
+            <Link to="/seller/reviews" className="hover:text-[#E11D30] whitespace-nowrap">
               Reviews
             </Link>
           </div>
@@ -297,7 +298,7 @@ export const Header: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search spare parts, SKU, OEM..."
               aria-label="Mobile search parts"
-              className="w-full h-9 pl-9 pr-16 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none"
+              className="w-full h-9 pl-9 pr-16 rounded-lg border border-slate-300 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#E11D30] focus:outline-none"
             />
             <button
               type="submit"
@@ -344,7 +345,7 @@ export const Header: React.FC = () => {
               <>
                 <Link
                   to="/seller/dashboard"
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-blue-700 bg-blue-50"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-[#E11D30] bg-red-50"
                 >
                   <Store className="w-4 h-4" />
                   <span>Seller Portal</span>

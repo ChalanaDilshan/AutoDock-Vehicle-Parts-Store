@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
@@ -67,7 +67,7 @@ export const CartLoginPrompt: React.FC = () => {
           New member?{' '}
           <Link
             to="/register"
-            className="font-medium text-blue-700 hover:text-blue-800 hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+            className="font-medium text-[#E11D30] hover:text-[#BE123C] hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E11D30]"
           >
             Register
           </Link>{' '}
@@ -119,7 +119,7 @@ export const CartLoginPrompt: React.FC = () => {
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-medium text-blue-700 hover:text-blue-800 hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                  className="text-xs font-medium text-[#E11D30] hover:text-[#BE123C] hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E11D30]"
                 >
                   Forgot Password?
                 </Link>
@@ -142,7 +142,7 @@ export const CartLoginPrompt: React.FC = () => {
                     onClick={() => setShowPassword((prev) => !prev)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                     aria-pressed={showPassword}
-                    className="inline-flex items-center justify-center w-8 h-8 rounded text-slate-500 hover:text-slate-700 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                    className="inline-flex items-center justify-center w-8 h-8 rounded text-slate-500 hover:text-slate-700 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E11D30]"
                   >
                     {showPassword ? (
                       <Eye className="w-4 h-4" aria-hidden="true" />
@@ -183,13 +183,13 @@ export const CartLoginPrompt: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link
               to="/register"
-              className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E11D30] focus-visible:ring-offset-2"
             >
               Create Account
             </Link>
             <Link
               to="/products"
-              className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+              className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E11D30] focus-visible:ring-offset-2"
             >
               Browse Parts
             </Link>

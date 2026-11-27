@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Building2, Copy, Check, Upload } from 'lucide-react';
 import {
   PlatformBankSettings,
@@ -149,7 +149,7 @@ export const InvoiceBankInstructionsModal: React.FC<
               <div className="p-3.5 flex items-center justify-between gap-2">
                 <dt className="text-slate-500">Payment Reference</dt>
                 <dd className="flex items-center gap-2">
-                  <span className="font-mono font-semibold text-blue-700">
+                  <span className="font-mono font-semibold text-[#E11D30]">
                     {invoiceNumber}
                   </span>
                   <button

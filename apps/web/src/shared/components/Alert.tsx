@@ -11,8 +11,8 @@ export interface AlertProps {
 
 const STYLES = {
   info: {
-    container: 'bg-blue-50/70 border-blue-200 text-blue-900',
-    icon: <Info className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />,
+    container: 'bg-red-50/70 border-red-200 text-red-900',
+    icon: <Info className="w-4 h-4 text-[#E11D30] shrink-0 mt-0.5" aria-hidden="true" />,
   },
   success: {
     container: 'bg-emerald-50 border-emerald-200 text-emerald-900',

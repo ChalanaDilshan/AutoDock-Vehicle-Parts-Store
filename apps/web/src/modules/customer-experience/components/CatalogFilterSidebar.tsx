@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { CategoryItem, BrandItem, ProductCondition } from '../api/customerExperienceApi.js';
 import { X, RotateCcw } from 'lucide-react';
 import { Button } from '../../../shared/components/index.js';
@@ -56,7 +56,7 @@ export const CatalogFilterSidebar: React.FC<CatalogFilterSidebarProps> = ({
         <button
           type="button"
           onClick={onResetFilters}
-          className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:text-blue-800"
+          className="inline-flex items-center gap-1 text-xs font-medium text-[#E11D30] hover:text-[#BE123C]"
         >
           <RotateCcw className="w-3 h-3" aria-hidden="true" />
           <span>Reset all</span>
@@ -75,7 +75,7 @@ export const CatalogFilterSidebar: React.FC<CatalogFilterSidebarProps> = ({
               name="catalog-category"
               checked={!selectedCategory}
               onChange={() => onCategoryChange(undefined)}
-              className="text-blue-700 border-slate-300 focus:ring-blue-600"
+              className="text-[#E11D30] border-slate-300 focus:ring-[#E11D30]"
             />
             <span>All Categories</span>
           </label>
@@ -93,7 +93,7 @@ export const CatalogFilterSidebar: React.FC<CatalogFilterSidebarProps> = ({
                   name="catalog-category"
                   checked={checked}
                   onChange={() => onCategoryChange(val)}
-                  className="text-blue-700 border-slate-300 focus:ring-blue-600"
+                  className="text-[#E11D30] border-slate-300 focus:ring-[#E11D30]"
                 />
                 <span className="truncate">{cat.name}</span>
               </label>
@@ -114,7 +114,7 @@ export const CatalogFilterSidebar: React.FC<CatalogFilterSidebarProps> = ({
               name="catalog-brand"
               checked={!selectedBrand}
               onChange={() => onBrandChange(undefined)}
-              className="text-blue-700 border-slate-300 focus:ring-blue-600"
+              className="text-[#E11D30] border-slate-300 focus:ring-[#E11D30]"
             />
             <span>All Brands</span>
           </label>
@@ -132,7 +132,7 @@ export const CatalogFilterSidebar: React.FC<CatalogFilterSidebarProps> = ({
                   name="catalog-brand"
                   checked={checked}
                   onChange={() => onBrandChange(val)}
-                  className="text-blue-700 border-slate-300 focus:ring-blue-600"
+                  className="text-[#E11D30] border-slate-300 focus:ring-[#E11D30]"
                 />
                 <span className="truncate">{brand.name}</span>
               </label>
@@ -158,7 +158,7 @@ export const CatalogFilterSidebar: React.FC<CatalogFilterSidebarProps> = ({
                 onChange={() =>
                   onConditionChange(selectedCondition === cond ? undefined : cond)
                 }
-                className="rounded text-blue-700 border-slate-300 focus:ring-blue-600"
+                className="rounded text-[#E11D30] border-slate-300 focus:ring-[#E11D30]"
               />
               <span>
                 {cond === 'NEW'
@@ -185,7 +185,7 @@ export const CatalogFilterSidebar: React.FC<CatalogFilterSidebarProps> = ({
             onChange={(e) => setLocalMin(e.target.value)}
             placeholder="Min"
             aria-label="Minimum price LKR"
-            className="w-full px-2.5 py-1.5 rounded-md border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none"
+            className="w-full px-2.5 py-1.5 rounded-md border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#E11D30] focus:outline-none"
           />
           <input
             type="number"
@@ -194,7 +194,7 @@ export const CatalogFilterSidebar: React.FC<CatalogFilterSidebarProps> = ({
             onChange={(e) => setLocalMax(e.target.value)}
             placeholder="Max"
             aria-label="Maximum price LKR"
-            className="w-full px-2.5 py-1.5 rounded-md border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none"
+            className="w-full px-2.5 py-1.5 rounded-md border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#E11D30] focus:outline-none"
           />
         </div>
         <Button type="submit" variant="outline" size="sm" fullWidth>

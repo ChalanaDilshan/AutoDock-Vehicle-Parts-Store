@@ -9,13 +9,22 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  :root {
+    --primary: #E11D30;
+    --primary-hover: #BE123C;
+    --bg-dark: #0B121F;
+    --bg-light: #E5E7EB;
+    --card: #1C2433;
+    --accent: #FB2C36;
+  }
+
   body {
     @apply bg-slate-50 text-slate-900 font-sans overflow-x-hidden;
   }
 
   /* Visible focus ring for keyboard accessibility */
   :focus-visible {
-    @apply outline-none ring-2 ring-blue-600 ring-offset-2 ring-offset-white;
+    @apply outline-none ring-2 ring-[#E11D30] ring-offset-2 ring-offset-white;
   }
 
   /* Clear pointer affordances for enabled controls and disabled cursor feedback */

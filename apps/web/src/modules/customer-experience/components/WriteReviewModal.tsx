@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Star } from 'lucide-react';
 import { reviewApi } from '../api/customerExperienceApi.js';
 import { Alert, Button, Input, Modal } from '../../../shared/components/index.js';
@@ -122,7 +122,7 @@ export const WriteReviewModal: React.FC<WriteReviewModalProps> = ({
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Share fitment accuracy, build quality, and delivery experience..."
-            className="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/15"
+            className="w-full rounded-lg border border-slate-300 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#E11D30] focus:outline-none focus:ring-2 focus:ring-[#E11D30]/15"
           />
         </div>
 

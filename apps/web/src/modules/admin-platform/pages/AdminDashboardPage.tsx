@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   DollarSign,
@@ -85,7 +85,7 @@ export const AdminDashboardPage: React.FC = () => {
       label: 'Seller KYC Verification',
       count: q?.pendingSellerKYC ?? 0,
       to: '/admin/sellers/verification',
-      icon: <ShieldCheck className="w-4 h-4 text-blue-700" />,
+      icon: <ShieldCheck className="w-4 h-4 text-[#E11D30]" />,
     },
     {
       label: 'Rate Card Proposals',
@@ -136,7 +136,7 @@ export const AdminDashboardPage: React.FC = () => {
             <Link
               key={item.label}
               to={item.to}
-              className="bg-white border border-slate-200 hover:border-blue-300 rounded-lg p-4 flex items-center justify-between gap-3 transition-colors"
+              className="bg-white border border-slate-200 hover:border-red-300 rounded-lg p-4 flex items-center justify-between gap-3 transition-colors"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center shrink-0">
@@ -167,7 +167,7 @@ export const AdminDashboardPage: React.FC = () => {
             label="Gross Merchandise Value"
             value={formatLKR(ov?.grossMerchandiseValueInCents ?? 0)}
             icon={DollarSign}
-            iconColor="text-blue-700"
+            iconColor="text-[#E11D30]"
             subtext={`Logistics: ${formatLKR(ov?.logisticsRevenueInCents ?? 0)}`}
             isDegraded={mod3Degraded}
           />

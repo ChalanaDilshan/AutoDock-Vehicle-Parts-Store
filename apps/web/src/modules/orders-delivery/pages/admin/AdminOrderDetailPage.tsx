@@ -98,7 +98,7 @@ export const AdminOrderDetailPage: React.FC = () => {
               </div>
 
               {sub.courierDetails && (
-                <div className="px-5 py-3 bg-blue-50/50 border-t border-slate-200 flex items-center justify-between text-xs text-blue-900">
+                <div className="px-5 py-3 bg-red-50/50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-700">
                   <span className="inline-flex items-center gap-1.5 font-medium">
                     <Truck className="w-3.5 h-3.5" />
                     <span>{sub.courierDetails.courierName}</span>

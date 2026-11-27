@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { EyeOff, Eye, Trash2, Star, MessageSquare } from 'lucide-react';
 import {
   ProductReview,
@@ -241,7 +241,7 @@ export const AdminReviewModerationPage: React.FC = () => {
               value={moderationReason}
               onChange={(e) => setModerationReason(e.target.value)}
               placeholder="Explain why this review is being moderated..."
-              className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+              className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-[#E11D30] focus:outline-none"
             />
           </div>
 

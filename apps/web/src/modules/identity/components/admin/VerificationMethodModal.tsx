@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { SellerProfileData } from '../../api/identityApi.js';
 import { Alert, Button, Modal, Select } from '../../../../shared/components/index.js';
 
@@ -110,7 +110,7 @@ export const VerificationDecisionModal: React.FC<VerificationDecisionModalProps>
             value={verificationNotes}
             onChange={(e) => setVerificationNotes(e.target.value)}
             placeholder="Record inspection findings, requested changes, or approval remarks..."
-            className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-none"
+            className="w-full rounded-lg border border-slate-300 p-2.5 text-sm text-slate-900 focus:border-[#E11D30] focus:outline-none"
           />
         </div>
 

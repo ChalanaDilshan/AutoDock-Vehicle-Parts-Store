@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Package,
@@ -223,7 +223,7 @@ export const RestrictedSellerDashboard: React.FC = () => {
             {!tool.locked && (
               <Link
                 to={tool.to}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-700 hover:text-blue-800 pt-2 border-t border-slate-100"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#E11D30] hover:text-[#BE123C] pt-2 border-t border-slate-100"
               >
                 <span>Open workspace</span>
                 <ArrowRight className="w-3.5 h-3.5" />

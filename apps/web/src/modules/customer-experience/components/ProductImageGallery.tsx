@@ -43,7 +43,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
               onClick={() => setSelectedIndex(idx)}
               className={`aspect-square rounded-md border overflow-hidden bg-white transition-colors ${
                 selectedIndex === idx
-                  ? 'border-blue-600 ring-2 ring-blue-600/20'
+                  ? 'border-[#E11D30] ring-2 ring-[#E11D30]/20'
                   : 'border-slate-200 hover:border-slate-300'
               }`}
             >

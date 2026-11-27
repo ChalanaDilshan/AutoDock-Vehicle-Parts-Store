@@ -80,7 +80,7 @@ export const LoginPage: React.FC = () => {
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-medium text-blue-700 hover:underline"
+                  className="text-xs font-medium text-[#E11D30] hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -114,7 +114,7 @@ export const LoginPage: React.FC = () => {
           Don&apos;t have an account?{' '}
           <Link
             to={buildAuthPathWithNext('/register', safeNextParam)}
-            className="font-medium text-blue-700 hover:underline"
+            className="font-medium text-[#E11D30] hover:underline"
           >
             Create an account
           </Link>
