@@ -19,6 +19,39 @@ vi.mock('../../src/modules/admin-platform/components/AdminLayout.js', () => ({
   AdminLayout: () => <div data-testid="admin-layout">Admin Layout</div>,
 }));
 
+vi.mock('../../src/modules/customer-experience/api/customerExperienceApi.js', () => ({
+  taxonomyApi: {
+    getCategories: vi.fn().mockResolvedValue({
+      success: true,
+      data: [
+        { _id: 'c1', name: 'Brake Pads', slug: 'brake-pads', isActive: true, displayOrder: 1 },
+        { _id: 'c2', name: 'Engine Parts', slug: 'engine-parts', isActive: true, displayOrder: 2 },
+      ],
+    }),
+    getBrands: vi.fn().mockResolvedValue({
+      success: true,
+      data: [{ _id: 'b1', name: 'Brembo', slug: 'brembo', countryOfOrigin: 'Italy', isActive: true }],
+    }),
+    getMakes: vi.fn().mockResolvedValue({
+      success: true,
+      data: ['TOYOTA', 'HONDA'],
+    }),
+  },
+  productsApi: {
+    getRecommendations: vi.fn().mockResolvedValue({
+      success: true,
+      data: [
+        {
+          _id: 'p1',
+          name: 'Ceramic Brake Pad Set',
+          priceInCents: 1450000,
+          images: [],
+        },
+      ],
+    }),
+  },
+}));
+
 describe('Extracted Header, Footer & Layout Components', () => {
   beforeEach(() => {
     mockUseAuth.mockReturnValue({
@@ -132,6 +165,26 @@ describe('Extracted Header, Footer & Layout Components', () => {
 
       fireEvent.click(toggleBtn);
       expect(screen.queryByLabelText('Mobile search parts')).toBeNull();
+    });
+
+    it('renders storefront category bar and opens mega-menu with categories and featured products', async () => {
+      render(
+        <MemoryRouter>
+          <Header />
+        </MemoryRouter>
+      );
+
+      expect(screen.getByText('Shop By Category')).toBeDefined();
+      expect(screen.getByText('Auto Parts')).toBeDefined();
+      expect(screen.getByText('Categories')).toBeDefined();
+
+      fireEvent.click(screen.getByText('Auto Parts'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Featured Products')).toBeDefined();
+        expect(screen.getByText('Brake Pads')).toBeDefined();
+        expect(screen.getByText('Ceramic Brake Pad Set')).toBeDefined();
+      });
     });
   });
 

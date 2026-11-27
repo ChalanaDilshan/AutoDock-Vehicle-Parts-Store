@@ -7,6 +7,9 @@ export const HomeHeroVisual: React.FC = () => {
       <img
         src="/hero-wheel.jpg"
         alt="Forged alloy wheel with ventilated brake rotor and caliper"
+        width={800}
+        height={600}
+        {...({ fetchpriority: 'high' } as Record<string, string>)}
         className="w-full aspect-[4/3] object-cover block"
       />
       <div className="px-4 py-3 bg-[#1C2433]/95 border-t border-slate-700/80 flex items-center justify-between gap-3">
@@ -14,7 +17,7 @@ export const HomeHeroVisual: React.FC = () => {
           <ShieldCheck className="w-4 h-4 text-[#FB2C36] shrink-0" aria-hidden="true" />
           <span>OEM &amp; Aftermarket Verified Fitment</span>
         </div>
-        <span className="text-xs text-slate-400 shrink-0">Sri Lanka</span>
+        <span className="text-xs text-slate-300 shrink-0">Sri Lanka</span>
       </div>
     </div>
   );

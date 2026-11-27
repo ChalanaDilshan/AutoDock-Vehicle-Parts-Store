@@ -15,6 +15,10 @@ import {
   Zap,
   Compass,
   Car,
+  Truck,
+  BadgeCheck,
+  Thermometer,
+  Settings,
 } from 'lucide-react';
 import {
   productsApi,
@@ -35,10 +39,13 @@ export const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuth();
 
   const [featuredProducts, setFeaturedProducts] = useState<ProductItem[]>([]);
+  const [latestProducts, setLatestProducts] = useState<ProductItem[]>([]);
+  const [popularProducts, setPopularProducts] = useState<ProductItem[]>([]);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [brands, setBrands] = useState<BrandItem[]>([]);
 
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [isLoadingLatest, setIsLoadingLatest] = useState(true);
   const [isLoadingTaxonomy, setIsLoadingTaxonomy] = useState(true);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [taxonomyError, setTaxonomyError] = useState<string | null>(null);
@@ -56,7 +63,9 @@ export const HomePage: React.FC = () => {
   const years = Array.from({ length: 35 }, (_, i) => String(currentYear - i));
 
   useEffect(() => {
+    let isMounted = true;
     setIsLoadingProducts(true);
+    setIsLoadingLatest(true);
     setIsLoadingTaxonomy(true);
     setProductsError(null);
     setTaxonomyError(null);
@@ -64,14 +73,47 @@ export const HomePage: React.FC = () => {
     productsApi
       .getRecommendations({ limit: 8 })
       .then((res) => {
+        if (!isMounted) return;
         if (res.success && Array.isArray(res.data)) {
           setFeaturedProducts(res.data);
         }
       })
       .catch(() => {
+        if (!isMounted) return;
         setProductsError('Unable to load featured products right now.');
       })
-      .finally(() => setIsLoadingProducts(false));
+      .finally(() => {
+        if (isMounted) setIsLoadingProducts(false);
+      });
+
+    if (typeof productsApi.search === 'function') {
+      Promise.allSettled([
+        productsApi.search({ sortBy: 'NEWEST', limit: 8 }),
+        productsApi.search({ sortBy: 'RATING_DESC', limit: 6 }),
+      ])
+        .then(([newestRes, popularRes]) => {
+          if (!isMounted) return;
+          if (
+            newestRes.status === 'fulfilled' &&
+            newestRes.value?.success &&
+            Array.isArray(newestRes.value.data?.items)
+          ) {
+            setLatestProducts(newestRes.value.data.items);
+          }
+          if (
+            popularRes.status === 'fulfilled' &&
+            popularRes.value?.success &&
+            Array.isArray(popularRes.value.data?.items)
+          ) {
+            setPopularProducts(popularRes.value.data.items);
+          }
+        })
+        .finally(() => {
+          if (isMounted) setIsLoadingLatest(false);
+        });
+    } else {
+      setIsLoadingLatest(false);
+    }
 
     Promise.allSettled([
       taxonomyApi.getCategories(),
@@ -79,6 +121,7 @@ export const HomePage: React.FC = () => {
       taxonomyApi.getMakes(),
     ])
       .then(([catRes, brandRes, makeRes]) => {
+        if (!isMounted) return;
         let taxonomyFailed = false;
         if (catRes.status === 'fulfilled' && catRes.value.success && Array.isArray(catRes.value.data)) {
           setCategories(catRes.value.data.slice(0, 8));
@@ -86,7 +129,7 @@ export const HomePage: React.FC = () => {
           taxonomyFailed = true;
         }
         if (brandRes.status === 'fulfilled' && brandRes.value.success && Array.isArray(brandRes.value.data)) {
-          setBrands(brandRes.value.data.slice(0, 8));
+          setBrands(brandRes.value.data.slice(0, 10));
         }
         if (makeRes.status === 'fulfilled' && makeRes.value.success && Array.isArray(makeRes.value.data)) {
           setMakes(makeRes.value.data);
@@ -95,7 +138,13 @@ export const HomePage: React.FC = () => {
           setTaxonomyError('Categories are currently unavailable.');
         }
       })
-      .finally(() => setIsLoadingTaxonomy(false));
+      .finally(() => {
+        if (isMounted) setIsLoadingTaxonomy(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -170,11 +219,15 @@ export const HomePage: React.FC = () => {
     if (s.includes('engine')) return <Wrench className="w-5 h-5" />;
     if (s.includes('brake')) return <Disc className="w-5 h-5" />;
     if (s.includes('filter') || s.includes('fluid')) return <Droplets className="w-5 h-5" />;
-    if (s.includes('elec')) return <Zap className="w-5 h-5" />;
+    if (s.includes('elec') || s.includes('spark')) return <Zap className="w-5 h-5" />;
+    if (s.includes('cool')) return <Thermometer className="w-5 h-5" />;
+    if (s.includes('trans')) return <Settings className="w-5 h-5" />;
     if (s.includes('susp')) return <Compass className="w-5 h-5" />;
     if (s.includes('body')) return <Car className="w-5 h-5" />;
     return <Package className="w-5 h-5" />;
   };
+
+  const stripCategories = categories.slice(0, 7);
 
   return (
     <div className="bg-white">
@@ -200,7 +253,7 @@ export const HomePage: React.FC = () => {
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
                 Quality Vehicle Parts for a Smoother Ride
               </h1>
-              <p className="text-base text-slate-300 max-w-xl leading-relaxed">
+              <p className="text-base text-slate-200 max-w-xl leading-relaxed">
                 Find the right parts for your vehicle. Wide range. Trusted sellers.
               </p>
               <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -226,27 +279,89 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Featured Categories Strip (#categories) */}
+        <div
+          id="categories"
+          aria-labelledby="shop-by-category-heading"
+          className="scroll-mt-32 bg-[#E5E7EB] border-t border-slate-300"
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <h2
+                id="shop-by-category-heading"
+                className="text-sm font-semibold text-[#111827]"
+              >
+                Shop by Category
+              </h2>
+              <Link
+                to="/products"
+                className="min-h-[44px] px-1 text-xs font-medium text-[#E11D30] hover:text-[#BE123C] inline-flex items-center gap-1 shrink-0"
+              >
+                <span>View All Categories</span>
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+              </Link>
+            </div>
+
+            {taxonomyError ? (
+              <Alert variant="warning">{taxonomyError}</Alert>
+            ) : isLoadingTaxonomy ? (
+              <div role="status" aria-live="polite" className="space-y-2">
+                <p className="sr-only">Loading vehicle system categories...</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+                  {[...Array(7)].map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="h-20 bg-[#1C2433]/20 rounded-lg border border-slate-300"
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : stripCategories.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+                {stripCategories.map((cat) => (
+                  <Link
+                    key={cat._id || cat.slug}
+                    to={`/products?category=${encodeURIComponent(cat.slug)}`}
+                    className="group min-h-[44px] flex flex-col items-center text-center gap-2 px-3 py-3 rounded-lg border border-[#1C2433] bg-[#1C2433] hover:border-[#E11D30] transition-colors"
+                  >
+                    <span className="w-10 h-10 rounded-full border border-slate-700 bg-[#0B121F] text-[#E11D30] group-hover:border-[#E11D30] group-hover:text-white flex items-center justify-center transition-colors">
+                      {getCategoryIcon(cat.slug || cat.name)}
+                    </span>
+                    <span className="text-xs font-medium text-white line-clamp-1">
+                      {cat.name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 text-center border border-slate-300 bg-white rounded-lg text-xs text-slate-600">
+                Categories will appear here once added by administrators.
+              </div>
+            )}
+          </div>
+        </div>
       </section>
 
       {/* Inline Vehicle Finder Bar */}
       <section className="bg-slate-50 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="bg-white border border-slate-200 rounded-lg p-4 sm:p-5">
+          <div className="bg-white border border-slate-200 rounded-lg p-4 sm:p-5 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
               <div>
                 <h2 className="text-sm font-semibold text-slate-900">
                   Find Parts for Your Vehicle
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-600">
                   Filter parts confirmed to fit your specific model and production year
                 </p>
               </div>
               <Link
                 to="/garage"
-                className="text-xs font-medium text-[#E11D30] hover:text-[#BE123C] inline-flex items-center gap-1"
+                className="min-h-[44px] px-1 text-xs font-medium text-[#E11D30] hover:text-[#BE123C] inline-flex items-center gap-1"
               >
                 <span>Open My Garage</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
               </Link>
             </div>
 
@@ -289,110 +404,152 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Shop by Category */}
-      <section
-        id="categories"
-        aria-labelledby="shop-by-category-heading"
-        className="bg-[#E5E7EB] border-b border-slate-300"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <div>
-            <h2
-              id="shop-by-category-heading"
-              className="text-xl font-semibold text-[#111827] tracking-tight"
-            >
-              Shop by Category
-            </h2>
-            <p className="text-sm text-slate-700 mt-0.5">
-              Browse parts organized by vehicle system
-            </p>
-          </div>
-          <Link
-            to="/products"
-            className="text-sm font-medium text-[#E11D30] hover:text-[#BE123C] inline-flex items-center gap-1 shrink-0"
-          >
-            <span>View All Categories</span>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        {taxonomyError ? (
-          <Alert variant="warning">{taxonomyError}</Alert>
-        ) : isLoadingTaxonomy ? (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[...Array(4)].map((_, idx) => (
-              <div
-                key={idx}
-                className="h-24 bg-[#1C2433]/20 rounded-lg border border-slate-300"
-              />
-            ))}
-          </div>
-        ) : categories.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {categories.map((cat) => (
-              <Link
-                key={cat._id}
-                to={`/products?category=${encodeURIComponent(cat.slug)}`}
-                className="flex items-center gap-3 p-4 rounded-lg border border-[#1C2433] bg-[#1C2433] hover:border-[#E11D30] transition-colors"
-              >
-                <div className="w-10 h-10 rounded-md bg-[#0B121F] text-[#E11D30] flex items-center justify-center shrink-0">
-                  {getCategoryIcon(cat.slug || cat.name)}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-white truncate">
-                    {cat.name}
-                  </div>
-                  {cat.description && (
-                    <div className="text-xs text-slate-300 truncate mt-0.5">
-                      {cat.description}
-                    </div>
-                  )}
-                </div>
+      {/* Dual Promotional Sub-Banners (Asymmetric Contrast) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-4">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+          <div className="md:col-span-7 rounded-lg bg-[#0B121F] text-white border border-slate-800 p-6 flex flex-col justify-between gap-4">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#FB2C36]">
+                <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+                <span>Verified Quality</span>
+              </div>
+              <h3 className="text-xl font-semibold text-white">
+                Genuine Parts &amp; Clear Warranty Terms
+              </h3>
+              <p className="text-sm text-slate-200 leading-relaxed max-w-xl">
+                Every seller passes business registration and bank verification before listing parts on AutoDock.
+              </p>
+            </div>
+            <div>
+              <Link to="/products">
+                <Button variant="primary" size="md">
+                  Browse Verified Parts
+                </Button>
               </Link>
-            ))}
+            </div>
           </div>
-        ) : (
-          <div className="p-8 text-center border border-slate-300 bg-white rounded-lg text-sm text-slate-600">
-            Categories will appear here once added by administrators.
+
+          <div className="md:col-span-5 rounded-lg bg-red-50 text-slate-900 border border-red-200 p-6 flex flex-col justify-between gap-4">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700">
+                <Tag className="w-4 h-4" aria-hidden="true" />
+                <span>Special Offers</span>
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900">
+                Compare Prices Across Suppliers
+              </h3>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                Sort parts by price, condition, or rating and view delivery charges upfront by district.
+              </p>
+            </div>
+            <div>
+              <Link to="/products?sortBy=PRICE_ASC">
+                <Button variant="outline" size="md">
+                  Compare Lowest Prices
+                </Button>
+              </Link>
+            </div>
           </div>
-        )}
         </div>
       </section>
 
+      {/* Latest Products */}
+      {(isLoadingLatest || latestProducts.length > 0) && (
+        <section
+          aria-labelledby="latest-products-heading"
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-b border-slate-200"
+        >
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <h2
+                id="latest-products-heading"
+                className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight"
+              >
+                Latest Products
+              </h2>
+              <p className="text-sm text-slate-600 mt-0.5">
+                Newly added spare parts from verified local suppliers
+              </p>
+            </div>
+            <Link
+              to="/products?sortBy=NEWEST"
+              className="min-h-[44px] px-1 text-sm font-medium text-[#E11D30] hover:text-[#BE123C] inline-flex items-center gap-1 shrink-0"
+            >
+              <span>Browse Latest</span>
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
+          </div>
+
+          {isLoadingLatest ? (
+            <div role="status" aria-live="polite" className="space-y-3">
+              <p className="text-xs text-slate-600">Loading latest spare parts...</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                {[...Array(4)].map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="h-72 bg-slate-100 rounded-lg border border-slate-200"
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {latestProducts.map((product) => (
+                <ProductCard
+                  key={`latest-${product._id}`}
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                  onToggleWishlist={handleToggleWishlist}
+                  isWishlisted={wishlistedIds.has(product._id)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       {/* Featured Products */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-b border-slate-200">
+      <section
+        aria-labelledby="featured-products-heading"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-b border-slate-200"
+      >
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900 tracking-tight">
+            <h2
+              id="featured-products-heading"
+              className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight"
+            >
               Featured Products
             </h2>
             <p className="text-sm text-slate-600 mt-0.5">
-              Popular spare parts from verified local suppliers
+              Recommended spare parts tailored to popular vehicles
             </p>
           </div>
           <Link
             to="/products"
-            className="text-sm font-medium text-[#E11D30] hover:text-[#BE123C] inline-flex items-center gap-1 shrink-0"
+            className="min-h-[44px] px-1 text-sm font-medium text-[#E11D30] hover:text-[#BE123C] inline-flex items-center gap-1 shrink-0"
           >
             <span>View All</span>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-4 h-4" aria-hidden="true" />
           </Link>
         </div>
 
         {productsError ? (
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 flex items-center gap-3 text-sm text-slate-700">
-            <AlertCircle className="w-4 h-4 text-slate-500 shrink-0" />
+            <AlertCircle className="w-4 h-4 text-slate-600 shrink-0" aria-hidden="true" />
             <span>{productsError}</span>
           </div>
         ) : isLoadingProducts ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {[...Array(4)].map((_, idx) => (
-              <div
-                key={idx}
-                className="h-72 bg-slate-100 rounded-lg border border-slate-200"
-              />
-            ))}
+          <div role="status" aria-live="polite" className="space-y-3">
+            <p className="text-xs text-slate-600">Loading featured spare parts...</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {[...Array(4)].map((_, idx) => (
+                <div
+                  key={idx}
+                  className="h-72 bg-slate-100 rounded-lg border border-slate-200"
+                />
+              ))}
+            </div>
           </div>
         ) : featuredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -425,78 +582,142 @@ export const HomePage: React.FC = () => {
         )}
       </section>
 
-      {/* Practical Value & Deals Strip */}
-      <section className="bg-slate-50 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col justify-between gap-4">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#E11D30]">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Verified Quality</span>
+      {/* Popular Products Dark Showcase */}
+      {popularProducts.length > 0 && (
+        <section
+          aria-labelledby="popular-products-heading"
+          className="bg-[#0B121F] text-white border-b border-slate-800 py-12"
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <div>
+                <p className="text-xs font-semibold text-[#FB2C36]">
+                  Top Rated by Buyers
+                </p>
+                <h2
+                  id="popular-products-heading"
+                  className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-0.5"
+                >
+                  Popular Products
+                </h2>
               </div>
-              <h3 className="text-lg font-semibold text-slate-900">
-                Genuine Parts &amp; Clear Warranty Terms
-              </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Every seller passes business registration and bank verification before listing parts on AutoDock.
-              </p>
-            </div>
-            <div>
-              <Link to="/products">
-                <Button variant="outline" size="sm">
-                  Shop Now
-                </Button>
+              <Link
+                to="/products?sortBy=RATING_DESC"
+                className="min-h-[44px] px-1 text-sm font-medium text-[#FB2C36] hover:text-red-300 inline-flex items-center gap-1 shrink-0"
+              >
+                <span>Top Rated Catalog</span>
+                <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {popularProducts.map((product) => (
+                <ProductCard
+                  key={`popular-${product._id}`}
+                  product={product}
+                  variant="compact"
+                  onAddToCart={handleAddToCart}
+                />
+              ))}
             </div>
           </div>
+        </section>
+      )}
 
-          <div className="bg-white border border-slate-200 rounded-lg p-6 flex flex-col justify-between gap-4">
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700">
-                <Tag className="w-4 h-4" />
-                <span>Special Offers</span>
+      {/* Trust & Marketplace Guarantees Bar */}
+      <section className="bg-slate-50 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-red-50 text-[#E11D30] flex items-center justify-center shrink-0">
+                <BadgeCheck className="w-5 h-5" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900">
-                Compare Prices Across Suppliers
-              </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Sort parts by price, condition, or rating and view delivery charges upfront by district.
-              </p>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Verified Sellers</h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Onboarded Sri Lankan parts stores with reviewed documents
+                </p>
+              </div>
             </div>
-            <div>
-              <Link to="/products?sortBy=PRICE_ASC">
-                <Button variant="outline" size="sm">
-                  Learn More
-                </Button>
-              </Link>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-red-50 text-[#E11D30] flex items-center justify-center shrink-0">
+                <Truck className="w-5 h-5" aria-hidden="true" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Island-Wide Delivery</h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Seller-specific district rates shown upfront at checkout
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-red-50 text-[#E11D30] flex items-center justify-center shrink-0">
+                <Car className="w-5 h-5" aria-hidden="true" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Fitment Checking</h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Match spare parts by vehicle make, model, and year
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-red-50 text-[#E11D30] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5" aria-hidden="true" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Direct LKR Checkout</h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  COD and verified seller bank-transfer support
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Brands Strip */}
+      {/* Popular Brands Bordered Matrix */}
       {brands.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <section
+          aria-labelledby="popular-brands-heading"
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+        >
+          <div className="flex items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-base font-semibold text-slate-900">
-                Supported Manufacturers &amp; Brands
+              <h2
+                id="popular-brands-heading"
+                className="text-xl font-semibold text-slate-900 tracking-tight"
+              >
+                Popular Manufacturers &amp; Brands
               </h2>
-              <p className="text-xs text-slate-500">
-                Select a brand to view available parts
+              <p className="text-sm text-slate-600 mt-0.5">
+                Select an OEM or aftermarket brand to filter parts
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {brands.map((b) => (
-                <Link
-                  key={b._id}
-                  to={`/products?brand=${encodeURIComponent(b.slug)}`}
-                  className="px-3 py-1.5 rounded-md border border-slate-200 bg-white hover:border-red-300 hover:text-[#E11D30] text-xs font-medium text-slate-700 transition-colors"
-                >
+            <Link
+              to="/products"
+              className="min-h-[44px] px-1 text-sm font-medium text-[#E11D30] hover:text-[#BE123C] inline-flex items-center gap-1 shrink-0"
+            >
+              <span>All Parts</span>
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 border-t border-l border-slate-200 rounded-lg overflow-hidden">
+            {brands.map((b) => (
+              <Link
+                key={b._id || b.slug}
+                to={`/products?brand=${encodeURIComponent(b.slug)}`}
+                className="min-h-[64px] p-4 border-r border-b border-slate-200 bg-white hover:bg-red-50/40 hover:text-[#E11D30] transition-colors flex flex-col items-center justify-center text-center gap-1"
+              >
+                <span className="text-sm font-bold text-slate-900 tracking-tight">
                   {b.name}
-                </Link>
-              ))}
-            </div>
+                </span>
+                {b.countryOfOrigin && (
+                  <span className="text-xs text-slate-600">{b.countryOfOrigin}</span>
+                )}
+              </Link>
+            ))}
           </div>
         </section>
       )}

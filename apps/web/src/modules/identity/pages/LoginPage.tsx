@@ -1,13 +1,22 @@
-﻿import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 import { Alert, Button, Input } from '../../../shared/components/index.js';
+import { buildAuthPathWithNext, getSafeRedirectPath } from '../utils/navigation.js';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  const safeNextParam = getSafeRedirectPath(searchParams.get('next'), '');
+  const stateFrom = (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from;
+  const stateFromPath = stateFrom?.pathname
+    ? `${stateFrom.pathname}${stateFrom.search || ''}${stateFrom.hash || ''}`
+    : '';
+  const redirectTarget = safeNextParam || getSafeRedirectPath(stateFromPath, '/');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,12 +35,7 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       await login({ email: email.trim(), password });
-      const from = (location.state as any)?.from?.pathname;
-      if (from) {
-        navigate(from, { replace: true });
-      } else {
-        navigate('/', { replace: true });
-      }
+      navigate(redirectTarget, { replace: true });
     } catch (err: any) {
       setErrorMessage(err?.message || 'Invalid email or password credentials.');
     } finally {
@@ -108,7 +112,10 @@ export const LoginPage: React.FC = () => {
 
         <p className="text-center text-sm text-slate-600">
           Don&apos;t have an account?{' '}
-          <Link to="/register" className="font-medium text-[#E11D30] hover:underline">
+          <Link
+            to={buildAuthPathWithNext('/register', safeNextParam)}
+            className="font-medium text-[#E11D30] hover:underline"
+          >
             Create an account
           </Link>
         </p>

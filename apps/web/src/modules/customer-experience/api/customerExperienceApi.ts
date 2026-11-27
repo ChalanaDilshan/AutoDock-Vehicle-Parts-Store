@@ -174,18 +174,93 @@ export interface ApiResponse<T> {
 // Products API (Public)
 // ---------------------------------------------------------------------------
 
-function normalizePaginatedResponse<T>(raw: any, defaultLimit = 20): ApiResponse<PaginatedResult<T>> {
+function normalizeRefEntity(raw: any): any {
+  if (!raw || typeof raw !== 'object') return raw;
+  return {
+    ...raw,
+    _id: raw._id || raw.id || '',
+  };
+}
+
+function normalizeCategory(raw: any): CategoryItem {
+  const subs = Array.isArray(raw?.children)
+    ? raw.children
+    : Array.isArray(raw?.subcategories)
+      ? raw.subcategories
+      : undefined;
+
+  return {
+    ...raw,
+    _id: raw?._id || raw?.id || '',
+    children: subs ? subs.map(normalizeCategory) : undefined,
+  };
+}
+
+function normalizeBrand(raw: any): BrandItem {
+  return {
+    ...raw,
+    _id: raw?._id || raw?.id || '',
+  };
+}
+
+function normalizeSpecifications(specs: any): Record<string, string> {
+  if (Array.isArray(specs)) {
+    const out: Record<string, string> = {};
+    for (const entry of specs) {
+      if (entry && entry.key) {
+        out[String(entry.key)] = String(entry.value ?? '');
+      }
+    }
+    return out;
+  }
+  return specs && typeof specs === 'object' ? specs : {};
+}
+
+function normalizeProduct(raw: any): ProductItem {
+  const rawImages =
+    Array.isArray(raw?.images) && raw.images.length > 0
+      ? raw.images
+      : raw?.primaryImageUrl
+        ? [{ url: raw.primaryImageUrl, isPrimary: true }]
+        : [];
+
+  return {
+    ...raw,
+    _id: raw?._id || raw?.id || '',
+    name: raw?.name || raw?.title || '',
+    slug: raw?.slug || '',
+    categoryId: normalizeRefEntity(raw?.categoryId ?? raw?.category ?? ''),
+    brandId: normalizeRefEntity(raw?.brandId ?? raw?.brand ?? ''),
+    storeName: raw?.storeName || raw?.seller?.businessName || raw?.seller?.storeName,
+    images: rawImages,
+    specifications: normalizeSpecifications(raw?.specifications),
+    condition: raw?.condition || 'BRAND_NEW',
+    status: raw?.status || 'ACTIVE',
+    averageRating: Number(raw?.averageRating ?? 0),
+    reviewCount: Number(raw?.reviewCount ?? 0),
+    isUniversalFit: Boolean(raw?.isUniversalFit),
+  };
+}
+
+function normalizePaginatedResponse<T>(
+  raw: any,
+  defaultLimit = 20,
+  mapItem?: (item: any) => T
+): ApiResponse<PaginatedResult<T>> {
   if (Array.isArray(raw?.data)) {
-    const total = Number(raw?.meta?.pagination?.total ?? raw.data.length);
-    const page = Number(raw?.meta?.pagination?.page ?? 1);
-    const limit = Number(raw?.meta?.pagination?.limit ?? defaultLimit) || defaultLimit;
+    const rawPagination = raw?.meta?.pagination ?? {};
+    const total = Number(rawPagination.total ?? rawPagination.totalRecords ?? raw.data.length);
+    const page = Number(rawPagination.page ?? 1);
+    const limit = Number(rawPagination.limit ?? defaultLimit) || defaultLimit;
     const pages = Number(
-      raw?.meta?.pagination?.pages ?? Math.max(1, Math.ceil(total / Math.max(1, limit)))
+      rawPagination.pages ??
+        rawPagination.totalPages ??
+        Math.max(1, Math.ceil(total / Math.max(1, limit)))
     );
     return {
       ...raw,
       data: {
-        items: raw.data,
+        items: mapItem ? raw.data.map(mapItem) : raw.data,
         pagination: { total, page, limit, pages },
       },
     };
@@ -227,11 +302,15 @@ export const productsApi = {
     }
 
     const raw = await apiClient.get('/products', { params });
-    return normalizePaginatedResponse<ProductItem>(raw, query.limit ?? 12);
+    return normalizePaginatedResponse<ProductItem>(raw, query.limit ?? 12, normalizeProduct);
   },
 
-  getById: (id: string): Promise<ApiResponse<ProductItem>> => {
-    return apiClient.get(`/products/${id}`);
+  getById: async (id: string): Promise<ApiResponse<ProductItem>> => {
+    const raw: any = await apiClient.get(`/products/${id}`);
+    if (raw?.data && typeof raw.data === 'object') {
+      return { ...raw, data: normalizeProduct(raw.data) };
+    }
+    return raw;
   },
 
   checkFitment: (
@@ -246,7 +325,7 @@ export const productsApi = {
     return normalizePaginatedResponse<ProductReview>(raw, params.limit ?? 20);
   },
 
-  getRecommendations: (params: {
+  getRecommendations: async (params: {
     productId?: string;
     category?: string;
     make?: string;
@@ -254,7 +333,16 @@ export const productsApi = {
     year?: number;
     limit?: number;
   } = {}): Promise<ApiResponse<ProductItem[]>> => {
-    return apiClient.get('/products/recommendations', { params });
+    const raw: any = await apiClient.get('/products/recommendations', { params });
+    const list = Array.isArray(raw?.data)
+      ? raw.data
+      : Array.isArray(raw?.data?.products)
+        ? raw.data.products
+        : [];
+    return {
+      ...raw,
+      data: list.map(normalizeProduct),
+    };
   },
 };
 
@@ -425,8 +513,12 @@ export const reviewApi = {
 // ---------------------------------------------------------------------------
 
 export const taxonomyApi = {
-  getCategories: (): Promise<ApiResponse<CategoryItem[]>> => {
-    return apiClient.get('/categories');
+  getCategories: async (): Promise<ApiResponse<CategoryItem[]>> => {
+    const raw: any = await apiClient.get('/categories');
+    if (Array.isArray(raw?.data)) {
+      return { ...raw, data: raw.data.map(normalizeCategory) };
+    }
+    return raw;
   },
 
   adminCreateCategory: (data: Partial<CategoryItem>): Promise<ApiResponse<CategoryItem>> => {
@@ -437,8 +529,12 @@ export const taxonomyApi = {
     return apiClient.put(`/categories/${id}`, data);
   },
 
-  getBrands: (): Promise<ApiResponse<BrandItem[]>> => {
-    return apiClient.get('/brands');
+  getBrands: async (): Promise<ApiResponse<BrandItem[]>> => {
+    const raw: any = await apiClient.get('/brands');
+    if (Array.isArray(raw?.data)) {
+      return { ...raw, data: raw.data.map(normalizeBrand) };
+    }
+    return raw;
   },
 
   adminCreateBrand: (data: Partial<BrandItem>): Promise<ApiResponse<BrandItem>> => {

@@ -196,6 +196,33 @@ describe('MOD-02 Garage, Cart & Wishlist Frontend Tests', () => {
     expect(await screen.findByTestId('checkout-route')).toBeDefined();
   });
 
+  it('Renders inline CartLoginPrompt when clicking Cart while unauthenticated', () => {
+    vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isLoading: false,
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      refreshProfile: vi.fn(),
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/cart']}>
+        <CartPage />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole('heading', { name: /Welcome to AutoDock! Please sign in\./i })).toBeDefined();
+    expect(screen.getByRole('heading', { name: /Login with Password/i })).toBeDefined();
+    expect(screen.getByLabelText(/Email Address/i)).toBeDefined();
+    expect(screen.getByLabelText(/^Password/i)).toBeDefined();
+    expect(screen.getByRole('button', { name: /^LOGIN$/i })).toBeDefined();
+    expect(screen.getByRole('link', { name: /Forgot Password\?/i }).getAttribute('href')).toBe('/forgot-password');
+    expect(screen.getByRole('link', { name: /^Register$/i }).getAttribute('href')).toBe('/register');
+  });
+
   it('Renders customer wishlist with 1-click move to cart', async () => {
     vi.mocked(wishlistApi.get).mockResolvedValueOnce({
       success: true,

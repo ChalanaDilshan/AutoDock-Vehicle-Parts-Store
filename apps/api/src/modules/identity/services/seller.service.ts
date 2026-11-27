@@ -10,6 +10,7 @@ import {
   AcknowledgePrivacyInput,
 } from '../validators/seller.validator.js';
 import { storageService } from './storage.service.js';
+import { CURRENT_PRIVACY_NOTICE_VERSION } from '../../../shared/constants.js';
 import { AppError } from '../../../shared/middleware/errorHandler.js';
 
 export class SellerService {
@@ -90,12 +91,10 @@ export class SellerService {
     }
 
     // Prepare buffer
-    let buffer: Buffer;
-    if (input.fileContentBase64) {
-      buffer = Buffer.from(input.fileContentBase64, 'base64');
-    } else {
-      buffer = Buffer.from(`AutoDock Document Payload Mock for ${input.fileName}`);
+    if (!input.fileContentBase64 || input.fileContentBase64.trim() === '') {
+      throw new AppError('File content is required', 400, 'MISSING_FILE_CONTENT');
     }
+    const buffer = Buffer.from(input.fileContentBase64, 'base64');
 
     const s3StorageKey = await storageService.uploadPrivateFile(
       profile._id.toString(),
@@ -179,6 +178,14 @@ export class SellerService {
       throw new AppError('Seller profile not found', 404, 'NOT_FOUND');
     }
 
+    if (input.noticeVersion !== CURRENT_PRIVACY_NOTICE_VERSION) {
+      throw new AppError(
+        `Invalid privacy notice version. Expected ${CURRENT_PRIVACY_NOTICE_VERSION}`,
+        400,
+        'INVALID_NOTICE_VERSION'
+      );
+    }
+
     const ack = await PrivacyAcknowledgement.create({
       sellerId: profile._id,
       userId,
@@ -201,8 +208,16 @@ export class SellerService {
       throw new AppError('Seller profile not found', 404, 'NOT_FOUND');
     }
 
-    if (profile.verificationStatus === 'APPROVED') {
-      throw new AppError('Your seller application is already approved', 400, 'ALREADY_APPROVED');
+    const submittableStatuses = ['DRAFT', 'ADDITIONAL_INFO_REQUIRED'];
+    if (!submittableStatuses.includes(profile.verificationStatus)) {
+      if (profile.verificationStatus === 'APPROVED') {
+        throw new AppError('Your seller application is already approved', 400, 'ALREADY_APPROVED');
+      }
+      throw new AppError(
+        `Cannot submit application in status: ${profile.verificationStatus}`,
+        400,
+        'INVALID_STATUS'
+      );
     }
 
     // 1. Validate mandatory documents
