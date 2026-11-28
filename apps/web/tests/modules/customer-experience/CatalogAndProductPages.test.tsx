@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { ProductListingPage } from '../../../src/modules/customer-experience/pages/ProductListingPage.js';
 import { ProductDetailPage } from '../../../src/modules/customer-experience/pages/ProductDetailPage.js';
 import { productsApi, taxonomyApi, garageApi } from '../../../src/modules/customer-experience/api/customerExperienceApi.js';
@@ -182,5 +182,40 @@ describe('MOD-02 Product Browsing & Details Frontend Tests', () => {
     // Verified review
     expect(screen.getByText('Fitted perfectly on my 2018 Corolla. Excellent braking response.')).toBeDefined();
     expect(screen.getByText('Verified Purchase')).toBeDefined();
+  });
+
+  it('Redirects guest Add to Cart click on ProductListingPage to /login with encoded ?next= query', async () => {
+    vi.mocked(productsApi.search).mockResolvedValueOnce({
+      success: true,
+      data: {
+        items: [mockProducts[0]] as any,
+        pagination: { total: 1, page: 1, limit: 12, pages: 1 },
+      },
+    });
+
+    const LoginCapture: React.FC = () => {
+      const loc = useLocation();
+      return <div data-testid="login-redirect-url">{`${loc.pathname}${loc.search}`}</div>;
+    };
+
+    render(
+      <MemoryRouter initialEntries={['/products?category=brake-system']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/products" element={<ProductListingPage />} />
+            <Route path="/login" element={<LoginCapture />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect((await screen.findAllByText('Front Brake Pads Ceramic')).length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole('button', { name: /Add to Shopping Cart/i }));
+
+    expect(await screen.findByTestId('login-redirect-url')).toBeDefined();
+    expect(screen.getByTestId('login-redirect-url').textContent).toBe(
+      '/login?next=%2Fproducts%3Fcategory%3Dbrake-system'
+    );
   });
 });

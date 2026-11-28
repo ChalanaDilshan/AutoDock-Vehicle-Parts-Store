@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   ChevronRight,
   Star,
@@ -23,10 +23,12 @@ import { AddToCartBox } from '../components/AddToCartBox.js';
 import { WriteReviewModal } from '../components/WriteReviewModal.js';
 import { ProductCard } from '../components/ProductCard.js';
 import { useAuth } from '../../identity/context/AuthContext.js';
+import { buildAuthPathWithNext } from '../../identity/utils/navigation.js';
 import { Alert, Badge, Button, Select } from '../../../shared/components/index.js';
 
 export const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
@@ -100,10 +102,14 @@ export const ProductDetailPage: React.FC = () => {
       .catch(() => setFitmentResult(null));
   }, [id, activeVehicle, product?.isUniversalFit]);
 
+  const redirectGuestToLogin = () => {
+    navigate(buildAuthPathWithNext('/login', `${location.pathname}${location.search}`));
+  };
+
   const handleAddToCart = async (quantity: number) => {
     if (!product) return;
     if (!isAuthenticated) {
-      navigate('/login');
+      redirectGuestToLogin();
       return;
     }
     await cartApi.addItem({ productId: product._id, quantity });
@@ -112,7 +118,7 @@ export const ProductDetailPage: React.FC = () => {
   const handleToggleWishlist = async () => {
     if (!product) return;
     if (!isAuthenticated) {
-      navigate('/login');
+      redirectGuestToLogin();
       return;
     }
     if (isWishlisted) {

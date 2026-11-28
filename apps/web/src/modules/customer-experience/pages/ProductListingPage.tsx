@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import {
   Search,
   SlidersHorizontal,
@@ -25,12 +25,14 @@ import { ProductCard } from '../components/ProductCard.js';
 import { CatalogFilterSidebar } from '../components/CatalogFilterSidebar.js';
 import { VehicleFilterBar } from '../components/VehicleFilterBar.js';
 import { useAuth } from '../../identity/context/AuthContext.js';
+import { buildAuthPathWithNext } from '../../identity/utils/navigation.js';
 import { Alert, Button, EmptyState } from '../../../shared/components/index.js';
 
 const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/;
 
 export const ProductListingPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
@@ -202,9 +204,13 @@ export const ProductListingPage: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  const redirectGuestToLogin = () => {
+    navigate(buildAuthPathWithNext('/login', `${location.pathname}${location.search}`));
+  };
+
   const handleAddToCart = async (product: ProductItem) => {
     if (!isAuthenticated) {
-      navigate('/login');
+      redirectGuestToLogin();
       return;
     }
     try {
@@ -217,7 +223,7 @@ export const ProductListingPage: React.FC = () => {
 
   const handleToggleWishlist = async (product: ProductItem) => {
     if (!isAuthenticated) {
-      navigate('/login');
+      redirectGuestToLogin();
       return;
     }
     try {

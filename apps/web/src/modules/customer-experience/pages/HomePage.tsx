@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Search,
   ArrowRight,
@@ -32,10 +32,12 @@ import {
 import { ProductCard } from '../components/ProductCard.js';
 import { HomeHeroVisual } from '../components/HomeHeroVisual.js';
 import { useAuth } from '../../identity/context/AuthContext.js';
+import { buildAuthPathWithNext } from '../../identity/utils/navigation.js';
 import { Button, Select, Alert } from '../../../shared/components/index.js';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
 
   const [featuredProducts, setFeaturedProducts] = useState<ProductItem[]>([]);
@@ -177,9 +179,13 @@ export const HomePage: React.FC = () => {
     navigate(`/products?${params.toString()}`);
   };
 
+  const redirectGuestToLogin = () => {
+    navigate(buildAuthPathWithNext('/login', `${location.pathname}${location.search}`));
+  };
+
   const handleAddToCart = async (product: ProductItem) => {
     if (!isAuthenticated) {
-      navigate('/login');
+      redirectGuestToLogin();
       return;
     }
     try {
@@ -192,7 +198,7 @@ export const HomePage: React.FC = () => {
 
   const handleToggleWishlist = async (product: ProductItem) => {
     if (!isAuthenticated) {
-      navigate('/login');
+      redirectGuestToLogin();
       return;
     }
     try {

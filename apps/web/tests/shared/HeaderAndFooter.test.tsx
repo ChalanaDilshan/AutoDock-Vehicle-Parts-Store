@@ -189,7 +189,7 @@ describe('Extracted Header, Footer & Layout Components', () => {
   });
 
   describe('Footer', () => {
-    it('renders all 4 footer columns, links, and payment badges', () => {
+    it('renders all 4 footer columns, active category links, and payment badges', () => {
       render(
         <MemoryRouter>
           <Footer />
@@ -197,8 +197,20 @@ describe('Extracted Header, Footer & Layout Components', () => {
       );
 
       expect(screen.getByText('AutoDock')).toBeDefined();
-      expect(screen.getByText('Engine & Drivetrain')).toBeDefined();
-      expect(screen.getByText('Brakes & Suspension')).toBeDefined();
+
+      const expectedCategoryLinks: Array<[string, string]> = [
+        ['Engine Parts', '/products?category=engine-parts'],
+        ['Brake System', '/products?category=brake-system'],
+        ['Suspension & Steering', '/products?category=suspension-steering'],
+        ['Filters & Fluids', '/products?category=filters-fluids'],
+        ['Electrical & Ignition', '/products?category=electrical-ignition'],
+      ];
+
+      for (const [label, expectedHref] of expectedCategoryLinks) {
+        const link = screen.getByRole('link', { name: label });
+        expect(link.getAttribute('href')).toBe(expectedHref);
+      }
+
       expect(screen.getByText('My Garage')).toBeDefined();
       expect(screen.getByText('Track Orders')).toBeDefined();
       expect(screen.getByText('Privacy Policy')).toBeDefined();
