@@ -4,6 +4,7 @@ import { ShieldAlert, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 import { UserRole } from '../api/identityApi.js';
 import { Button } from '../../../shared/components/index.js';
+import { buildAuthPathWithNext } from '../utils/navigation.js';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -26,7 +27,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const nextTarget = `${location.pathname}${location.search}${location.hash}`;
+    return (
+      <Navigate
+        to={buildAuthPathWithNext('/login', nextTarget)}
+        state={{ from: location }}
+        replace
+      />
+    );
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {

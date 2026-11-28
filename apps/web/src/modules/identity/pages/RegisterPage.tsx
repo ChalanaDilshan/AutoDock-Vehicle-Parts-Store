@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, Button, Input } from '../../../shared/components/index.js';
 import { authApi } from '../api/identityApi.js';
-import { buildAuthPathWithNext, getSafeRedirectPath } from '../utils/navigation.js';
+import {
+  buildAuthPathWithNext,
+  getSafeRedirectTarget,
+  RedirectLocationState,
+} from '../utils/navigation.js';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
-  const safeNextParam = getSafeRedirectPath(searchParams.get('next'), '');
+  const stateFrom = (location.state as { from?: RedirectLocationState } | null)?.from;
+  const safeNextParam = getSafeRedirectTarget(searchParams.get('next'), stateFrom, '');
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');

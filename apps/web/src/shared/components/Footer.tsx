@@ -28,13 +28,18 @@ export const Footer: React.FC = () => {
             <h3 className="text-sm font-semibold text-slate-900">Popular Categories</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/products?category=engine-drivetrain" className="hover:text-[#E11D30] transition-colors">
-                  Engine &amp; Drivetrain
+                <Link to="/products?category=engine-parts" className="hover:text-[#E11D30] transition-colors">
+                  Engine Parts
                 </Link>
               </li>
               <li>
-                <Link to="/products?category=brakes-suspension" className="hover:text-[#E11D30] transition-colors">
-                  Brakes &amp; Suspension
+                <Link to="/products?category=brake-system" className="hover:text-[#E11D30] transition-colors">
+                  Brake System
+                </Link>
+              </li>
+              <li>
+                <Link to="/products?category=suspension-steering" className="hover:text-[#E11D30] transition-colors">
+                  Suspension &amp; Steering
                 </Link>
               </li>
               <li>
@@ -43,8 +48,8 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/products?category=electrical-lighting" className="hover:text-[#E11D30] transition-colors">
-                  Electrical &amp; Lighting
+                <Link to="/products?category=electrical-ignition" className="hover:text-[#E11D30] transition-colors">
+                  Electrical &amp; Ignition
                 </Link>
               </li>
             </ul>
